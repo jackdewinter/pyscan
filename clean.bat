@@ -4,6 +4,7 @@ pushd %~dp0
 
 rem Set needed environment variables.
 set CLEAN_TEMPFILE=temp_clean.txt
+set PYTHON_MODULE_NAME=pyscan
 
 rem Look for options on the command line.
 
@@ -37,7 +38,7 @@ if ERRORLEVEL 1 (
 )
 
 echo Executing pylint static analyzer on source Python code.
-pipenv run pylint --rcfile=setup.cfg pymarkdown %MY_VERBOSE%
+pipenv run pylint --rcfile=setup.cfg %PYTHON_MODULE_NAME% %MY_VERBOSE%
 if ERRORLEVEL 1 (
 	echo.
 	echo Executing pylint static analyzer on source Python code failed.
