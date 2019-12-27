@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuites>
+	<testsuite errors="0" failures="0" hostname="Office" name="pytest" skipped="1" tests="3" time="0.244" timestamp="2019-12-26T14:36:38.977540">
+		<testcase classname="test.test_scenarios" name="test_get_summarizer_version" time="0.004">
+			<skipped message="unconditional skip" type="pytest.skip">test\test_markdown_link_reference_definitions.py:11: unconditional skip
+			</skipped>
+		</testcase>
+		<testcase classname="test.test_scenarios" name="test_simple_junit_report" time="0.001">
+		</testcase>
+		<testcase classname="test.test_scenarios" name="test_simple_other_report" time="0.001">
+		</testcase>
+	</testsuite>
+</testsuites>
