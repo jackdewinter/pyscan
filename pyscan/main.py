@@ -429,9 +429,9 @@ class PyScan:
 
         if not os.path.exists(self.test_summary_output_path):
             print(
-                "Test results summary file "
+                "Test results summary file '"
                 + self.test_summary_output_path
-                + "does not exist."
+                + "' does not exist."
             )
             sys.exit(1)
         if not os.path.isfile(self.test_summary_output_path):
