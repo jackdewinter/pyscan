@@ -104,6 +104,10 @@ def test_summarize_simple_junit_report(create_publish_directory=False):
     suppplied_arguments = ["--junit", junit_test_file]
 
     expected_output = """\
+
+Test Results Summary
+--------------------
+
 Class Name            Total Tests   Failed Tests   Skipped Tests
 -------------------  ------------  -------------  --------------
 test.test_scenarios        3 (+3)              0               0
@@ -392,11 +396,51 @@ def test_summarize_simple_junit_report_and_publish_and_summarize_again():
     suppplied_arguments = ["--junit", junit_test_file]
 
     expected_output = """\
+
+Test Results Summary
+--------------------
+
 Class Name            Total Tests   Failed Tests   Skipped Tests
 -------------------  ------------  -------------  --------------
 test.test_scenarios             3              0               0
 ---                             -              -               -
 TOTALS                          3              0               0
+"""
+    expected_error = ""
+    expected_return_code = 0
+
+    # Act
+    execute_results = executor.invoke_main(
+        arguments=suppplied_arguments, cwd=temporary_work_directory.name
+    )
+
+    # Assert
+    execute_results.assert_results(
+        expected_output, expected_error, expected_return_code
+    )
+
+
+def test_summarize_simple_junit_report_and_publish_and_summarize_again_only_changes():
+    """
+    Test the summarizing of junit results, publishing, and then comparing again with
+    only changes enabled.
+    """
+
+    # Arrange
+    (
+        executor,
+        temporary_work_directory,
+        junit_test_file,
+    ) = test_summarize_simple_junit_report_and_publish()
+
+    suppplied_arguments = ["--only-changes", "--junit", junit_test_file]
+
+    expected_output = """\
+
+Test Results Summary
+--------------------
+
+Test results have not changed since last published test results.
 """
     expected_error = ""
     expected_return_code = 0
@@ -432,11 +476,103 @@ def test_summarize_simple_junit_report_and_publish_and_then_test_fails():
     suppplied_arguments = ["--junit", junit_test_file]
 
     expected_output = """\
+
+Test Results Summary
+--------------------
+
 Class Name            Total Tests   Failed Tests   Skipped Tests
 -------------------  ------------  -------------  --------------
 test.test_scenarios             3         1 (+1)               0
 ---                             -         -                    -
 TOTALS                          3         1 (+1)               0
+"""
+    expected_error = ""
+    expected_return_code = 0
+
+    # Act
+    execute_results = executor.invoke_main(
+        arguments=suppplied_arguments, cwd=temporary_work_directory.name
+    )
+
+    # Assert
+    execute_results.assert_results(
+        expected_output, expected_error, expected_return_code
+    )
+
+
+def test_summarize_simple_junit_report_and_publish_and_then_new_test_only_changes():
+    """
+    Test the summarizing of junit results, publishing, and then comparing again with
+    a new test with only changes enabled.
+    """
+
+    # Arrange
+    (
+        executor,
+        temporary_work_directory,
+        junit_test_file,
+    ) = test_summarize_simple_junit_report_and_publish()
+    copyfile(
+        os.path.join(executor.resource_directory, "tests-with-new-test.xml"),
+        junit_test_file,
+    )
+
+    suppplied_arguments = ["--only-changes", "--junit", junit_test_file]
+
+    expected_output = """\
+
+Test Results Summary
+--------------------
+
+Class Name            Total Tests   Failed Tests   Skipped Tests
+-------------------  ------------  -------------  --------------
+test.test_scenarios        4 (+1)              0               0
+---                        -                   -               -
+TOTALS                     4 (+1)              0               0
+"""
+    expected_error = ""
+    expected_return_code = 0
+
+    # Act
+    execute_results = executor.invoke_main(
+        arguments=suppplied_arguments, cwd=temporary_work_directory.name
+    )
+
+    # Assert
+    execute_results.assert_results(
+        expected_output, expected_error, expected_return_code
+    )
+
+
+def test_summarize_simple_junit_report_and_publish_and_then_new_test_class_only_changes():
+    """
+    Test the summarizing of junit results, publishing, and then comparing again with
+    a new test in a new class with only changes enabled.
+    """
+
+    # Arrange
+    (
+        executor,
+        temporary_work_directory,
+        junit_test_file,
+    ) = test_summarize_simple_junit_report_and_publish()
+    copyfile(
+        os.path.join(executor.resource_directory, "tests-with-new-class-test.xml"),
+        junit_test_file,
+    )
+
+    suppplied_arguments = ["--only-changes", "--junit", junit_test_file]
+
+    expected_output = """\
+
+Test Results Summary
+--------------------
+
+Class Name                  Total Tests   Failed Tests   Skipped Tests
+-------------------------  ------------  -------------  --------------
+test.test_other_scenarios        1 (+1)              0               0
+---                              -                   -               -
+TOTALS                           4 (+1)              0               0
 """
     expected_error = ""
     expected_return_code = 0
@@ -472,6 +608,10 @@ def test_summarize_simple_junit_report_and_publish_and_then_test_skipped():
     suppplied_arguments = ["--junit", junit_test_file]
 
     expected_output = """\
+
+Test Results Summary
+--------------------
+
 Class Name            Total Tests   Failed Tests   Skipped Tests
 -------------------  ------------  -------------  --------------
 test.test_scenarios             3              0          1 (+1)
@@ -512,6 +652,10 @@ def test_summarize_simple_junit_report_and_publish_and_then_test_rename():
     suppplied_arguments = ["--junit", junit_test_file]
 
     expected_output = """\
+
+Test Results Summary
+--------------------
+
 Class Name                 Total Tests   Failed Tests   Skipped Tests
 ------------------------  ------------  -------------  --------------
 test.test_good_scenarios        3 (+3)              0               0

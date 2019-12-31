@@ -69,6 +69,7 @@ class InProcessResult:
         Assert the results are as expected in the "assert" phase.
         """
 
+        stdout_error = None
         try:
             if stdout:
                 self.compare_versus_expected("Stdout", self.std_out, stdout)
@@ -78,7 +79,13 @@ class InProcessResult:
                     + self.std_out.getvalue()
                     + "\n---\n"
                 )
+        except AssertionError as ex:
+            stdout_error = ex
+        finally:
+            self.std_out.close()
 
+        stderr_error = None
+        try:
             if stderr:
                 self.compare_versus_expected(
                     "Stderr", self.std_err, stderr, additional_error
@@ -97,10 +104,19 @@ class InProcessResult:
                 + str(error_code)
                 + ") differ."
             )
-
+        except AssertionError as ex:
+            stderr_error = ex
         finally:
-            self.std_out.close()
             self.std_err.close()
+
+        combined_error_msg = ""
+        if stdout_error:
+            combined_error_msg = combined_error_msg + "\n" + str(stdout_error)
+        if stderr_error:
+            combined_error_msg = combined_error_msg + "\n" + str(stderr_error)
+        assert not combined_error_msg, (
+            "Either stdout or stderr was not as expected.\n" + combined_error_msg
+        )
 
     @classmethod
     def assert_resultant_file(cls, file_path, expected_contents):

@@ -145,6 +145,13 @@ class PyScan:
             help="source file for any reporting on test success",
         )
         parser.add_argument(
+            "--only-changes",
+            dest="only_changes",
+            action="store_true",
+            default=False,
+            help="only_changes",
+        )
+        parser.add_argument(
             "--publish",
             dest="publish_summaries",
             action="store_true",
@@ -364,7 +371,54 @@ class PyScan:
                     new_value = "".rjust(max_width_2, " ")
                 next_row[column_index] = next_row[column_index] + " " + new_value
 
-    def report_test_files(self, new_stats, new_totals, loaded_stats, loaded_totals):
+    def print_test_summary(self, test_report_rows, new_totals, loaded_totals):
+        """
+        Print the actual test summaries.
+        """
+
+        print("\nTest Results Summary\n--------------------\n")
+        if not test_report_rows:
+            print("Test results have not changed since last published test results.")
+        else:
+            test_report_rows.append(["---", "-1 0", "-1 0", "-1 0"])
+            test_report_rows.append(
+                self.generate_full_match("TOTALS", new_totals, loaded_totals)
+            )
+
+            self.format_test_totals_column(test_report_rows, 1)
+            self.format_test_totals_column(test_report_rows, 2)
+            self.format_test_totals_column(test_report_rows, 3)
+
+            hdrs = ["Class Name", "Total Tests", "Failed Tests", "Skipped Tests"]
+
+            tabulate_module.MIN_PADDING = 1
+            tabulate_module.PRESERVE_WHITESPACE = True
+            print(
+                tabulate(
+                    test_report_rows,
+                    headers=hdrs,
+                    tablefmt="simple",
+                    colalign=("left", "right", "right", "right"),
+                )
+            )
+
+    @classmethod
+    def add_row_to_report(cls, row_to_add, test_report_rows, only_report_changes):
+        """
+        Determine if adequate requirements exist to add the specified row to the report.
+        """
+
+        did_change = False
+        for column_number in range(1, len(row_to_add)):
+            if "+" in row_to_add[column_number] or "-" in row_to_add[column_number]:
+                did_change = True
+        if not only_report_changes or did_change:
+            test_report_rows.append(row_to_add)
+
+    # pylint: disable=too-many-arguments
+    def report_test_files(
+        self, new_stats, new_totals, loaded_stats, loaded_totals, only_report_changes
+    ):
         """
         Generate a report comparing the current stats with the loaded/previous stats.
         """
@@ -381,46 +435,33 @@ class PyScan:
         for next_output in difflib.ndiff(new_stats_keys, loaded_stats_keys):
             next_output_prefix = next_output[0:2]
             next_output_name = next_output[2:]
+
+            row_to_add = None
             if next_output_prefix == "  ":
                 new_measurement = new_stats.measurements[next_output_name]
                 loaded_measurement = loaded_stats.measurements[next_output_name]
-                test_report_rows.append(
-                    self.generate_full_match(
-                        next_output_name, new_measurement, loaded_measurement
-                    )
+                row_to_add = self.generate_full_match(
+                    next_output_name, new_measurement, loaded_measurement
                 )
             elif next_output_prefix == "+ ":
                 loaded_measurement = loaded_stats.measurements[next_output_name]
-                test_report_rows.append(
-                    self.generate_older_match(next_output_name, loaded_measurement)
+                row_to_add = self.generate_older_match(
+                    next_output_name, loaded_measurement
                 )
             elif next_output_prefix == "- ":
                 new_measurement = new_stats.measurements[next_output_name]
-                test_report_rows.append(
-                    self.generate_newer_match(next_output_name, new_measurement)
+                row_to_add = self.generate_newer_match(
+                    next_output_name, new_measurement
                 )
 
-        test_report_rows.append(["---", "-1 0", "-1 0", "-1 0"])
-        test_report_rows.append(
-            self.generate_full_match("TOTALS", new_totals, loaded_totals)
-        )
+            if row_to_add:
+                self.add_row_to_report(
+                    row_to_add, test_report_rows, only_report_changes
+                )
 
-        self.format_test_totals_column(test_report_rows, 1)
-        self.format_test_totals_column(test_report_rows, 2)
-        self.format_test_totals_column(test_report_rows, 3)
+        self.print_test_summary(test_report_rows, new_totals, loaded_totals)
 
-        hdrs = ["Class Name", "Total Tests", "Failed Tests", "Skipped Tests"]
-
-        tabulate_module.MIN_PADDING = 1
-        tabulate_module.PRESERVE_WHITESPACE = True
-        print(
-            tabulate(
-                test_report_rows,
-                headers=hdrs,
-                tablefmt="simple",
-                colalign=("left", "right", "right", "right"),
-            )
-        )
+    # pylint: enable=too-many-arguments
 
     def publish_summaries(self):
         """
@@ -499,7 +540,9 @@ class PyScan:
                 published_test_summary_path
             )
 
-        self.report_test_files(new_stats, new_totals, loaded_stats, loaded_totals)
+        self.report_test_files(
+            new_stats, new_totals, loaded_stats, loaded_totals, args.only_changes
+        )
 
     def main(self):
         """
