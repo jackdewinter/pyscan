@@ -5,7 +5,7 @@ pushd %~dp0
 
 rem Set needed environment variables.
 set PTEST_TEMPFILE=temp_ptest.txt
-
+set PTEST_SCRIPT_DIRECTORY=%~dp0
 
 rem Look for options on the command line.
 :process_arguments
@@ -39,7 +39,7 @@ if ERRORLEVEL 1 (
 )
 
 echo {Summarizing changes in execution of full test suite.}
-pipenv run python pyscan\main.py --only-changes --junit report\tests.xml
+pipenv run python %PTEST_SCRIPT_DIRECTORY%..\pyscan\pyscan\main.py --only-changes --junit report\tests.xml
 if ERRORLEVEL 1 (
 	echo.
 	echo {Summarizing changes in execution of full test suite failed.}
