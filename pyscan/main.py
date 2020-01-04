@@ -8,6 +8,7 @@ import os
 import sys
 from shutil import copyfile
 from xml.etree import ElementTree as ET
+from xml.etree.ElementTree import ParseError
 
 import tabulate as tabulate_module
 from tabulate import tabulate
@@ -180,8 +181,13 @@ class PyScan:
             )
             sys.exit(1)
 
-        # TODO what if fails?
-        copyfile(file_to_publish, self.compute_published_path_to_file(file_to_publish))
+        try:
+            copyfile(
+                file_to_publish, self.compute_published_path_to_file(file_to_publish)
+            )
+        except IOError as ex:
+            print("Publishing file '" + file_to_publish + "' failed (" + str(ex) + ").")
+            sys.exit(1)
 
     def compute_published_path_to_file(self, file_to_publish):
         """
@@ -195,14 +201,37 @@ class PyScan:
 
     def load_test_results_summary_file(self, test_results_to_load):
         """
-        Attempt to load a previously published test sumary.
+        Attempt to load a previously published test summary.
         """
 
-        # TODO what if fails?
-        with open(test_results_to_load, "r") as infile:
-            results_dictionary = json.load(infile)
-        test_totals = TestTotals.from_dict(results_dictionary)
-        grand_totals = self.build_totals(test_totals)
+        test_totals = None
+        grand_totals = None
+        if os.path.exists(test_results_to_load) and os.path.isfile(
+            test_results_to_load
+        ):
+            try:
+                with open(os.path.abspath(test_results_to_load), "r") as infile:
+                    results_dictionary = json.load(infile)
+            except json.decoder.JSONDecodeError as ex:
+                print(
+                    "Previous summary file '"
+                    + test_results_to_load
+                    + "' is not a valid JSON file ("
+                    + str(ex)
+                    + ")."
+                )
+                sys.exit(1)
+            except IOError as ex:
+                print(
+                    "Previous summary file '"
+                    + test_results_to_load
+                    + "' was not loaded ("
+                    + str(ex)
+                    + ")."
+                )
+                sys.exit(1)
+            test_totals = TestTotals.from_dict(results_dictionary)
+            grand_totals = self.build_totals(test_totals)
         return test_totals, grand_totals
 
     def compose_summary_from_junit_document(self, junit_document):
@@ -505,10 +534,16 @@ class PyScan:
             )
             sys.exit(1)
 
-        # TODO what if fails?
-        junit_document = ET.parse(args.test_report_file).getroot()
+        try:
+            junit_document = ET.parse(args.test_report_file).getroot()
+        except ParseError:
+            print(
+                "Project test report file '"
+                + args.test_report_file
+                + "' is not a valid test report file."
+            )
+            sys.exit(1)
 
-        # TODO what if fails?
         if junit_document.tag != "testsuites":
             print(
                 "Project test report file '"
@@ -518,27 +553,31 @@ class PyScan:
             sys.exit(1)
 
         new_stats, new_totals = self.compose_summary_from_junit_document(junit_document)
-        # TODO what if fails?
 
         summary_output_path = os.path.dirname(self.test_summary_output_path)
         if not os.path.exists(summary_output_path):
             print("Summary output path '" + summary_output_path + "' does not exist.")
             sys.exit(1)
 
-        with open(self.test_summary_output_path, "w") as outfile:
-            json.dump(new_stats.to_dict(), outfile)
-
-        loaded_stats = None
-        loaded_totals = None
+        full_test_summary_output_path = os.path.abspath(self.test_summary_output_path)
+        try:
+            with open(full_test_summary_output_path, "w") as outfile:
+                json.dump(new_stats.to_dict(), outfile)
+        except IOError as ex:
+            print(
+                "Project test summary file '"
+                + full_test_summary_output_path
+                + "' was not written ("
+                + str(ex)
+                + ")."
+            )
+            sys.exit(1)
         published_test_summary_path = self.compute_published_path_to_file(
             self.test_summary_output_path
         )
-        if os.path.exists(published_test_summary_path) and os.path.isfile(
+        loaded_stats, loaded_totals = self.load_test_results_summary_file(
             published_test_summary_path
-        ):
-            loaded_stats, loaded_totals = self.load_test_results_summary_file(
-                published_test_summary_path
-            )
+        )
 
         self.report_test_files(
             new_stats, new_totals, loaded_stats, loaded_totals, args.only_changes
