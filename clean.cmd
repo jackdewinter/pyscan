@@ -72,7 +72,7 @@ set PC_EXIT_CODE=1
 echo {Analysis of project failed.}
 
 :real_end
-erase /f /q %CLEAN_TEMPFILE%
+erase /f /q %CLEAN_TEMPFILE% > nul 2>&1
 set CLEAN_TEMPFILE=
 popd
 exit /B %PC_EXIT_CODE%

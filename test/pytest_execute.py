@@ -62,6 +62,52 @@ class InProcessResult:
                     stream_name + " not as expected:\n---\n" + diff_values + "\n---\n"
                 )
 
+    def assert_stream_contents(
+        self, stream_name, actual_stream, expected_stream, additional_error=None
+    ):
+        """
+        Assert that the contents of the given stream are as expected.
+        """
+
+        result = None
+        try:
+            if expected_stream:
+                self.compare_versus_expected(
+                    stream_name, actual_stream, expected_stream, additional_error
+                )
+            else:
+                assert not actual_stream.getvalue(), (
+                    "Expected "
+                    + stream_name
+                    + " to be empty. Not:\n---\n"
+                    + actual_stream.getvalue()
+                    + "\n---\n"
+                )
+        except AssertionError as ex:
+            result = ex
+        finally:
+            actual_stream.close()
+        return result
+
+    @classmethod
+    def assert_return_code(cls, actual_return_code, expected_return_code):
+        """
+        Assert that the actual return code is as expected.
+        """
+
+        result = None
+        try:
+            assert actual_return_code == expected_return_code, (
+                "Actual error code ("
+                + str(actual_return_code)
+                + ") and expected error code ("
+                + str(expected_return_code)
+                + ") differ."
+            )
+        except AssertionError as ex:
+            result = ex
+        return result
+
     def assert_results(
         self, stdout=None, stderr=None, error_code=0, additional_error=None
     ):
@@ -69,53 +115,22 @@ class InProcessResult:
         Assert the results are as expected in the "assert" phase.
         """
 
-        stdout_error = None
-        try:
-            if stdout:
-                self.compare_versus_expected("Stdout", self.std_out, stdout)
-            else:
-                assert not self.std_out.getvalue(), (
-                    "Expected stdout to be empty. Not:\n---\n"
-                    + self.std_out.getvalue()
-                    + "\n---\n"
-                )
-        except AssertionError as ex:
-            stdout_error = ex
-        finally:
-            self.std_out.close()
-
-        stderr_error = None
-        try:
-            if stderr:
-                self.compare_versus_expected(
-                    "Stderr", self.std_err, stderr, additional_error
-                )
-            else:
-                assert not self.std_err.getvalue(), (
-                    "Expected stderr to be empty. Not:\n---\n"
-                    + self.std_err.getvalue()
-                    + "\n---\n"
-                )
-
-            assert self.return_code == error_code, (
-                "Actual error code ("
-                + str(self.return_code)
-                + ") and expected error code ("
-                + str(error_code)
-                + ") differ."
-            )
-        except AssertionError as ex:
-            stderr_error = ex
-        finally:
-            self.std_err.close()
+        stdout_error = self.assert_stream_contents("stdout", self.std_out, stdout)
+        stderr_error = self.assert_stream_contents(
+            "stderr", self.std_err, stderr, additional_error
+        )
+        return_code_error = self.assert_return_code(self.return_code, error_code)
 
         combined_error_msg = ""
         if stdout_error:
             combined_error_msg = combined_error_msg + "\n" + str(stdout_error)
         if stderr_error:
             combined_error_msg = combined_error_msg + "\n" + str(stderr_error)
+        if return_code_error:
+            combined_error_msg = combined_error_msg + "\n" + str(return_code_error)
         assert not combined_error_msg, (
-            "Either stdout or stderr was not as expected.\n" + combined_error_msg
+            "Either stdout, stderr, or the return code was not as expected.\n"
+            + combined_error_msg
         )
 
     @classmethod
@@ -151,6 +166,8 @@ class InProcessResult:
             )
 
 
+# pylint: enable=too-few-public-methods
+
 # pylint: disable=too-few-public-methods
 class SystemState:
     """
@@ -179,6 +196,9 @@ class SystemState:
         sys.argv = self.saved_argv
         sys.stdout = self.saved_stdout
         sys.stderr = self.saved_stderr
+
+
+# pylint: enable=too-few-public-methods
 
 
 class InProcessExecution(ABC):
@@ -235,22 +255,23 @@ class InProcessExecution(ABC):
 
         saved_state = SystemState()
 
-        std_output = io.StringIO()
-        std_error = io.StringIO()
-        sys.stdout = std_output
-        sys.stderr = std_error
-
-        if arguments:
-            sys.argv = arguments.copy()
-        else:
-            sys.argv = []
-        sys.argv.insert(0, self.get_main_name())
-
-        if cwd:
-            os.chdir(cwd)
-
         try:
             returncode = 0
+
+            std_output = io.StringIO()
+            std_error = io.StringIO()
+            sys.stdout = std_output
+            sys.stderr = std_error
+
+            if arguments:
+                sys.argv = arguments.copy()
+            else:
+                sys.argv = []
+            sys.argv.insert(0, self.get_main_name())
+
+            if cwd:
+                os.chdir(cwd)
+
             self.execute_main()
         except SystemExit as this_exception:
             returncode = self.handle_system_exit(this_exception, std_error)
@@ -260,3 +281,5 @@ class InProcessExecution(ABC):
             saved_state.restore()
 
         return InProcessResult(returncode, std_output, std_error)
+
+    # pylint: enable=broad-except
