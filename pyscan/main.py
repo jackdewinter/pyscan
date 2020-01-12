@@ -263,6 +263,7 @@ class PyScan:
         self.test_summary_output_path = os.path.join("report", "test-results.json")
         self.coverage_summary_output_path = os.path.join("report", "coverage.json")
         self.test_summary_publish_path = "publish"
+        self.debug = False
 
     def __parse_arguments(self):
         """
@@ -849,7 +850,7 @@ class PyScan:
             column_value = next_row[primary_column_index]
             primary_max = max(len(column_value), primary_max)
             column_value = next_row[primary_column_index + 1]
-            if column_value != "-":  # and gh != "0" and gh != "0.00":
+            if column_value not in ("-", "0", "0.00"):
                 secondary_max = max(len(column_value), secondary_max)
         return primary_max, secondary_max
 
@@ -1068,7 +1069,7 @@ class PyScan:
         if not os.path.exists(args.test_coverage_file):
             print(
                 "Project test coverage file '"
-                + args.test_report_file
+                + args.test_coverage_file
                 + "' does not exist."
             )
             sys.exit(1)

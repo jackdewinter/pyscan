@@ -64,14 +64,14 @@ echo {Execution of full test suite succeeded.}
 goto success_end
 
 :publish_start
-echo {Publishing summaries from previous test runs.}
+echo {Publishing summaries from last test runs.}
 pipenv run python %PTEST_PYSCAN_SCRIPT_PATH% --publish
 if ERRORLEVEL 1 (
 	echo.
-	echo {Publishing summaries from previous test runs failed.}
+	echo {Publishing summaries from last test runs failed.}
 	goto error_end
 )
-echo {Publishing summaries from previous test runs succeeded.}
+echo {Publishing summaries from last test runs succeeded.}
 
 :success_end
 rem Exit main part of script.
