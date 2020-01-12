@@ -632,7 +632,7 @@ class PyScan:
             if split_row[0] != "-1":
                 max_width_1 = max(max_width_1, len(split_row[0]))
             if split_row[1] != "0":
-                max_width_2 = max(max_width_1, len(split_row[1]) + 2)
+                max_width_2 = max(max_width_2, len(split_row[1]) + 2)
 
         for next_row in source_array:
             split_row = next_row[column_index].split(" ")

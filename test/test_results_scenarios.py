@@ -786,3 +786,65 @@ def test_summarize_simple_junit_report_with_error_on_report_write():
     execute_results.assert_results(
         expected_output, expected_error, expected_return_code
     )
+
+
+def test_sample_1():
+    """
+    Test the summarizing of junit results against a previous published version.
+    This was encountered during development, and the test case captured.
+    """
+
+    # Arrange
+    executor = MainlineExecutor()
+    temporary_work_directory, _, publish_directory = setup_directories()
+    junit_test_file = os.path.join(
+        temporary_work_directory.name, JUNIT_RESULTS_FILE_NAME
+    )
+    summary_result_file = os.path.join(publish_directory, RESULTS_SUMMARY_FILE_NAME)
+
+    copyfile(
+        os.path.join(executor.resource_directory, "tests-sample-1.xml"),
+        junit_test_file,
+    )
+
+    os.makedirs(publish_directory)
+    previous_test_summary_contents = (
+        '{"projectName": "?", "reportSource": "pytest", '
+        + '"measurements": ['
+        + '{"name": "test.test_coverage_scenarios", "totalTests": 14, "failedTests": 0, '
+        + '"errorTests": 0, "skippedTests": 0, "elapsedTimeInMilliseconds": 0}, '
+        + '{"name": "test.test_scenarios", "totalTests": 23, "failedTests": 0, '
+        + '"errorTests": 0, "skippedTests": 0, "elapsedTimeInMilliseconds": 0}'
+        + "]}"
+    )
+    with open(summary_result_file, "w") as outfile:
+        outfile.write(previous_test_summary_contents)
+
+    suppplied_arguments = [JUNIT_COMMAND_LINE_FLAG, junit_test_file]
+
+    expected_output = """\
+
+Test Results Summary
+--------------------
+
+Class Name                     Total Tests   Failed Tests   Skipped Tests
+----------------------------  ------------  -------------  --------------
+test.test_coverage_scenarios      12  (-2)              0               0
+test.test_publish_scenarios        9  (+9)              0               0
+test.test_results_scenarios       18 (+18)              0               0
+test.test_scenarios                1 (-22)              0               0
+---                               --                    -               -
+TOTALS                            40  (+3)              0               0
+"""
+    expected_error = ""
+    expected_return_code = 0
+
+    # Act
+    execute_results = executor.invoke_main(
+        arguments=suppplied_arguments, cwd=temporary_work_directory.name
+    )
+
+    # Assert
+    execute_results.assert_results(
+        expected_output, expected_error, expected_return_code
+    )
