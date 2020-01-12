@@ -793,7 +793,7 @@ class PyScan:
         report_rows = self.__calculate_coverage_rows(new_stats, loaded_stats)
         test_report_rows = self.__format_coverage_rows(report_rows, only_report_changes)
 
-        print("\nCoverage Results Summary\n------------------------\n")
+        print("\nTest Coverage Summary\n---------------------\n")
         if not test_report_rows:
             print("Test coverage has not changed since last published test coverage.")
         else:
