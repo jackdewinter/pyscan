@@ -1,1 +1,1 @@
-{"projectName": "?", "reportSource": "pytest", "measurements": [{"name": "test.test_scenarios", "totalTests": 7, "failedTests": 0, "errorTests": 0, "skippedTests": 0, "elapsedTimeInMilliseconds": 0}]}
+{"projectName": "?", "reportSource": "pytest", "measurements": [{"name": "test.test_coverage_scenarios", "totalTests": 5, "failedTests": 0, "errorTests": 0, "skippedTests": 0, "elapsedTimeInMilliseconds": 0}, {"name": "test.test_scenarios", "totalTests": 23, "failedTests": 0, "errorTests": 0, "skippedTests": 0, "elapsedTimeInMilliseconds": 0}]}

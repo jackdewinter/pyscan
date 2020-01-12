@@ -8,8 +8,32 @@ set PYTHON_MODULE_NAME=pyscan
 
 rem Look for options on the command line.
 
-rem set MY_VERBOSE=--verbose
 set MY_VERBOSE=
+set MY_PUBLISH=
+:process_arguments
+if "%1" == "-h" (
+    echo Command: %0 [options]
+    echo   Usage:
+    echo     - Execute a clean build for this project.
+    echo   Options:
+    echo     -h                This message.
+	echo     -v                Display verbose information.
+	echo     -p				   Publish project summaries if successful.
+    GOTO real_end
+) else if "%1" == "-v" (
+	set MY_VERBOSE=--verbose
+) else if "%1" == "-p" (
+	set MY_PUBLISH=1
+) else if "%1" == "" (
+    goto after_process_arguments
+) else (
+    echo Argument '%1' not understood.  Stopping.
+	echo Type '%0 -h' to see valid arguments.
+    goto error_end
+)
+shift
+goto process_arguments
+:after_process_arguments
 
 echo {Analysis of project started.}
 
@@ -54,12 +78,21 @@ if ERRORLEVEL 1 (
 )
 
 echo {Executing unit tests on Python code.}
-set COVERAGE_FILE=build/.coverage
 call ptest.cmd
 if ERRORLEVEL 1 (
 	echo.
 	echo {Executing unit tests on Python code failed.}
 	goto error_end
+)
+
+if defined MY_PUBLISH (
+	echo {Publishing summaries after successful analysis of project.}
+	call ptest.cmd -p
+	if ERRORLEVEL 1 (
+		echo.
+		echo {Publishing summaries failed.}
+		goto error_end
+	)
 )
 
 echo.

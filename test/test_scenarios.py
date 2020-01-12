@@ -330,41 +330,6 @@ Publish directory 'publish' already exists, but as a file.
     return executor, temporary_work_directory, junit_test_file
 
 
-def test_publish_with_no_test_file():
-    """
-    Test to make sure that publishing with a test results summary file that does not exist.
-    """
-
-    # Arrange
-    executor = MainlineExecutor()
-    temporary_work_directory, report_directory, _ = setup_directories()
-    junit_test_file = os.path.join(temporary_work_directory.name, "test.xml")
-    copyfile(os.path.join(executor.resource_directory, "tests.xml"), junit_test_file)
-    summary_result_file = os.path.join(report_directory, "test-results.json")
-
-    assert not os.path.exists(summary_result_file)
-
-    suppplied_arguments = ["--publish"]
-
-    expected_output = """\
-Test results summary file 'report/test-results.json' does not exist.
-"""
-    expected_error = ""
-    expected_return_code = 1
-
-    # Act
-    execute_results = executor.invoke_main(
-        arguments=suppplied_arguments, cwd=temporary_work_directory.name
-    )
-
-    # Assert
-    execute_results.assert_results(
-        expected_output, expected_error, expected_return_code
-    )
-
-    return executor, temporary_work_directory, junit_test_file
-
-
 def test_publish_with_no_test_file_as_directory():
     """
     Test to make sure that publishing with a test results summary file that is not a file fails.
@@ -381,9 +346,10 @@ def test_publish_with_no_test_file_as_directory():
 
     suppplied_arguments = ["--publish"]
 
-    expected_output = """\
-Test results summary path 'report/test-results.json' is not a file.
-"""
+    results_path = os.path.join("report", "test-results.json")
+    expected_output = (
+        "Test results summary path '" + results_path + "' is not a file.\n"
+    )
     expected_error = ""
     expected_return_code = 1
 
@@ -936,14 +902,15 @@ def test_summarize_simple_junit_report_and_publish_with_error_on_source_read():
 
     suppplied_arguments = ["--publish"]
 
-    expected_output = "Publishing file 'report/test-results.json' failed (None).\n"
+    results_path = os.path.join("report", "test-results.json")
+    expected_output = "Publishing file '" + results_path + "' failed (None).\n"
     expected_error = ""
     expected_return_code = 1
 
     # Act
     try:
         pbo = PatchBuiltinOpen()
-        pbo.register_exception("report/test-results.json", "rb")
+        pbo.register_exception(results_path, "rb")
         pbo.start()
 
         execute_results = executor.invoke_main(
@@ -970,7 +937,8 @@ def test_summarize_simple_junit_report_and_publish_with_error_on_destination_wri
 
     suppplied_arguments = ["--publish"]
 
-    expected_output = "Publishing file 'report/test-results.json' failed (None).\n"
+    results_path = os.path.join("report", "test-results.json")
+    expected_output = "Publishing file '" + results_path + "' failed (None).\n"
     expected_error = ""
     expected_return_code = 1
 
