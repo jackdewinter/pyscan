@@ -1,5 +1,5 @@
 """
-Tests for the ...
+Tests for the basic scenarios for the scanner.
 """
 import os
 import sys
@@ -7,7 +7,7 @@ import tempfile
 from test.pytest_execute import InProcessExecution
 
 # https://docs.pytest.org/en/latest/goodpractices.html#tests-outside-application-code
-sys.path.insert(0, os.path.abspath("pymarkdown"))  # isort:skip
+sys.path.insert(0, os.path.abspath("pyscan"))  # isort:skip
 # pylint: disable=wrong-import-position
 from pyscan.main import PyScan  # isort:skip
 
