@@ -435,7 +435,7 @@ def test_summarize_invalid_published_summary_file():
     suppplied_arguments = [COBERTURA_COMMAND_LINE_FLAG, cobertura_coverage_file]
 
     expected_output = """\
-Previous summary file 'publish\\coverage.json' is not a valid JSON file (Expecting value: line 1 column 1 (char 0)).
+Previous coverage summary file 'publish\\coverage.json' is not a valid JSON file (Expecting value: line 1 column 1 (char 0)).
 """
     expected_error = ""
     expected_return_code = 1
@@ -467,9 +467,7 @@ def test_summarize_simple_cobertura_report_and_publish_and_summarize_with_error_
 
     suppplied_arguments = [COBERTURA_COMMAND_LINE_FLAG, cobertura_coverage_file]
 
-    expected_output = (
-        "Previous summary file 'publish\\coverage.json' was not loaded (None).\n"
-    )
+    expected_output = "Previous coverage summary file 'publish\\coverage.json' was not loaded (None).\n"
     expected_error = ""
     expected_return_code = 1
 
@@ -513,7 +511,7 @@ def test_summarize_simple_cobertura_report_with_error_on_report_write():
     suppplied_arguments = [COBERTURA_COMMAND_LINE_FLAG, cobertura_coverage_file]
 
     expected_output = (
-        "Project test coverage file '"
+        "Project test coverage summary file '"
         + os.path.abspath(summary_coverage_file)
         + "' was not written (None).\n"
     )

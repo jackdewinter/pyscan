@@ -1,1 +1,1 @@
-{"projectName": "pyscan", "reportSource": "pytest", "branchLevel": {"totalMeasured": 164, "totalCovered": 158}, "lineLevel": {"totalMeasured": 507, "totalCovered": 505}}
+{"projectName": "pyscan", "reportSource": "pytest", "branchLevel": {"totalMeasured": 156, "totalCovered": 150}, "lineLevel": {"totalMeasured": 489, "totalCovered": 487}}

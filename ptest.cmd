@@ -8,9 +8,12 @@ rem Set needed environment variables.
 set PTEST_TEMPFILE=temp_ptest.txt
 set PTEST_SCRIPT_DIRECTORY=%~dp0
 set PTEST_PYSCAN_SCRIPT_PATH=%PTEST_SCRIPT_DIRECTORY%..\pyscan\pyscan\main.py
+set PTEST_TEST_RESULTS_PATH=report\tests.xml
+set PTEST_TEST_COVERAGE_PATH=report\coverage.xml
 
 rem Look for options on the command line.
 set PTEST_PUBLISH_SUMMARIES=
+set PTEST_FULL_REPORT=
 :process_arguments
 if "%1" == "-h" (
     echo Command: %0 [options]
@@ -18,10 +21,13 @@ if "%1" == "-h" (
     echo     - Execute the tests for this project.
     echo   Options:
     echo     -h                This message.
-	echo     -p				   Publish project summaries instead of running tests.
+	echo     -f                Produce a full report for the tests instead of a 'changes only' report.
+	echo     -p                Publish project summaries instead of running tests.
     GOTO real_end
 ) else if "%1" == "-p" (
 	set PTEST_PUBLISH_SUMMARIES=1
+) else if "%1" == "-f" (
+	set PTEST_FULL_REPORT=1
 ) else if "%1" == "" (
     goto after_process_arguments
 ) else (
@@ -37,6 +43,11 @@ if defined PTEST_PUBLISH_SUMMARIES (
 	goto publish_start
 )
 
+set PTEST_PYSCAN_OPTIONS=
+if not defined PTEST_FULL_REPORT (
+	set PTEST_PYSCAN_OPTIONS=--only-changes
+)
+
 rem Enter main part of script.
 echo {Executing full test suite.}
 set TEST_EXECUTION_FAILED=
@@ -48,8 +59,13 @@ if ERRORLEVEL 1 (
 	set TEST_EXECUTION_FAILED=1
 )
 
+set PTEST_REPORT_OPTIONS=--junit %PTEST_TEST_RESULTS_PATH%
+if not defined TEST_EXECUTION_FAILED (
+	set PTEST_REPORT_OPTIONS=%PTEST_REPORT_OPTIONS% --cobertura=%PTEST_TEST_COVERAGE_PATH%
+)
+
 echo {Summarizing changes in execution of full test suite.}
-pipenv run python %PTEST_PYSCAN_SCRIPT_PATH% --only-changes --junit report\tests.xml --cobertura=report\coverage.xml
+pipenv run python %PTEST_PYSCAN_SCRIPT_PATH% %PTEST_PYSCAN_OPTIONS% %PTEST_REPORT_OPTIONS%
 if ERRORLEVEL 1 (
 	echo.
 	echo {Summarizing changes in execution of full test suite failed.}

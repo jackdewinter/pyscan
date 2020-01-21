@@ -134,7 +134,7 @@ class PyScan:
                     results_dictionary = json.load(infile)
             except json.decoder.JSONDecodeError as ex:
                 print(
-                    "Previous summary file '"
+                    "Previous results summary file '"
                     + test_results_to_load
                     + "' is not a valid JSON file ("
                     + str(ex)
@@ -143,7 +143,7 @@ class PyScan:
                 sys.exit(1)
             except IOError as ex:
                 print(
-                    "Previous summary file '"
+                    "Previous results summary file '"
                     + test_results_to_load
                     + "' was not loaded ("
                     + str(ex)
@@ -169,7 +169,7 @@ class PyScan:
                     results_dictionary = json.load(infile)
             except json.decoder.JSONDecodeError as ex:
                 print(
-                    "Previous summary file '"
+                    "Previous coverage summary file '"
                     + test_results_to_load
                     + "' is not a valid JSON file ("
                     + str(ex)
@@ -178,7 +178,7 @@ class PyScan:
                 sys.exit(1)
             except IOError as ex:
                 print(
-                    "Previous summary file '"
+                    "Previous coverage summary file '"
                     + test_results_to_load
                     + "' was not loaded ("
                     + str(ex)
@@ -757,64 +757,103 @@ class PyScan:
         self.__publish_file(self.test_summary_output_path)
         self.__publish_file(self.coverage_summary_output_path)
 
-    def generate_test_report(self, args):
+    @classmethod
+    def __load_xml_docment(
+        cls, xml_file_to_load, xml_root_element_name, file_type_name, format_type_name
+    ):
         """
-        Respond to a request to generate a test report.
+        Load a given XML document, check for various formalities along the way.
         """
 
-        if not os.path.exists(args.test_report_file):
+        if not os.path.exists(xml_file_to_load):
             print(
-                "Project test report file '"
-                + args.test_report_file
+                "Project "
+                + file_type_name
+                + " file '"
+                + xml_file_to_load
                 + "' does not exist."
             )
             sys.exit(1)
-        if not os.path.isfile(args.test_report_file):
+        if not os.path.isfile(xml_file_to_load):
             print(
-                "Project test report file '"
-                + args.test_report_file
+                "Project "
+                + file_type_name
+                + " file '"
+                + xml_file_to_load
                 + "' is not a file."
             )
             sys.exit(1)
 
         try:
-            junit_document = ET.parse(args.test_report_file).getroot()
+            xml_document = ET.parse(xml_file_to_load).getroot()
         except ParseError:
             print(
-                "Project test report file '"
-                + args.test_report_file
-                + "' is not a valid test report file."
+                "Project "
+                + file_type_name
+                + " file '"
+                + xml_file_to_load
+                + "' is not a valid "
+                + file_type_name
+                + " file."
             )
             sys.exit(1)
 
-        if junit_document.tag != "testsuites":
+        if xml_document.tag != xml_root_element_name:
             print(
-                "Project test report file '"
-                + args.test_report_file
-                + "' is not a proper Junit-format test report file."
+                "Project "
+                + file_type_name
+                + " file '"
+                + xml_file_to_load
+                + "' is not a proper "
+                + format_type_name
+                + "-format "
+                + file_type_name
+                + " file."
             )
             sys.exit(1)
+        return xml_document
 
-        new_stats, new_totals = self.compose_summary_from_junit_document(junit_document)
+    @classmethod
+    def __save_summary_file(cls, json_file_to_write, object_to_write, file_type_name):
+        """
+        Save the specified summary file.
+        """
 
-        summary_output_path = os.path.dirname(self.test_summary_output_path)
+        summary_output_path = os.path.dirname(json_file_to_write)
         if not os.path.exists(summary_output_path):
             print("Summary output path '" + summary_output_path + "' does not exist.")
             sys.exit(1)
 
-        full_test_summary_output_path = os.path.abspath(self.test_summary_output_path)
+        full_test_summary_output_path = os.path.abspath(json_file_to_write)
         try:
             with open(full_test_summary_output_path, "w") as outfile:
-                json.dump(new_stats.to_dict(), outfile)
+                json.dump(object_to_write.to_dict(), outfile)
         except IOError as ex:
             print(
-                "Project test summary file '"
+                "Project "
+                + file_type_name
+                + " summary file '"
                 + full_test_summary_output_path
                 + "' was not written ("
                 + str(ex)
                 + ")."
             )
             sys.exit(1)
+
+    def generate_test_report(self, args):
+        """
+        Respond to a request to generate a test report.
+        """
+
+        junit_document = self.__load_xml_docment(
+            args.test_report_file, "testsuites", "test report", "Junit"
+        )
+
+        new_stats, new_totals = self.compose_summary_from_junit_document(junit_document)
+        self.__save_summary_file(
+            self.test_summary_output_path, new_stats, "test report"
+        )
+
         published_test_summary_path = self.compute_published_path_to_file(
             self.test_summary_output_path
         )
@@ -831,62 +870,17 @@ class PyScan:
         Generate the coverage report and display it.
         """
 
-        if not os.path.exists(args.test_coverage_file):
-            print(
-                "Project test coverage file '"
-                + args.test_coverage_file
-                + "' does not exist."
-            )
-            sys.exit(1)
-        if not os.path.isfile(args.test_coverage_file):
-            print(
-                "Project test coverage file '"
-                + args.test_coverage_file
-                + "' is not a file."
-            )
-            sys.exit(1)
-        try:
-            cobertura_document = ET.parse(args.test_coverage_file).getroot()
-        except ParseError:
-            print(
-                "Project test coverage file '"
-                + args.test_coverage_file
-                + "' is not a valid test coverage file."
-            )
-            sys.exit(1)
-
-        if cobertura_document.tag != "coverage":
-            print(
-                "Project test coverage file '"
-                + args.test_coverage_file
-                + "' is not a proper Cobertura-format test coverage file."
-            )
-            sys.exit(1)
+        cobertura_document = self.__load_xml_docment(
+            args.test_coverage_file, "coverage", "test coverage", "Cobertura"
+        )
 
         new_stats = self.compose_summary_from_cobertura_document(cobertura_document)
-
-        summary_output_path = os.path.dirname(self.coverage_summary_output_path)
-        if not os.path.exists(summary_output_path):
-            print("Summary output path '" + summary_output_path + "' does not exist.")
-            sys.exit(1)
-
-        coverage_summary_output_path = os.path.abspath(
-            self.coverage_summary_output_path
+        self.__save_summary_file(
+            self.coverage_summary_output_path, new_stats, "test coverage"
         )
-        try:
-            with open(coverage_summary_output_path, "w") as outfile:
-                json.dump(new_stats.to_dict(), outfile)
-        except IOError as ex:
-            print(
-                "Project test coverage file '"
-                + coverage_summary_output_path
-                + "' was not written ("
-                + str(ex)
-                + ")."
-            )
-            sys.exit(1)
+
         published_coverage_summary_path = self.compute_published_path_to_file(
-            coverage_summary_output_path
+            self.coverage_summary_output_path
         )
         loaded_stats = self.load_coverage_results_summary_file(
             published_coverage_summary_path

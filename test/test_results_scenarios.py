@@ -688,7 +688,7 @@ def test_summarize_invalid_published_summary_file():
     suppplied_arguments = [JUNIT_COMMAND_LINE_FLAG, junit_test_file]
 
     expected_output = """\
-Previous summary file 'publish\\test-results.json' is not a valid JSON file (Expecting value: line 1 column 1 (char 0)).
+Previous results summary file 'publish\\test-results.json' is not a valid JSON file (Expecting value: line 1 column 1 (char 0)).
 """
     expected_error = ""
     expected_return_code = 1
@@ -720,9 +720,7 @@ def test_summarize_simple_junit_report_and_publish_and_summarize_with_error_on_p
 
     suppplied_arguments = [JUNIT_COMMAND_LINE_FLAG, junit_test_file]
 
-    expected_output = (
-        "Previous summary file 'publish\\test-results.json' was not loaded (None).\n"
-    )
+    expected_output = "Previous results summary file 'publish\\test-results.json' was not loaded (None).\n"
     expected_error = ""
     expected_return_code = 1
 
@@ -763,7 +761,7 @@ def test_summarize_simple_junit_report_with_error_on_report_write():
     suppplied_arguments = [JUNIT_COMMAND_LINE_FLAG, junit_test_file]
 
     expected_output = (
-        "Project test summary file '"
+        "Project test report summary file '"
         + os.path.abspath(summary_result_file)
         + "' was not written (None).\n"
     )
