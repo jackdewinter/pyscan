@@ -104,3 +104,34 @@ def test_junit_jacoco_profile():
     # Assert
     assert coverage_profile_as_dictionary == expected_dictionary
     assert back_from_dictionary == coverage_profile
+
+
+def test_made_up_profile():
+    """
+    Test to make sure the model can test a fictional profile that does not have
+    any line or branch measurements, say a coverage of assembly instructions.
+    """
+
+    # Arrange
+    coverage_profile = CoverageTotals(project_name="?", report_source="asmunit")
+    coverage_profile.instruction_level = CoverageMeasurement(
+        total_covered=25, total_measured=30
+    )
+
+    expected_dictionary = {}
+    expected_dictionary["projectName"] = "?"
+    expected_dictionary["reportSource"] = "asmunit"
+
+    g_instructions = {}
+    g_instructions["totalCovered"] = 25
+    g_instructions["totalMeasured"] = 30
+
+    expected_dictionary["instructionLevel"] = g_instructions
+
+    # Act
+    coverage_profile_as_dictionary = coverage_profile.to_dict()
+    back_from_dictionary = CoverageTotals.from_dict(coverage_profile_as_dictionary)
+
+    # Assert
+    assert coverage_profile_as_dictionary == expected_dictionary
+    assert back_from_dictionary == coverage_profile
