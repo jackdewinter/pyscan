@@ -114,10 +114,9 @@ class PyScan:
         Compute the path for the given file, assuming it will be placed in the publish directory.
         """
 
-        destination_path = os.path.join(
+        return os.path.join(
             self.test_summary_publish_path, os.path.basename(file_to_publish)
         )
-        return destination_path
 
     def load_test_results_summary_file(self, test_results_to_load):
         """
@@ -207,10 +206,10 @@ class PyScan:
                     measurement_to_add_to = TestMeasurement(class_name)
                     test_totals.measurements[class_name] = measurement_to_add_to
                 for next_child_node in next_test_case:
-                    if next_child_node.tag == "skipped":
-                        did_skip = True
                     if next_child_node.tag == "failure":
                         did_fail = True
+                    elif next_child_node.tag == "skipped":
+                        did_skip = True
                 if did_fail:
                     measurement_to_add_to.failed_tests = (
                         measurement_to_add_to.failed_tests + 1
@@ -232,13 +231,11 @@ class PyScan:
         Determine the deltas for a line node.
         """
 
-        covered_line_delta = 0
         line_branch_coverage = 0
         line_branch_measured = 0
 
         line_hits = next_line.attrib["hits"]
-        if line_hits != "0":
-            covered_line_delta = 1
+        covered_line_delta = 1 if line_hits != "0" else 0
         if "condition-coverage" in next_line.attrib:
             line_coverage = next_line.attrib["condition-coverage"]
             start_fraction = line_coverage.index("(")
@@ -273,10 +270,10 @@ class PyScan:
                         line_branch_coverage,
                         line_branch_measured,
                     ) = self.__process_line_node(next_line)
-                    measured_lines = measured_lines + 1
-                    covered_lines = covered_lines + covered_line_delta
-                    covered_branches = covered_branches + line_branch_coverage
-                    measured_branches = measured_branches + line_branch_measured
+                    measured_lines += 1
+                    covered_lines += covered_line_delta
+                    covered_branches += line_branch_coverage
+                    measured_branches += line_branch_measured
 
         coverage_totals.line_level = CoverageMeasurement(
             total_covered=covered_lines, total_measured=measured_lines
@@ -451,10 +448,11 @@ class PyScan:
         Determine if adequate requirements exist to add the specified row to the report.
         """
 
-        did_change = False
-        for column_number in range(1, len(row_to_add)):
-            if "+" in row_to_add[column_number] or "-" in row_to_add[column_number]:
-                did_change = True
+        did_change = any(
+            "+" in row_to_add[column_number] or "-" in row_to_add[column_number]
+            for column_number in range(1, len(row_to_add))
+        )
+
         if not only_report_changes or did_change:
             test_report_rows.append(row_to_add)
 
@@ -463,14 +461,14 @@ class PyScan:
         Calculate the coverage rows from the stats objects.
         """
 
-        report_rows = []
-        report_rows.append(
+        report_rows = [
             self.__create_coverage_row_contents(
                 "Instructions",
                 new_stats.instruction_level,
                 loaded_stats.instruction_level,
             )
-        )
+        ]
+
         report_rows.append(
             self.__create_coverage_row_contents(
                 "Lines", new_stats.line_level, loaded_stats.line_level
@@ -515,9 +513,7 @@ class PyScan:
 
         test_report_rows = []
         for next_row in report_rows:
-            formatted_report_row = []
-
-            formatted_report_row.append(next_row[0])
+            formatted_report_row = [next_row[0]]
 
             formatted_row, row_has_changes = self.__compute_formatted_coverage_column(
                 next_row, 1, covered_max_widths
@@ -624,8 +620,7 @@ class PyScan:
         """
         Create a row of contents for the coverage item.
         """
-        new_row = []
-        new_row.append(coverage_name)
+        new_row = [coverage_name]
         if current_stats:
             covered_value = current_stats.total_covered
             measured_value = current_stats.total_measured
@@ -663,7 +658,7 @@ class PyScan:
                     "{0:.2f}".format(percentage_value),
                 )
         else:
-            for _ in range(0, 6):
+            for _ in range(6):
                 new_row.append("-")
         return new_row
 
@@ -700,7 +695,7 @@ class PyScan:
 
         test_report_rows = []
         for next_output in difflib.ndiff(new_stats_keys, loaded_stats_keys):
-            next_output_prefix = next_output[0:2]
+            next_output_prefix = next_output[:2]
             next_output_name = next_output[2:]
 
             row_to_add = None

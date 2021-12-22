@@ -22,14 +22,13 @@ def compose_test_results(total_tests):
     for a report with only one class to test.
     """
 
-    expected_test_results_file = (
+    return (
         '{"projectName": "?", "reportSource": "pytest", "measurements": '
         + '[{"name": "test.test_scenarios", "totalTests": '
         + str(total_tests)
         + ', "failedTests": 0, '
         + '"errorTests": 0, "skippedTests": 0, "elapsedTimeInMilliseconds": 0}]}'
     )
-    return expected_test_results_file
 
 
 def test_summarize_simple_junit_report(

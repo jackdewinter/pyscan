@@ -21,8 +21,7 @@ def compose_coverage_summary_file():
     Create a test coverage file for a sample report.
     """
 
-    expected_coverage_file = """{"projectName": "pyscan", "reportSource": "pytest", "branchLevel": {"totalMeasured": 4, "totalCovered": 2}, "lineLevel": {"totalMeasured": 15, "totalCovered": 10}}"""
-    return expected_coverage_file
+    return """{"projectName": "pyscan", "reportSource": "pytest", "branchLevel": {"totalMeasured": 4, "totalCovered": 2}, "lineLevel": {"totalMeasured": 15, "totalCovered": 10}}"""
 
 
 def test_summarize_simple_cobertura_report(

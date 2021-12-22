@@ -51,16 +51,15 @@ class InProcessResult:
                         + "\n---\nwas not found in\n---\n"
                         + actual_stream.getvalue()
                     )
-        else:
-            if actual_stream.getvalue() != expected_text:
-                diff = difflib.ndiff(
-                    expected_text.splitlines(), actual_stream.getvalue().splitlines()
-                )
+        elif actual_stream.getvalue() != expected_text:
+            diff = difflib.ndiff(
+                expected_text.splitlines(), actual_stream.getvalue().splitlines()
+            )
 
-                diff_values = "\n".join(list(diff))
-                assert False, (
-                    stream_name + " not as expected:\n---\n" + diff_values + "\n---\n"
-                )
+            diff_values = "\n".join(list(diff))
+            assert False, (
+                stream_name + " not as expected:\n---\n" + diff_values + "\n---\n"
+            )
 
     def assert_stream_contents(
         self, stream_name, actual_stream, expected_stream, additional_error=None
@@ -152,7 +151,7 @@ class InProcessResult:
                 )
                 if are_different:
                     break
-                index = index + 1
+                index += 1
 
         if are_different:
             diff = difflib.ndiff(split_actual_contents, split_expected_contents)
@@ -263,10 +262,7 @@ class InProcessExecution(ABC):
             sys.stdout = std_output
             sys.stderr = std_error
 
-            if arguments:
-                sys.argv = arguments.copy()
-            else:
-                sys.argv = []
+            sys.argv = arguments.copy() if arguments else []
             sys.argv.insert(0, self.get_main_name())
 
             if cwd:

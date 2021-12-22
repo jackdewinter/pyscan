@@ -23,8 +23,7 @@ class PatchBuiltinOpen:
         self.mock_patcher = unittest.mock.patch("builtins.open")
         self.patched_open = self.mock_patcher.start()
         self.patched_open.side_effect = self.my_open
-        self.open_file_args = []
-        self.open_file_args.append("map=" + str(self.exception_map))
+        self.open_file_args = ["map=" + str(self.exception_map)]
 
     def stop(self):
         """
@@ -52,10 +51,7 @@ class PatchBuiltinOpen:
         """
 
         filename = args[0]
-        filemode = "r"
-        if len(args) > 1:
-            filemode = args[1]
-
+        filemode = args[1] if len(args) > 1 else "r"
         if filename in self.content_map and filemode == "r":
             self.open_file_args.append((args, "text-content"))
             content = self.content_map[filename]
