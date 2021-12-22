@@ -3,64 +3,162 @@ Module to provide functionality to test scripts from within pytest.
 """
 import difflib
 import io
+import logging
 import os
 import sys
 import traceback
 from abc import ABC, abstractmethod
 
+LOGGER = logging.getLogger(__name__)
 
-# pylint: disable=too-few-public-methods
+
 class InProcessResult:
     """
     Class to provide for an encapsulation of the results of an execution.
     """
 
     def __init__(self, return_code, std_out, std_err):
-        self.return_code = return_code
-        self.std_out = std_out
-        self.std_err = std_err
+        self.__return_code = return_code
+        self.__std_out = std_out
+        self.__std_err = std_err
 
+    # pylint: disable=too-many-arguments
     @classmethod
     def compare_versus_expected(
-        cls, stream_name, actual_stream, expected_text, additional_text=None
+        cls,
+        stream_name,
+        actual_stream,
+        expected_text,
+        additional_text=None,
+        log_extra=None,
     ):
         """
         Do a thorough comparison of the actual stream against the expected text.
         """
 
         if additional_text:
-            assert actual_stream.getvalue().startswith(expected_text), (
-                "Block\n---\n"
-                + expected_text
-                + "\n---\nwas not found at the start of\n---\n"
-                + actual_stream.getvalue()
+            assert actual_stream.getvalue().strip().startswith(expected_text.strip()), (
+                f"Block\n---\n{expected_text}\n---\nwas not found at the start of"
+                + "\n---\n{actual_stream.getvalue()}\nExtra:{log_extra}"
             )
 
             for next_text_block in additional_text:
-                was_found = next_text_block in actual_stream.getvalue()
+                was_found = next_text_block.strip() in actual_stream.getvalue().strip()
                 diff = difflib.ndiff(
-                    next_text_block.splitlines(), actual_stream.getvalue().splitlines()
+                    next_text_block.strip().splitlines(),
+                    actual_stream.getvalue().strip().splitlines(),
                 )
 
                 diff_values = "\n".join(list(diff))
                 print(diff_values, file=sys.stderr)
                 if not was_found:
-                    assert False, (
-                        "Block\n---\n"
-                        + next_text_block
-                        + "\n---\nwas not found in\n---\n"
-                        + actual_stream.getvalue()
-                    )
-        else:
-            if actual_stream.getvalue() != expected_text:
-                diff = difflib.ndiff(
-                    expected_text.splitlines(), actual_stream.getvalue().splitlines()
-                )
+                    assert (
+                        False
+                    ), f"Block\n---\n{next_text_block}\n---\nwas not found in\n---\n{actual_stream.getvalue()}"
+        elif actual_stream.getvalue().strip() != expected_text.strip():
+            diff = difflib.ndiff(
+                expected_text.splitlines(), actual_stream.getvalue().splitlines()
+            )
 
-                diff_values = "\n".join(list(diff))
-                assert False, (
-                    stream_name + " not as expected:\n---\n" + diff_values + "\n---\n"
+            diff_values = "\n".join(list(diff)) + "\n---\n"
+
+            LOGGER.warning(
+                "actual>>%s",
+                cls.__make_value_visible(actual_stream.getvalue()),
+            )
+            print(f"WARN>actual>>{cls.__make_value_visible(actual_stream.getvalue())}")
+            LOGGER.warning("expect>>%s", cls.__make_value_visible(expected_text))
+            print(f"WARN>expect>>{cls.__make_value_visible(expected_text)}")
+            if log_extra:
+                print(f"log_extra:{log_extra}")
+            assert False, f"{stream_name} not as expected:\n{diff_values}"
+
+    # pylint: enable=too-many-arguments
+
+    # pylint: disable=unused-private-member
+    @classmethod
+    def __make_value_visible(cls, string_to_modify):
+        return string_to_modify.replace("\n", "\\n").replace("\t", "\\t")
+
+    # pylint: enable=unused-private-member
+
+    @property
+    def return_code(self):
+        """
+        Return code provided after execution.
+        """
+        return self.__return_code
+
+    @property
+    def std_out(self):
+        """
+        Standard output collected during execution.
+        """
+        return self.__std_out
+
+    # pylint: disable=too-many-arguments
+    def assert_results(
+        self,
+        stdout=None,
+        stderr=None,
+        error_code=0,
+        additional_error=None,
+        alternate_stdout=None,
+    ):
+        """
+        Assert the results are as expected in the "assert" phase.
+        """
+
+        try:
+            if stdout:
+                if alternate_stdout:
+                    try:
+                        self.compare_versus_expected(
+                            "Stdout",
+                            self.__std_out,
+                            stdout,
+                            log_extra=self.__std_err.getvalue(),
+                        )
+                    except AssertionError:
+                        self.compare_versus_expected(
+                            "Stdout",
+                            self.__std_out,
+                            alternate_stdout,
+                            log_extra=self.__std_err.getvalue(),
+                        )
+                else:
+                    self.compare_versus_expected(
+                        "Stdout",
+                        self.__std_out,
+                        stdout,
+                        log_extra=self.__std_err.getvalue(),
+                    )
+            else:
+                assert_text = (
+                    f"Expected stdout to be empty, not: {self.__std_out.getvalue()}"
                 )
+                if self.__std_err.getvalue():
+                    assert_text += f"\nStdErr was:{self.__std_err.getvalue()}"
+                assert not self.__std_out.getvalue(), assert_text
+
+            if stderr:
+                self.compare_versus_expected(
+                    "Stderr", self.__std_err, stderr, additional_error
+                )
+            else:
+                assert (
+                    not self.__std_err.getvalue()
+                ), f"Expected stderr to be empty, not: {self.__std_err.getvalue()}"
+
+            assert (
+                self.__return_code == error_code
+            ), f"Actual error code ({self.__return_code}) and expected error code ({error_code}) differ."
+
+        finally:
+            self.__std_out.close()
+            self.__std_err.close()
+
+    # pylint: enable=too-many-arguments
 
     def assert_stream_contents(
         self, stream_name, actual_stream, expected_stream, additional_error=None
@@ -90,57 +188,13 @@ class InProcessResult:
         return result
 
     @classmethod
-    def assert_return_code(cls, actual_return_code, expected_return_code):
-        """
-        Assert that the actual return code is as expected.
-        """
-
-        result = None
-        try:
-            assert actual_return_code == expected_return_code, (
-                "Actual error code ("
-                + str(actual_return_code)
-                + ") and expected error code ("
-                + str(expected_return_code)
-                + ") differ."
-            )
-        except AssertionError as ex:
-            result = ex
-        return result
-
-    def assert_results(
-        self, stdout=None, stderr=None, error_code=0, additional_error=None
-    ):
-        """
-        Assert the results are as expected in the "assert" phase.
-        """
-
-        stdout_error = self.assert_stream_contents("stdout", self.std_out, stdout)
-        stderr_error = self.assert_stream_contents(
-            "stderr", self.std_err, stderr, additional_error
-        )
-        return_code_error = self.assert_return_code(self.return_code, error_code)
-
-        combined_error_msg = ""
-        if stdout_error:
-            combined_error_msg = combined_error_msg + "\n" + str(stdout_error)
-        if stderr_error:
-            combined_error_msg = combined_error_msg + "\n" + str(stderr_error)
-        if return_code_error:
-            combined_error_msg = combined_error_msg + "\n" + str(return_code_error)
-        assert not combined_error_msg, (
-            "Either stdout, stderr, or the return code was not as expected.\n"
-            + combined_error_msg
-        )
-
-    @classmethod
     def assert_resultant_file(cls, file_path, expected_contents):
         """
         Assert the contents of a given file against it's expected contents.
         """
 
         split_expected_contents = expected_contents.split("\n")
-        with open(file_path, "r") as infile:
+        with open(file_path, "r", encoding="utf-8") as infile:
             split_actual_contents = infile.readlines()
 
         are_different = len(split_expected_contents) != len(split_actual_contents)
@@ -152,21 +206,15 @@ class InProcessResult:
                 )
                 if are_different:
                     break
-                index = index + 1
+                index += 1
 
         if are_different:
             diff = difflib.ndiff(split_actual_contents, split_expected_contents)
             diff_values = "\n".join(list(diff))
-            assert False, (
-                "Actual and expected contents of '"
-                + file_path
-                + "' are not equal:\n---\n"
-                + diff_values
-                + "\n---\n"
-            )
+            assert (
+                False
+            ), f"Actual and expected contents of '{file_path}' are not equal:\n---\n{diff_values}\n---\n"
 
-
-# pylint: enable=too-few-public-methods
 
 # pylint: disable=too-few-public-methods
 class SystemState:
@@ -227,7 +275,7 @@ class InProcessExecution(ABC):
         """
         returncode = exit_exception.code
         if isinstance(returncode, str):
-            std_error.write("{}\n".format(exit_exception))
+            std_error.write("f{exit_exception}\n")
             returncode = 1
         elif returncode is None:
             returncode = 0
@@ -255,23 +303,19 @@ class InProcessExecution(ABC):
 
         saved_state = SystemState()
 
+        std_output = io.StringIO()
+        std_error = io.StringIO()
+        sys.stdout = std_output
+        sys.stderr = std_error
+
+        sys.argv = arguments.copy() if arguments else []
+        sys.argv.insert(0, self.get_main_name())
+
+        if cwd:
+            os.chdir(cwd)
+
         try:
             returncode = 0
-
-            std_output = io.StringIO()
-            std_error = io.StringIO()
-            sys.stdout = std_output
-            sys.stderr = std_error
-
-            if arguments:
-                sys.argv = arguments.copy()
-            else:
-                sys.argv = []
-            sys.argv.insert(0, self.get_main_name())
-
-            if cwd:
-                os.chdir(cwd)
-
             self.execute_main()
         except SystemExit as this_exception:
             returncode = self.handle_system_exit(this_exception, std_error)

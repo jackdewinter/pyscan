@@ -13,9 +13,12 @@ from xml.etree.ElementTree import ParseError
 import tabulate as tabulate_module
 from tabulate import tabulate
 
-from model import CoverageMeasurement, CoverageTotals, TestMeasurement, TestTotals
-
-# pylint: enable=too-many-instance-attributes
+from pyscan.model import (
+    CoverageMeasurement,
+    CoverageTotals,
+    TestMeasurement,
+    TestTotals,
+)
 
 
 class PyScan:
@@ -71,7 +74,15 @@ class PyScan:
             default=False,
             help="publish",
         )
-        return parser.parse_args()
+        args = parser.parse_args()
+        if (
+            not args.publish_summaries
+            and not args.test_coverage_file
+            and not args.test_report_file
+        ):
+            parser.print_help()
+            sys.exit(2)
+        return args
 
     def __publish_file(self, file_to_publish):
         """
@@ -80,16 +91,12 @@ class PyScan:
 
         if not os.path.exists(self.test_summary_publish_path):
             print(
-                "Publish directory '"
-                + self.test_summary_publish_path
-                + "' does not exist.  Creating."
+                f"Publish directory '{self.test_summary_publish_path}' does not exist.  Creating."
             )
             os.makedirs(self.test_summary_publish_path)
         elif not os.path.isdir(self.test_summary_publish_path):
             print(
-                "Publish directory '"
-                + self.test_summary_publish_path
-                + "' already exists, but as a file."
+                f"Publish directory '{self.test_summary_publish_path}' already exists, but as a file."
             )
             sys.exit(1)
 
@@ -100,13 +107,7 @@ class PyScan:
                     self.compute_published_path_to_file(file_to_publish),
                 )
             except IOError as ex:
-                print(
-                    "Publishing file '"
-                    + file_to_publish
-                    + "' failed ("
-                    + str(ex)
-                    + ")."
-                )
+                print(f"Publishing file '{file_to_publish}' failed ({ex}).")
                 sys.exit(1)
 
     def compute_published_path_to_file(self, file_to_publish):
@@ -114,40 +115,32 @@ class PyScan:
         Compute the path for the given file, assuming it will be placed in the publish directory.
         """
 
-        destination_path = os.path.join(
+        return os.path.join(
             self.test_summary_publish_path, os.path.basename(file_to_publish)
         )
-        return destination_path
 
     def load_test_results_summary_file(self, test_results_to_load):
         """
         Attempt to load a previously published test summary.
         """
 
-        test_totals = None
-        grand_totals = None
+        test_totals, grand_totals = None, None
         if os.path.exists(test_results_to_load) and os.path.isfile(
             test_results_to_load
         ):
             try:
-                with open(os.path.abspath(test_results_to_load), "r") as infile:
+                with open(
+                    os.path.abspath(test_results_to_load), "r", encoding="utf-8"
+                ) as infile:
                     results_dictionary = json.load(infile)
             except json.decoder.JSONDecodeError as ex:
                 print(
-                    "Previous results summary file '"
-                    + test_results_to_load
-                    + "' is not a valid JSON file ("
-                    + str(ex)
-                    + ")."
+                    f"Previous results summary file '{test_results_to_load}' is not a valid JSON file ({ex})."
                 )
                 sys.exit(1)
             except IOError as ex:
                 print(
-                    "Previous results summary file '"
-                    + test_results_to_load
-                    + "' was not loaded ("
-                    + str(ex)
-                    + ")."
+                    f"Previous results summary file '{test_results_to_load}' was not loaded ({ex})."
                 )
                 sys.exit(1)
             test_totals = TestTotals.from_dict(results_dictionary)
@@ -165,24 +158,18 @@ class PyScan:
             test_results_to_load
         ):
             try:
-                with open(os.path.abspath(test_results_to_load), "r") as infile:
+                with open(
+                    os.path.abspath(test_results_to_load), "r", encoding="utf-8"
+                ) as infile:
                     results_dictionary = json.load(infile)
             except json.decoder.JSONDecodeError as ex:
                 print(
-                    "Previous coverage summary file '"
-                    + test_results_to_load
-                    + "' is not a valid JSON file ("
-                    + str(ex)
-                    + ")."
+                    f"Previous coverage summary file '{test_results_to_load}' is not a valid JSON file ({ex})."
                 )
                 sys.exit(1)
             except IOError as ex:
                 print(
-                    "Previous coverage summary file '"
-                    + test_results_to_load
-                    + "' was not loaded ("
-                    + str(ex)
-                    + ")."
+                    f"Previous coverage summary file '{test_results_to_load}' was not loaded ({ex})."
                 )
                 sys.exit(1)
             test_totals = CoverageTotals.from_dict(results_dictionary)
@@ -207,10 +194,10 @@ class PyScan:
                     measurement_to_add_to = TestMeasurement(class_name)
                     test_totals.measurements[class_name] = measurement_to_add_to
                 for next_child_node in next_test_case:
-                    if next_child_node.tag == "skipped":
-                        did_skip = True
                     if next_child_node.tag == "failure":
                         did_fail = True
+                    elif next_child_node.tag == "skipped":
+                        did_skip = True
                 if did_fail:
                     measurement_to_add_to.failed_tests = (
                         measurement_to_add_to.failed_tests + 1
@@ -232,13 +219,11 @@ class PyScan:
         Determine the deltas for a line node.
         """
 
-        covered_line_delta = 0
         line_branch_coverage = 0
         line_branch_measured = 0
 
         line_hits = next_line.attrib["hits"]
-        if line_hits != "0":
-            covered_line_delta = 1
+        covered_line_delta = 1 if line_hits != "0" else 0
         if "condition-coverage" in next_line.attrib:
             line_coverage = next_line.attrib["condition-coverage"]
             start_fraction = line_coverage.index("(")
@@ -260,11 +245,7 @@ class PyScan:
             project_name=project_name, report_source="pytest"
         )
 
-        measured_lines = 0
-        covered_lines = 0
-        measured_branches = 0
-        covered_branches = 0
-
+        measured_lines, covered_lines, measured_branches, covered_branches = 0, 0, 0, 0
         for next_package in cobertura_document.findall("./packages/package"):
             for next_class in next_package.findall("./classes/class"):
                 for next_line in next_class.findall("./lines/line"):
@@ -273,10 +254,10 @@ class PyScan:
                         line_branch_coverage,
                         line_branch_measured,
                     ) = self.__process_line_node(next_line)
-                    measured_lines = measured_lines + 1
-                    covered_lines = covered_lines + covered_line_delta
-                    covered_branches = covered_branches + line_branch_coverage
-                    measured_branches = measured_branches + line_branch_measured
+                    measured_lines += 1
+                    covered_lines += covered_line_delta
+                    covered_branches += line_branch_coverage
+                    measured_branches += line_branch_measured
 
         coverage_totals.line_level = CoverageMeasurement(
             total_covered=covered_lines, total_measured=measured_lines
@@ -311,8 +292,8 @@ class PyScan:
         """
 
         if delta_to_display > 0:
-            return str(value_to_display) + " +" + str(delta_to_display)
-        return str(value_to_display) + " " + str(delta_to_display)
+            return f"{value_to_display} +{delta_to_display}"
+        return f"{value_to_display} {delta_to_display}"
 
     # pylint: disable=too-many-arguments
     def __generate_match(
@@ -451,10 +432,11 @@ class PyScan:
         Determine if adequate requirements exist to add the specified row to the report.
         """
 
-        did_change = False
-        for column_number in range(1, len(row_to_add)):
-            if "+" in row_to_add[column_number] or "-" in row_to_add[column_number]:
-                did_change = True
+        did_change = any(
+            "+" in row_to_add[column_number] or "-" in row_to_add[column_number]
+            for column_number in range(1, len(row_to_add))
+        )
+
         if not only_report_changes or did_change:
             test_report_rows.append(row_to_add)
 
@@ -463,14 +445,14 @@ class PyScan:
         Calculate the coverage rows from the stats objects.
         """
 
-        report_rows = []
-        report_rows.append(
+        report_rows = [
             self.__create_coverage_row_contents(
                 "Instructions",
                 new_stats.instruction_level,
                 loaded_stats.instruction_level,
             )
-        )
+        ]
+
         report_rows.append(
             self.__create_coverage_row_contents(
                 "Lines", new_stats.line_level, loaded_stats.line_level
@@ -515,9 +497,7 @@ class PyScan:
 
         test_report_rows = []
         for next_row in report_rows:
-            formatted_report_row = []
-
-            formatted_report_row.append(next_row[0])
+            formatted_report_row = [next_row[0]]
 
             formatted_row, row_has_changes = self.__compute_formatted_coverage_column(
                 next_row, 1, covered_max_widths
@@ -624,8 +604,7 @@ class PyScan:
         """
         Create a row of contents for the coverage item.
         """
-        new_row = []
-        new_row.append(coverage_name)
+        new_row = [coverage_name]
         if current_stats:
             covered_value = current_stats.total_covered
             measured_value = current_stats.total_measured
@@ -647,8 +626,8 @@ class PyScan:
                 )
                 cls.__format_coverage_value(
                     new_row,
-                    "{0:.2f}".format(percentage_value),
-                    "{0:.2f}".format(delta_percentage_value),
+                    f"{percentage_value:.2f}",
+                    f"{delta_percentage_value:.2f}",
                 )
             else:
                 cls.__format_coverage_value(
@@ -659,14 +638,15 @@ class PyScan:
                 )
                 cls.__format_coverage_value(
                     new_row,
-                    "{0:.2f}".format(percentage_value),
-                    "{0:.2f}".format(percentage_value),
+                    f"{percentage_value:.2f}",
+                    f"{percentage_value:.2f}",
                 )
         else:
-            for _ in range(0, 6):
+            for _ in range(6):
                 new_row.append("-")
         return new_row
 
+    # pylint: disable=unused-private-member
     @classmethod
     def __format_coverage_value(cls, new_row, value, delta):
         """
@@ -681,6 +661,8 @@ class PyScan:
         ):
             delta_value = "+" + delta_value
         new_row.append(delta_value)
+
+    # pylint: enable=unused-private-member
 
     # pylint: disable=too-many-arguments
     def __report_test_files(
@@ -700,7 +682,7 @@ class PyScan:
 
         test_report_rows = []
         for next_output in difflib.ndiff(new_stats_keys, loaded_stats_keys):
-            next_output_prefix = next_output[0:2]
+            next_output_prefix = next_output[:2]
             next_output_name = next_output[2:]
 
             row_to_add = None
@@ -739,18 +721,14 @@ class PyScan:
             self.test_summary_output_path
         ):
             print(
-                "Test results summary path '"
-                + self.test_summary_output_path
-                + "' is not a file."
+                f"Test results summary path '{self.test_summary_output_path}' is not a file."
             )
             sys.exit(1)
         if os.path.exists(self.coverage_summary_output_path) and not os.path.isfile(
             self.coverage_summary_output_path
         ):
             print(
-                "Test coverage summary path '"
-                + self.coverage_summary_output_path
-                + "' is not a file."
+                f"Test coverage summary path '{self.coverage_summary_output_path}' is not a file."
             )
             sys.exit(1)
 
@@ -766,49 +744,24 @@ class PyScan:
         """
 
         if not os.path.exists(xml_file_to_load):
-            print(
-                "Project "
-                + file_type_name
-                + " file '"
-                + xml_file_to_load
-                + "' does not exist."
-            )
+            print(f"Project {file_type_name} file '{xml_file_to_load}' does not exist.")
             sys.exit(1)
         if not os.path.isfile(xml_file_to_load):
-            print(
-                "Project "
-                + file_type_name
-                + " file '"
-                + xml_file_to_load
-                + "' is not a file."
-            )
+            print(f"Project {file_type_name} file '{xml_file_to_load}' is not a file.")
             sys.exit(1)
 
         try:
             xml_document = ET.parse(xml_file_to_load).getroot()
         except ParseError:
             print(
-                "Project "
-                + file_type_name
-                + " file '"
-                + xml_file_to_load
-                + "' is not a valid "
-                + file_type_name
-                + " file."
+                f"Project {file_type_name} file '{xml_file_to_load}' is not a valid {file_type_name} file."
             )
             sys.exit(1)
 
         if xml_document.tag != xml_root_element_name:
             print(
-                "Project "
-                + file_type_name
-                + " file '"
-                + xml_file_to_load
-                + "' is not a proper "
-                + format_type_name
-                + "-format "
-                + file_type_name
-                + " file."
+                f"Project {file_type_name} file '{xml_file_to_load}' is not a proper "
+                + f"{format_type_name}-format {file_type_name} file."
             )
             sys.exit(1)
         return xml_document
@@ -821,22 +774,17 @@ class PyScan:
 
         summary_output_path = os.path.dirname(json_file_to_write)
         if not os.path.exists(summary_output_path):
-            print("Summary output path '" + summary_output_path + "' does not exist.")
+            print(f"Summary output path '{summary_output_path}' does not exist.")
             sys.exit(1)
 
         full_test_summary_output_path = os.path.abspath(json_file_to_write)
         try:
-            with open(full_test_summary_output_path, "w") as outfile:
+            with open(full_test_summary_output_path, "w", encoding="utf-8") as outfile:
                 json.dump(object_to_write.to_dict(), outfile)
         except IOError as ex:
             print(
-                "Project "
-                + file_type_name
-                + " summary file '"
-                + full_test_summary_output_path
-                + "' was not written ("
-                + str(ex)
-                + ")."
+                f"Project {file_type_name} summary file '{full_test_summary_output_path}"
+                + f"' was not written ({ex})."
             )
             sys.exit(1)
 

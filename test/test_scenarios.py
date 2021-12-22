@@ -2,14 +2,11 @@
 Tests for the basic scenarios for the scanner.
 """
 import os
-import sys
 import tempfile
 from test.pytest_execute import InProcessExecution
 
-# https://docs.pytest.org/en/latest/goodpractices.html#tests-outside-application-code
-sys.path.insert(0, os.path.abspath("pyscan"))  # isort:skip
-# pylint: disable=wrong-import-position
-from pyscan.main import PyScan  # isort:skip
+from pyscan.__main__ import main
+from pyscan.main import PyScan
 
 JUNIT_COMMAND_LINE_FLAG = "--junit"
 COBERTURA_COMMAND_LINE_FLAG = "--cobertura"
@@ -23,18 +20,25 @@ class MainlineExecutor(InProcessExecution):
     Class to provide for a local instance of a InProcessExecution class.
     """
 
-    def __init__(self):
+    def __init__(self, use_module=False, use_main=False):
         super().__init__()
+
+        self.__use_main = use_main
+        self.__entry_point = "__main.py__" if use_module else "main.py"
+
         resource_directory = os.path.join(os.getcwd(), "test", "resources")
         assert os.path.exists(resource_directory)
         assert os.path.isdir(resource_directory)
         self.resource_directory = resource_directory
 
     def execute_main(self):
-        PyScan().main()
+        if self.__use_main:
+            main()
+        else:
+            PyScan().main()
 
     def get_main_name(self):
-        return "main.py"
+        return self.__entry_point
 
 
 def test_get_summarizer_version():
@@ -61,6 +65,7 @@ main.py 0.1.0
     )
 
 
+# pylint: disable=consider-using-with
 def setup_directories(
     create_report_directory=True,
     create_publish_directory=False,
@@ -80,3 +85,6 @@ def setup_directories(
     if create_publish_directory:
         os.makedirs(publish_directory)
     return temporary_work_directory, report_directory, publish_directory
+
+
+# pylint: enable=consider-using-with

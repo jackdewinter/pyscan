@@ -22,14 +22,13 @@ def compose_test_results(total_tests):
     for a report with only one class to test.
     """
 
-    expected_test_results_file = (
+    return (
         '{"projectName": "?", "reportSource": "pytest", "measurements": '
         + '[{"name": "test.test_scenarios", "totalTests": '
         + str(total_tests)
         + ', "failedTests": 0, '
         + '"errorTests": 0, "skippedTests": 0, "elapsedTimeInMilliseconds": 0}]}'
     )
-    return expected_test_results_file
 
 
 def test_summarize_simple_junit_report(
@@ -682,7 +681,7 @@ def test_summarize_invalid_published_summary_file():
     copyfile(os.path.join(executor.resource_directory, "tests.xml"), junit_test_file)
     summary_result_file = os.path.join(publish_directory, RESULTS_SUMMARY_FILE_NAME)
 
-    with open(summary_result_file, "w") as outfile:
+    with open(summary_result_file, "w", encoding="utf-8") as outfile:
         outfile.write("this is not a json file")
 
     suppplied_arguments = [JUNIT_COMMAND_LINE_FLAG, junit_test_file]
@@ -815,7 +814,7 @@ def test_sample_1():
         + '"errorTests": 0, "skippedTests": 0, "elapsedTimeInMilliseconds": 0}'
         + "]}"
     )
-    with open(summary_result_file, "w") as outfile:
+    with open(summary_result_file, "w", encoding="utf-8") as outfile:
         outfile.write(previous_test_summary_contents)
 
     suppplied_arguments = [JUNIT_COMMAND_LINE_FLAG, junit_test_file]

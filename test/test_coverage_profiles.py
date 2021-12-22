@@ -18,17 +18,9 @@ def test_pytest_cobertura_profile():
         total_covered=15, total_measured=20
     )
 
-    expected_dictionary = {}
-    expected_dictionary["projectName"] = "?"
-    expected_dictionary["reportSource"] = "pytest"
-
-    g_branch = {}
-    g_branch["totalCovered"] = 5
-    g_branch["totalMeasured"] = 10
-    g_line = {}
-    g_line["totalCovered"] = 15
-    g_line["totalMeasured"] = 20
-
+    expected_dictionary = {"projectName": "?", "reportSource": "pytest"}
+    g_branch = {"totalCovered": 5, "totalMeasured": 10}
+    g_line = {"totalCovered": 15, "totalMeasured": 20}
     expected_dictionary["branchLevel"] = g_branch
     expected_dictionary["lineLevel"] = g_line
 
@@ -67,29 +59,13 @@ def test_junit_jacoco_profile():
         total_covered=1, total_measured=1
     )
 
-    expected_dictionary = {}
-    expected_dictionary["projectName"] = "?"
-    expected_dictionary["reportSource"] = "junit"
-
-    g_instructions = {}
-    g_instructions["totalCovered"] = 25
-    g_instructions["totalMeasured"] = 30
-    g_line = {}
-    g_line["totalCovered"] = 15
-    g_line["totalMeasured"] = 20
-    g_branch = {}
-    g_branch["totalCovered"] = 5
-    g_branch["totalMeasured"] = 10
-    g_complexity = {}
-    g_complexity["totalCovered"] = 6
-    g_complexity["totalMeasured"] = 11
-    g_method = {}
-    g_method["totalCovered"] = 3
-    g_method["totalMeasured"] = 4
-    g_class = {}
-    g_class["totalCovered"] = 1
-    g_class["totalMeasured"] = 1
-
+    expected_dictionary = {"projectName": "?", "reportSource": "junit"}
+    g_instructions = {"totalCovered": 25, "totalMeasured": 30}
+    g_line = {"totalCovered": 15, "totalMeasured": 20}
+    g_branch = {"totalCovered": 5, "totalMeasured": 10}
+    g_complexity = {"totalCovered": 6, "totalMeasured": 11}
+    g_method = {"totalCovered": 3, "totalMeasured": 4}
+    g_class = {"totalCovered": 1, "totalMeasured": 1}
     expected_dictionary["instructionLevel"] = g_instructions
     expected_dictionary["lineLevel"] = g_line
     expected_dictionary["branchLevel"] = g_branch
@@ -118,14 +94,8 @@ def test_made_up_profile():
         total_covered=25, total_measured=30
     )
 
-    expected_dictionary = {}
-    expected_dictionary["projectName"] = "?"
-    expected_dictionary["reportSource"] = "asmunit"
-
-    g_instructions = {}
-    g_instructions["totalCovered"] = 25
-    g_instructions["totalMeasured"] = 30
-
+    expected_dictionary = {"projectName": "?", "reportSource": "asmunit"}
+    g_instructions = {"totalCovered": 25, "totalMeasured": 30}
     expected_dictionary["instructionLevel"] = g_instructions
 
     # Act

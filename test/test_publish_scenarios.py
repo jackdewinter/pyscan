@@ -39,8 +39,7 @@ def test_summarize_simple_junit_report_and_publish_with_existing_publish():
 
     suppplied_arguments = [PUBLISH_COMMAND_LINE_FLAG]
 
-    expected_output = """\
-"""
+    expected_output = ""
     expected_error = ""
     expected_return_code = 0
     expected_test_results_file = compose_test_results(3)
@@ -75,8 +74,7 @@ def test_summarize_simple_cobertura_report_and_publish_with_existing_publish():
 
     suppplied_arguments = [PUBLISH_COMMAND_LINE_FLAG]
 
-    expected_output = """\
-"""
+    expected_output = ""
     expected_error = ""
     expected_return_code = 0
     expected_test_coverage_file = compose_coverage_summary_file()
@@ -104,7 +102,7 @@ def test_publish_with_existing_publish_as_file():
     executor = MainlineExecutor()
     temporary_work_directory, _, publish_directory = setup_directories()
 
-    with open(publish_directory, "w") as outfile:
+    with open(publish_directory, "w", encoding="utf-8") as outfile:
         outfile.write("test")
 
     suppplied_arguments = [PUBLISH_COMMAND_LINE_FLAG]
@@ -145,9 +143,7 @@ def test_publish_with_test_file_as_directory():
     suppplied_arguments = [PUBLISH_COMMAND_LINE_FLAG]
 
     results_path = os.path.join("report", RESULTS_SUMMARY_FILE_NAME)
-    expected_output = (
-        "Test results summary path '" + results_path + "' is not a file.\n"
-    )
+    expected_output = f"Test results summary path '{results_path}' is not a file.\n"
     expected_error = ""
     expected_return_code = 1
 
@@ -184,9 +180,7 @@ def test_publish_with_coverage_file_as_directory():
     suppplied_arguments = [PUBLISH_COMMAND_LINE_FLAG]
 
     coverage_path = os.path.join("report", COVERAGE_SUMMARY_FILE_NAME)
-    expected_output = (
-        "Test coverage summary path '" + coverage_path + "' is not a file.\n"
-    )
+    expected_output = f"Test coverage summary path '{coverage_path}' is not a file.\n"
     expected_error = ""
     expected_return_code = 1
 
@@ -207,14 +201,17 @@ def test_summarize_simple_junit_report_and_publish_with_error_on_source_read():
     """
 
     # Arrange
-    (executor, temporary_work_directory, _, _,) = test_summarize_simple_junit_report(
-        create_publish_directory=True
-    )
+    (
+        executor,
+        temporary_work_directory,
+        _,
+        _,
+    ) = test_summarize_simple_junit_report(create_publish_directory=True)
 
     suppplied_arguments = [PUBLISH_COMMAND_LINE_FLAG]
 
     results_path = os.path.join("report", RESULTS_SUMMARY_FILE_NAME)
-    expected_output = "Publishing file '" + results_path + "' failed (None).\n"
+    expected_output = f"Publishing file '{results_path}' failed (None).\n"
     expected_error = ""
     expected_return_code = 1
 
@@ -242,14 +239,17 @@ def test_summarize_simple_junit_report_and_publish_with_error_on_destination_wri
     """
 
     # Arrange
-    (executor, temporary_work_directory, _, _,) = test_summarize_simple_junit_report(
-        create_publish_directory=True
-    )
+    (
+        executor,
+        temporary_work_directory,
+        _,
+        _,
+    ) = test_summarize_simple_junit_report(create_publish_directory=True)
 
     suppplied_arguments = [PUBLISH_COMMAND_LINE_FLAG]
 
     results_path = os.path.join("report", RESULTS_SUMMARY_FILE_NAME)
-    expected_output = "Publishing file '" + results_path + "' failed (None).\n"
+    expected_output = f"Publishing file '{results_path}' failed (None).\n"
     expected_error = ""
     expected_return_code = 1
 

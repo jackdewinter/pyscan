@@ -18,13 +18,16 @@ class TestTotals:
         Convert the current totals into a vanilla dictionary.
         """
 
-        serialized_dictionary = {}
-        serialized_dictionary["projectName"] = self.project_name
-        serialized_dictionary["reportSource"] = self.report_source
-        measurements_array = []
-        for next_measurement in self.measurements:
-            serialized_measurement = self.measurements[next_measurement].to_dict()
-            measurements_array.append(serialized_measurement)
+        serialized_dictionary = {
+            "projectName": self.project_name,
+            "reportSource": self.report_source,
+        }
+
+        measurements_array = [
+            next_measurement.to_dict()
+            for _, next_measurement in self.measurements.items()
+        ]
+
         serialized_dictionary["measurements"] = measurements_array
         return serialized_dictionary
 
@@ -73,14 +76,14 @@ class TestMeasurement:
         Convert the current measurement into a vanilla dictionary.
         """
 
-        serialized_dictionary = {}
-        serialized_dictionary["name"] = self.name
-        serialized_dictionary["totalTests"] = self.total_tests
-        serialized_dictionary["failedTests"] = self.failed_tests
-        serialized_dictionary["errorTests"] = self.error_tests
-        serialized_dictionary["skippedTests"] = self.skipped_tests
-        serialized_dictionary["elapsedTimeInMilliseconds"] = self.elapsed_time_ms
-        return serialized_dictionary
+        return {
+            "name": self.name,
+            "totalTests": self.total_tests,
+            "failedTests": self.failed_tests,
+            "errorTests": self.error_tests,
+            "skippedTests": self.skipped_tests,
+            "elapsedTimeInMilliseconds": self.elapsed_time_ms,
+        }
 
     @staticmethod
     def from_dict(input_dictionary):
@@ -94,7 +97,7 @@ class TestMeasurement:
         measure_errored = input_dictionary["errorTests"]
         measure_skipped = input_dictionary["skippedTests"]
         measure_elapsed = input_dictionary["elapsedTimeInMilliseconds"]
-        new_measurement = TestMeasurement(
+        return TestMeasurement(
             name=measure_name,
             total_tests=measure_total,
             failed_tests=measure_failed,
@@ -102,7 +105,6 @@ class TestMeasurement:
             skipped_tests=measure_skipped,
             elapsed_time_ms=measure_elapsed,
         )
-        return new_measurement
 
 
 class CoverageMeasurement:
@@ -111,7 +113,9 @@ class CoverageMeasurement:
     """
 
     def __init__(
-        self, total_covered, total_measured,
+        self,
+        total_covered,
+        total_measured,
     ):
         self.total_covered = total_covered
         self.total_measured = total_measured
@@ -132,10 +136,10 @@ class CoverageMeasurement:
         Convert the current measurement into a vanilla dictionary.
         """
 
-        serialized_dictionary = {}
-        serialized_dictionary["totalMeasured"] = self.total_measured
-        serialized_dictionary["totalCovered"] = self.total_covered
-        return serialized_dictionary
+        return {
+            "totalMeasured": self.total_measured,
+            "totalCovered": self.total_covered,
+        }
 
     @staticmethod
     def from_dict(input_dictionary):
@@ -145,10 +149,10 @@ class CoverageMeasurement:
 
         total_measured = input_dictionary["totalMeasured"]
         total_covered = input_dictionary["totalCovered"]
-        new_measurement = CoverageMeasurement(
-            total_measured=total_measured, total_covered=total_covered,
+        return CoverageMeasurement(
+            total_measured=total_measured,
+            total_covered=total_covered,
         )
-        return new_measurement
 
 
 # pylint: disable=too-many-instance-attributes
@@ -202,9 +206,11 @@ class CoverageTotals:
         Convert the current measurement into a vanilla dictionary.
         """
 
-        serialized_dictionary = {}
-        serialized_dictionary["projectName"] = self.project_name
-        serialized_dictionary["reportSource"] = self.report_source
+        serialized_dictionary = {
+            "projectName": self.project_name,
+            "reportSource": self.report_source,
+        }
+
         if self.instruction_level:
             serialized_dictionary["instructionLevel"] = self.instruction_level.to_dict()
         if self.branch_level:
@@ -253,7 +259,7 @@ class CoverageTotals:
             )
         if "classLevel" in input_dictionary:
             class_level = CoverageMeasurement.from_dict(input_dictionary["classLevel"])
-        new_measurement = CoverageTotals(
+        return CoverageTotals(
             project_name=project_name,
             report_source=report_source,
             instruction_level=instruction_level,
@@ -263,4 +269,6 @@ class CoverageTotals:
             method_level=method_level,
             class_level=class_level,
         )
-        return new_measurement
+
+
+# pylint: enable=too-many-instance-attributes
