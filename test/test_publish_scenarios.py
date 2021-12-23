@@ -107,9 +107,7 @@ def test_publish_with_existing_publish_as_file():
 
     suppplied_arguments = [PUBLISH_COMMAND_LINE_FLAG]
 
-    expected_output = """\
-Publish directory 'publish' already exists, but as a file.
-"""
+    expected_output = "Publish directory 'publish' already exists, but as a file."
     expected_error = ""
     expected_return_code = 1
 
