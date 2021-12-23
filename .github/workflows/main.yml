@@ -11,7 +11,7 @@ jobs:
     strategy:
       matrix:
         python: [3.8]
-        platform: [windows-latest]
+        platform: [windows-latest, ubuntu-latest]
     runs-on: ${{ matrix.platform }}
     steps:
       - name: Checkout Repository
