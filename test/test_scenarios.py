@@ -2,6 +2,7 @@
 Tests for the basic scenarios for the scanner.
 """
 import os
+import sys
 import tempfile
 from test.pytest_execute import InProcessExecution
 
@@ -13,6 +14,27 @@ COBERTURA_COMMAND_LINE_FLAG = "--cobertura"
 
 PUBLISH_COMMAND_LINE_FLAG = "--publish"
 ONLY_CHANGES_COMMAND_LINE_FLAG = "--only-changes"
+
+REPORT_DIRECTORY = "report"
+PUBLISH_DIRECTORY = "publish"
+
+JUNIT_RESULTS_FILE_NAME = "tests.xml"
+RESULTS_SUMMARY_FILE_NAME = "test-results.json"
+COVERAGE_SUMMARY_FILE_NAME = "coverage.json"
+
+__COBERTURA_COVERAGE_FILE_NAME = "coverage.xml"
+__COBERTURA_NON_WINDOWS_COVERAGE_FILE_NAME = "coverage-non-windows.xml"
+
+
+def get_coverage_file_name():
+    """
+    Get the coverage file for the specific operating system class.
+
+    This is needed as Windows uses a different file name hierarchy than the others.
+    """
+    if sys.platform.startswith("win"):
+        return __COBERTURA_COVERAGE_FILE_NAME
+    return __COBERTURA_NON_WINDOWS_COVERAGE_FILE_NAME
 
 
 class MainlineExecutor(InProcessExecution):

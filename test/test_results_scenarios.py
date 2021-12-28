@@ -6,14 +6,15 @@ from shutil import copyfile
 from test.patch_builtin_open import PatchBuiltinOpen
 from test.test_scenarios import (
     JUNIT_COMMAND_LINE_FLAG,
+    JUNIT_RESULTS_FILE_NAME,
     ONLY_CHANGES_COMMAND_LINE_FLAG,
     PUBLISH_COMMAND_LINE_FLAG,
+    PUBLISH_DIRECTORY,
+    REPORT_DIRECTORY,
+    RESULTS_SUMMARY_FILE_NAME,
     MainlineExecutor,
     setup_directories,
 )
-
-JUNIT_RESULTS_FILE_NAME = "test.xml"
-RESULTS_SUMMARY_FILE_NAME = "test-results.json"
 
 
 def compose_test_results(total_tests):
@@ -47,7 +48,10 @@ def test_summarize_simple_junit_report(
     junit_test_file = os.path.join(
         temporary_work_directory.name, JUNIT_RESULTS_FILE_NAME
     )
-    copyfile(os.path.join(executor.resource_directory, "tests.xml"), junit_test_file)
+    copyfile(
+        os.path.join(executor.resource_directory, JUNIT_RESULTS_FILE_NAME),
+        junit_test_file,
+    )
     summary_result_file = os.path.join(report_directory, RESULTS_SUMMARY_FILE_NAME)
 
     suppplied_arguments = [JUNIT_COMMAND_LINE_FLAG, junit_test_file]
@@ -168,7 +172,9 @@ def test_summarize_simple_junit_report_and_publish(
 
     suppplied_arguments = [PUBLISH_COMMAND_LINE_FLAG]
 
-    expected_output = "Publish directory 'publish' does not exist.  Creating."
+    expected_output = (
+        f"Publish directory '{PUBLISH_DIRECTORY}' does not exist.  Creating."
+    )
     expected_error = ""
     expected_return_code = 0
     expected_test_results_file = compose_test_results(3)
@@ -638,11 +644,14 @@ def test_summarize_bad_report_directory():
     junit_test_file = os.path.join(
         temporary_work_directory.name, JUNIT_RESULTS_FILE_NAME
     )
-    copyfile(os.path.join(executor.resource_directory, "tests.xml"), junit_test_file)
+    copyfile(
+        os.path.join(executor.resource_directory, JUNIT_RESULTS_FILE_NAME),
+        junit_test_file,
+    )
 
     suppplied_arguments = [JUNIT_COMMAND_LINE_FLAG, junit_test_file]
 
-    expected_output = "Summary output path 'report' does not exist."
+    expected_output = f"Summary output path '{REPORT_DIRECTORY}' does not exist."
     expected_error = ""
     expected_return_code = 1
 
@@ -670,7 +679,10 @@ def test_summarize_invalid_published_summary_file():
     junit_test_file = os.path.join(
         temporary_work_directory.name, JUNIT_RESULTS_FILE_NAME
     )
-    copyfile(os.path.join(executor.resource_directory, "tests.xml"), junit_test_file)
+    copyfile(
+        os.path.join(executor.resource_directory, JUNIT_RESULTS_FILE_NAME),
+        junit_test_file,
+    )
     summary_result_file = os.path.join(publish_directory, RESULTS_SUMMARY_FILE_NAME)
 
     with open(summary_result_file, "w", encoding="utf-8") as outfile:
@@ -678,8 +690,10 @@ def test_summarize_invalid_published_summary_file():
 
     suppplied_arguments = [JUNIT_COMMAND_LINE_FLAG, junit_test_file]
 
+    file_name = os.path.join(PUBLISH_DIRECTORY, RESULTS_SUMMARY_FILE_NAME)
+
     expected_output = (
-        "Previous results summary file 'publish\\test-results.json' is "
+        f"Previous results summary file '{file_name}' is "
         + "not a valid JSON file (Expecting value: line 1 column 1 (char 0))."
     )
     expected_error = ""
@@ -712,7 +726,11 @@ def test_summarize_simple_junit_report_and_publish_and_summarize_with_error_on_p
 
     suppplied_arguments = [JUNIT_COMMAND_LINE_FLAG, junit_test_file]
 
-    expected_output = "Previous results summary file 'publish\\test-results.json' was not loaded (None).\n"
+    file_name = os.path.join(PUBLISH_DIRECTORY, RESULTS_SUMMARY_FILE_NAME)
+
+    expected_output = (
+        f"Previous results summary file '{file_name}' was not loaded (None).\n"
+    )
     expected_error = ""
     expected_return_code = 1
 
@@ -747,7 +765,10 @@ def test_summarize_simple_junit_report_with_error_on_report_write():
     junit_test_file = os.path.join(
         temporary_work_directory.name, JUNIT_RESULTS_FILE_NAME
     )
-    copyfile(os.path.join(executor.resource_directory, "tests.xml"), junit_test_file)
+    copyfile(
+        os.path.join(executor.resource_directory, JUNIT_RESULTS_FILE_NAME),
+        junit_test_file,
+    )
     summary_result_file = os.path.join(report_directory, RESULTS_SUMMARY_FILE_NAME)
 
     suppplied_arguments = [JUNIT_COMMAND_LINE_FLAG, junit_test_file]
