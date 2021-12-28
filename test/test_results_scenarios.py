@@ -6,14 +6,15 @@ from shutil import copyfile
 from test.patch_builtin_open import PatchBuiltinOpen
 from test.test_scenarios import (
     JUNIT_COMMAND_LINE_FLAG,
+    JUNIT_RESULTS_FILE_NAME,
     ONLY_CHANGES_COMMAND_LINE_FLAG,
     PUBLISH_COMMAND_LINE_FLAG,
+    PUBLISH_DIRECTORY,
+    REPORT_DIRECTORY,
+    RESULTS_SUMMARY_FILE_NAME,
     MainlineExecutor,
     setup_directories,
 )
-
-JUNIT_RESULTS_FILE_NAME = "test.xml"
-RESULTS_SUMMARY_FILE_NAME = "test-results.json"
 
 
 def compose_test_results(total_tests):
@@ -47,7 +48,10 @@ def test_summarize_simple_junit_report(
     junit_test_file = os.path.join(
         temporary_work_directory.name, JUNIT_RESULTS_FILE_NAME
     )
-    copyfile(os.path.join(executor.resource_directory, "tests.xml"), junit_test_file)
+    copyfile(
+        os.path.join(executor.resource_directory, JUNIT_RESULTS_FILE_NAME),
+        junit_test_file,
+    )
     summary_result_file = os.path.join(report_directory, RESULTS_SUMMARY_FILE_NAME)
 
     suppplied_arguments = [JUNIT_COMMAND_LINE_FLAG, junit_test_file]
@@ -57,11 +61,12 @@ def test_summarize_simple_junit_report(
 Test Results Summary
 --------------------
 
-Class Name            Total Tests   Failed Tests   Skipped Tests
--------------------  ------------  -------------  --------------
-test.test_scenarios        3 (+3)              0               0
----                        -                   -               -
-TOTALS                     3 (+3)              0               0
+
+  CLASS NAME           TOTAL TESTS  FAILED TESTS  SKIPPED TESTS
+
+  test.test_scenarios       3 (+3)             0              0
+  ---                       -                  -              -
+  TOTALS                    3 (+3)             0              0
 """
     expected_error = ""
     expected_return_code = 0
@@ -97,9 +102,7 @@ def test_summarize_junit_report_with_bad_source():
     assert not os.path.exists(junit_test_file)
     suppplied_arguments = [JUNIT_COMMAND_LINE_FLAG, junit_test_file]
 
-    expected_output = (
-        "Project test report file '" + junit_test_file + "' does not exist.\n"
-    )
+    expected_output = f"Project test report file '{junit_test_file}' does not exist.\n"
     expected_error = ""
     expected_return_code = 1
 
@@ -130,9 +133,7 @@ def test_summarize_junit_report_with_source_as_directory():
 
     suppplied_arguments = [JUNIT_COMMAND_LINE_FLAG, junit_test_file]
 
-    expected_output = (
-        "Project test report file '" + junit_test_file + "' is not a file.\n"
-    )
+    expected_output = f"Project test report file '{junit_test_file}' is not a file.\n"
     expected_error = ""
     expected_return_code = 1
 
@@ -171,9 +172,9 @@ def test_summarize_simple_junit_report_and_publish(
 
     suppplied_arguments = [PUBLISH_COMMAND_LINE_FLAG]
 
-    expected_output = """\
-Publish directory 'publish' does not exist.  Creating.
-"""
+    expected_output = (
+        f"Publish directory '{PUBLISH_DIRECTORY}' does not exist.  Creating."
+    )
     expected_error = ""
     expected_return_code = 0
     expected_test_results_file = compose_test_results(3)
@@ -215,16 +216,17 @@ def test_summarize_simple_junit_report_and_publish_and_summarize_again(
 
     suppplied_arguments = [JUNIT_COMMAND_LINE_FLAG, junit_test_file]
 
-    expected_output = """\
+    expected_output = """
 
 Test Results Summary
 --------------------
 
-Class Name            Total Tests   Failed Tests   Skipped Tests
--------------------  ------------  -------------  --------------
-test.test_scenarios             3              0               0
----                             -              -               -
-TOTALS                          3              0               0
+
+  CLASS NAME           TOTAL TESTS  FAILED TESTS  SKIPPED TESTS
+
+  test.test_scenarios            3             0              0
+  ---                            -             -              -
+  TOTALS                         3             0              0
 """
     expected_error = ""
     expected_return_code = 0
@@ -260,7 +262,7 @@ def test_summarize_simple_junit_report_and_publish_and_summarize_again_only_chan
         junit_test_file,
     ]
 
-    expected_output = """\
+    expected_output = """
 
 Test Results Summary
 --------------------
@@ -301,16 +303,17 @@ def test_summarize_simple_junit_report_and_publish_and_then_test_fails():
 
     suppplied_arguments = [JUNIT_COMMAND_LINE_FLAG, junit_test_file]
 
-    expected_output = """\
+    expected_output = """
 
 Test Results Summary
 --------------------
 
-Class Name            Total Tests   Failed Tests   Skipped Tests
--------------------  ------------  -------------  --------------
-test.test_scenarios             3         1 (+1)               0
----                             -         -                    -
-TOTALS                          3         1 (+1)               0
+
+  CLASS NAME           TOTAL TESTS  FAILED TESTS  SKIPPED TESTS
+
+  test.test_scenarios            3        1 (+1)              0
+  ---                            -        -                   -
+  TOTALS                         3        1 (+1)              0
 """
     expected_error = ""
     expected_return_code = 0
@@ -350,16 +353,17 @@ def test_summarize_simple_junit_report_and_publish_and_then_new_test_only_change
         junit_test_file,
     ]
 
-    expected_output = """\
+    expected_output = """
 
 Test Results Summary
 --------------------
 
-Class Name            Total Tests   Failed Tests   Skipped Tests
--------------------  ------------  -------------  --------------
-test.test_scenarios        4 (+1)              0               0
----                        -                   -               -
-TOTALS                     4 (+1)              0               0
+
+  CLASS NAME           TOTAL TESTS  FAILED TESTS  SKIPPED TESTS
+
+  test.test_scenarios       4 (+1)             0              0
+  ---                       -                  -              -
+  TOTALS                    4 (+1)             0              0
 """
     expected_error = ""
     expected_return_code = 0
@@ -399,16 +403,17 @@ def test_summarize_simple_junit_report_and_publish_and_then_new_test_class_only_
         junit_test_file,
     ]
 
-    expected_output = """\
+    expected_output = """
 
 Test Results Summary
 --------------------
 
-Class Name                  Total Tests   Failed Tests   Skipped Tests
--------------------------  ------------  -------------  --------------
-test.test_other_scenarios        1 (+1)              0               0
----                              -                   -               -
-TOTALS                           4 (+1)              0               0
+
+  CLASS NAME                 TOTAL TESTS  FAILED TESTS  SKIPPED TESTS
+
+  test.test_other_scenarios       1 (+1)             0              0
+  ---                             -                  -              -
+  TOTALS                          4 (+1)             0              0
 """
     expected_error = ""
     expected_return_code = 0
@@ -444,16 +449,17 @@ def test_summarize_simple_junit_report_and_publish_and_then_test_skipped():
 
     suppplied_arguments = [JUNIT_COMMAND_LINE_FLAG, junit_test_file]
 
-    expected_output = """\
+    expected_output = """
 
 Test Results Summary
 --------------------
 
-Class Name            Total Tests   Failed Tests   Skipped Tests
--------------------  ------------  -------------  --------------
-test.test_scenarios             3              0          1 (+1)
----                             -              -          -
-TOTALS                          3              0          1 (+1)
+
+  CLASS NAME           TOTAL TESTS  FAILED TESTS  SKIPPED TESTS
+
+  test.test_scenarios            3             0         1 (+1)
+  ---                            -             -         -
+  TOTALS                         3             0         1 (+1)
 """
     expected_error = ""
     expected_return_code = 0
@@ -489,17 +495,18 @@ def test_summarize_simple_junit_report_and_publish_and_then_test_rename():
 
     suppplied_arguments = [JUNIT_COMMAND_LINE_FLAG, junit_test_file]
 
-    expected_output = """\
+    expected_output = """
 
 Test Results Summary
 --------------------
 
-Class Name                 Total Tests   Failed Tests   Skipped Tests
-------------------------  ------------  -------------  --------------
-test.test_good_scenarios        3 (+3)              0               0
-test.test_scenarios             - (-3)              -               -
----                             -                   -               -
-TOTALS                          3                   0               0
+
+  CLASS NAME                TOTAL TESTS  FAILED TESTS  SKIPPED TESTS
+
+  test.test_good_scenarios       3 (+3)             0              0
+  test.test_scenarios            - (-3)             -              -
+  ---                            -                  -              -
+  TOTALS                         3                  0              0
 """
     expected_error = ""
     expected_return_code = 0
@@ -535,17 +542,18 @@ def test_summarize_single_and_double_digit_changes_from_published():
 
     suppplied_arguments = [JUNIT_COMMAND_LINE_FLAG, junit_test_file]
 
-    expected_output = """\
+    expected_output = """
 
 Test Results Summary
 --------------------
 
-Class Name            Total Tests   Failed Tests   Skipped Tests
--------------------  ------------  -------------  --------------
-test.test_scenarios       6  (+3)              0               0
-test.xtra_scenarios      10 (+10)              0               0
----                      --                    -               -
-TOTALS                   16 (+13)              0               0
+
+  CLASS NAME           TOTAL TESTS  FAILED TESTS  SKIPPED TESTS
+
+  test.test_scenarios      6  (+3)             0              0
+  test.xtra_scenarios     10 (+10)             0              0
+  ---                     --                   -              -
+  TOTALS                  16 (+13)             0              0
 """
     expected_error = ""
     expected_return_code = 0
@@ -578,11 +586,7 @@ def test_summarize_bad_xml_test_results():
 
     suppplied_arguments = [JUNIT_COMMAND_LINE_FLAG, junit_test_file]
 
-    expected_output = (
-        "Project test report file '"
-        + junit_test_file
-        + "' is not a proper Junit-format test report file.\n"
-    )
+    expected_output = f"Project test report file '{junit_test_file}' is not a proper Junit-format test report file.\n"
     expected_error = ""
     expected_return_code = 1
 
@@ -614,11 +618,7 @@ def test_summarize_bad_test_results():
 
     suppplied_arguments = [JUNIT_COMMAND_LINE_FLAG, junit_test_file]
 
-    expected_output = (
-        "Project test report file '"
-        + junit_test_file
-        + "' is not a valid test report file.\n"
-    )
+    expected_output = f"Project test report file '{junit_test_file}' is not a valid test report file.\n"
     expected_error = ""
     expected_return_code = 1
 
@@ -644,13 +644,14 @@ def test_summarize_bad_report_directory():
     junit_test_file = os.path.join(
         temporary_work_directory.name, JUNIT_RESULTS_FILE_NAME
     )
-    copyfile(os.path.join(executor.resource_directory, "tests.xml"), junit_test_file)
+    copyfile(
+        os.path.join(executor.resource_directory, JUNIT_RESULTS_FILE_NAME),
+        junit_test_file,
+    )
 
     suppplied_arguments = [JUNIT_COMMAND_LINE_FLAG, junit_test_file]
 
-    expected_output = """\
-Summary output path 'report' does not exist.
-"""
+    expected_output = f"Summary output path '{REPORT_DIRECTORY}' does not exist."
     expected_error = ""
     expected_return_code = 1
 
@@ -678,7 +679,10 @@ def test_summarize_invalid_published_summary_file():
     junit_test_file = os.path.join(
         temporary_work_directory.name, JUNIT_RESULTS_FILE_NAME
     )
-    copyfile(os.path.join(executor.resource_directory, "tests.xml"), junit_test_file)
+    copyfile(
+        os.path.join(executor.resource_directory, JUNIT_RESULTS_FILE_NAME),
+        junit_test_file,
+    )
     summary_result_file = os.path.join(publish_directory, RESULTS_SUMMARY_FILE_NAME)
 
     with open(summary_result_file, "w", encoding="utf-8") as outfile:
@@ -686,9 +690,12 @@ def test_summarize_invalid_published_summary_file():
 
     suppplied_arguments = [JUNIT_COMMAND_LINE_FLAG, junit_test_file]
 
-    expected_output = """\
-Previous results summary file 'publish\\test-results.json' is not a valid JSON file (Expecting value: line 1 column 1 (char 0)).
-"""
+    file_name = os.path.join(PUBLISH_DIRECTORY, RESULTS_SUMMARY_FILE_NAME)
+
+    expected_output = (
+        f"Previous results summary file '{file_name}' is "
+        + "not a valid JSON file (Expecting value: line 1 column 1 (char 0))."
+    )
     expected_error = ""
     expected_return_code = 1
 
@@ -719,7 +726,11 @@ def test_summarize_simple_junit_report_and_publish_and_summarize_with_error_on_p
 
     suppplied_arguments = [JUNIT_COMMAND_LINE_FLAG, junit_test_file]
 
-    expected_output = "Previous results summary file 'publish\\test-results.json' was not loaded (None).\n"
+    file_name = os.path.join(PUBLISH_DIRECTORY, RESULTS_SUMMARY_FILE_NAME)
+
+    expected_output = (
+        f"Previous results summary file '{file_name}' was not loaded (None).\n"
+    )
     expected_error = ""
     expected_return_code = 1
 
@@ -754,16 +765,15 @@ def test_summarize_simple_junit_report_with_error_on_report_write():
     junit_test_file = os.path.join(
         temporary_work_directory.name, JUNIT_RESULTS_FILE_NAME
     )
-    copyfile(os.path.join(executor.resource_directory, "tests.xml"), junit_test_file)
+    copyfile(
+        os.path.join(executor.resource_directory, JUNIT_RESULTS_FILE_NAME),
+        junit_test_file,
+    )
     summary_result_file = os.path.join(report_directory, RESULTS_SUMMARY_FILE_NAME)
 
     suppplied_arguments = [JUNIT_COMMAND_LINE_FLAG, junit_test_file]
 
-    expected_output = (
-        "Project test report summary file '"
-        + os.path.abspath(summary_result_file)
-        + "' was not written (None).\n"
-    )
+    expected_output = f"Project test report summary file '{os.path.abspath(summary_result_file)}' was not written (None).\n"
     expected_error = ""
     expected_return_code = 1
 
@@ -819,19 +829,21 @@ def test_sample_1():
 
     suppplied_arguments = [JUNIT_COMMAND_LINE_FLAG, junit_test_file]
 
-    expected_output = """\
+    expected_output = """
 
 Test Results Summary
 --------------------
 
-Class Name                     Total Tests   Failed Tests   Skipped Tests
-----------------------------  ------------  -------------  --------------
-test.test_coverage_scenarios      12  (-2)              0               0
-test.test_publish_scenarios        9  (+9)              0               0
-test.test_results_scenarios       18 (+18)              0               0
-test.test_scenarios                1 (-22)              0               0
----                               --                    -               -
-TOTALS                            40  (+3)              0               0
+
+  CLASS NAME                    TOTAL TESTS  FAILED TESTS  SKIPPED TESTS
+
+  test.test_coverage_scenarios     12  (-2)             0              0
+  test.test_publish_scenarios       9  (+9)             0              0
+  test.test_results_scenarios      18 (+18)             0              0
+  test.test_scenarios               1 (-22)             0              0
+  ---                              --                   -              -
+  TOTALS                           40  (+3)             0              0
+
 """
     expected_error = ""
     expected_return_code = 0

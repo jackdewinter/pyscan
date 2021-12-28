@@ -7,11 +7,10 @@ import json
 import os
 import sys
 from shutil import copyfile
-from xml.etree import ElementTree as ET
-from xml.etree.ElementTree import ParseError
 
-import tabulate as tabulate_module
-from tabulate import tabulate
+import defusedxml.ElementTree as ET
+from columnar import columnar
+from defusedxml.ElementTree import ParseError
 
 from pyscan.model import (
     CoverageMeasurement,
@@ -415,16 +414,15 @@ class PyScan:
 
             hdrs = ["Class Name", "Total Tests", "Failed Tests", "Skipped Tests"]
 
-            tabulate_module.MIN_PADDING = 1
-            tabulate_module.PRESERVE_WHITESPACE = True
-            print(
-                tabulate(
-                    test_report_rows,
-                    headers=hdrs,
-                    tablefmt="simple",
-                    colalign=("left", "right", "right", "right"),
-                )
+            table = columnar(
+                test_report_rows,
+                headers=hdrs,
+                no_borders=True,
+                justify=["l", "r", "r", "r"],
             )
+            split_rows = table.split("\n")
+            new_rows = [next_row.rstrip() for next_row in split_rows]
+            print("\n".join(new_rows))
 
     @classmethod
     def __add_row_to_report(cls, row_to_add, test_report_rows, only_report_changes):
@@ -543,16 +541,15 @@ class PyScan:
             print("Test coverage has not changed since last published test coverage.")
         else:
             hdrs = ["Type", "Covered", "Measured", "Percentage"]
-            tabulate_module.MIN_PADDING = 1
-            tabulate_module.PRESERVE_WHITESPACE = True
-            print(
-                tabulate(
-                    test_report_rows,
-                    headers=hdrs,
-                    tablefmt="simple",
-                    colalign=("left", "right", "right", "right"),
-                )
+            table = columnar(
+                test_report_rows,
+                headers=hdrs,
+                no_borders=True,
+                justify=["l", "r", "r", "r"],
             )
+            split_rows = table.split("\n")
+            new_rows = [next_row.rstrip() for next_row in split_rows]
+            print("\n".join(new_rows))
         print()
 
     @classmethod
