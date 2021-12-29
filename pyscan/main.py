@@ -3,6 +3,7 @@ Module to provide for a simple summarization of relevant output files from a bui
 """
 import argparse
 import os
+import runpy
 import sys
 from shutil import copyfile
 
@@ -17,12 +18,22 @@ class PyScan:
     """
 
     def __init__(self):
-        self.version_number = "0.1.0"
+        self.__version_number = PyScan.__get_semantic_version()
         self.test_summary_publish_path = PyScanPlugin.SUMMARY_PUBLISH_PATH
         self.debug = False
         self.__available_plugins = None
         self.__plugin_argument_names = {}
         self.__plugin_variable_names = {}
+
+    @staticmethod
+    def __get_semantic_version():
+        file_path = __file__
+        assert os.path.isabs(file_path)
+        file_path = file_path.replace(os.sep, "/")
+        last_index = file_path.rindex("/")
+        file_path = file_path[: last_index + 1] + "version.py"
+        version_meta = runpy.run_path(file_path)
+        return version_meta["__version__"]
 
     def __parse_arguments(self):
         """
@@ -36,7 +47,7 @@ class PyScan:
         parser.add_argument(
             "--version",
             action="version",
-            version="%(prog)s " + self.version_number,
+            version="%(prog)s " + self.__version_number,
         )
 
         for next_plugin_instance in self.__available_plugins:

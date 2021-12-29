@@ -16,7 +16,8 @@
         "pyscan/pyscan_plugin.py": {},
         "pyscan/test_results_model.py": {
             "too-many-arguments": 1
-        }
+        },
+        "pyscan/version.py": {}
     },
     "disables-by-name": {
         "unused-private-member": 1,
