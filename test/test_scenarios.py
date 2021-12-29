@@ -73,7 +73,7 @@ def test_get_summarizer_version():
     suppplied_arguments = ["--version"]
 
     expected_output = """\
-main.py 0.1.0
+main.py 0.5.0
 """
     expected_error = ""
     expected_return_code = 0

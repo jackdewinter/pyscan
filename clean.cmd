@@ -5,8 +5,6 @@ pushd %~dp0
 rem Set needed environment variables.
 set CLEAN_TEMPFILE=temp_clean.txt
 set PYTHON_MODULE_NAME=pyscan
-set "PROJECT_DIRECTORY=%cd%"
-set PYTHONPATH=%PROJECT_DIRECTORY%
 
 rem Look for options on the command line.
 

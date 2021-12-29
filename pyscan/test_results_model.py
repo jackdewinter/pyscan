@@ -28,6 +28,8 @@ class TestTotals:
             for _, next_measurement in self.measurements.items()
         ]
 
+        measurements_array = sorted(measurements_array, key=lambda item: item["name"])
+
         serialized_dictionary["measurements"] = measurements_array
         return serialized_dictionary
 

@@ -2,12 +2,12 @@
     "projectName": "pyscan",
     "reportSource": "pytest",
     "branchLevel": {
-        "totalMeasured": 182,
-        "totalCovered": 182
+        "totalMeasured": 184,
+        "totalCovered": 184
     },
     "lineLevel": {
-        "totalMeasured": 551,
-        "totalCovered": 551
+        "totalMeasured": 563,
+        "totalCovered": 563
     }
 }
 
