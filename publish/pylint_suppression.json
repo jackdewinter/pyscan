@@ -2,18 +2,25 @@
     "disables-by-file": {
         "pyscan/__init__.py": {},
         "pyscan/__main__.py": {},
-        "pyscan/main.py": {
-            "too-many-arguments": 2,
+        "pyscan/cobertura_plugin.py": {
             "unused-private-member": 1
         },
-        "pyscan/model.py": {
-            "too-many-arguments": 2,
-            "too-many-instance-attributes": 1
+        "pyscan/coverage_model.py": {
+            "too-many-instance-attributes": 1,
+            "too-many-arguments": 1
+        },
+        "pyscan/junit_plugin.py": {
+            "too-many-arguments": 2
+        },
+        "pyscan/main.py": {},
+        "pyscan/pyscan_plugin.py": {},
+        "pyscan/test_results_model.py": {
+            "too-many-arguments": 1
         }
     },
     "disables-by-name": {
-        "too-many-arguments": 4,
         "unused-private-member": 1,
-        "too-many-instance-attributes": 1
+        "too-many-instance-attributes": 1,
+        "too-many-arguments": 4
     }
 }

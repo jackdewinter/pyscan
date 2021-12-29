@@ -148,7 +148,7 @@ def test_publish_with_test_file_as_directory():
     suppplied_arguments = [PUBLISH_COMMAND_LINE_FLAG]
 
     results_path = os.path.join(REPORT_DIRECTORY, RESULTS_SUMMARY_FILE_NAME)
-    expected_output = f"Test results summary path '{results_path}' is not a file.\n"
+    expected_output = f"Summary path '{results_path}' is not a file.\n"
     expected_error = ""
     expected_return_code = 1
 
@@ -185,7 +185,7 @@ def test_publish_with_coverage_file_as_directory():
     suppplied_arguments = [PUBLISH_COMMAND_LINE_FLAG]
 
     coverage_path = os.path.join(REPORT_DIRECTORY, COVERAGE_SUMMARY_FILE_NAME)
-    expected_output = f"Test coverage summary path '{coverage_path}' is not a file.\n"
+    expected_output = f"Summary path '{coverage_path}' is not a file.\n"
     expected_error = ""
     expected_return_code = 1
 

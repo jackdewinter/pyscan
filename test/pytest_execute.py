@@ -196,6 +196,9 @@ class InProcessResult:
         split_expected_contents = expected_contents.split("\n")
         with open(file_path, "r", encoding="utf-8") as infile:
             split_actual_contents = infile.readlines()
+        for line_index, line_content in enumerate(split_actual_contents):
+            if line_content[-1] == "\n":
+                split_actual_contents[line_index] = line_content[:-1]
 
         are_different = len(split_expected_contents) != len(split_actual_contents)
         if not are_different:
