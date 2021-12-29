@@ -23,12 +23,22 @@ def compose_test_results(total_tests):
     for a report with only one class to test.
     """
 
-    return (
-        '{"projectName": "?", "reportSource": "pytest", "measurements": '
-        + '[{"name": "test.test_scenarios", "totalTests": '
-        + str(total_tests)
-        + ', "failedTests": 0, '
-        + '"errorTests": 0, "skippedTests": 0, "elapsedTimeInMilliseconds": 0}]}'
+    return """{
+    "projectName": "?",
+    "reportSource": "pytest",
+    "measurements": [
+        {
+            "name": "test.test_scenarios",
+            "totalTests": {total_tests},
+            "failedTests": 0,
+            "errorTests": 0,
+            "skippedTests": 0,
+            "elapsedTimeInMilliseconds": 0
+        }
+    ]
+}
+""".replace(
+        "{total_tests}", str(total_tests)
     )
 
 
@@ -773,7 +783,10 @@ def test_summarize_simple_junit_report_with_error_on_report_write():
 
     suppplied_arguments = [JUNIT_COMMAND_LINE_FLAG, junit_test_file]
 
-    expected_output = f"Project test report summary file '{os.path.abspath(summary_result_file)}' was not written (None).\n"
+    expected_output = (
+        f"Project test report summary file '{os.path.abspath(summary_result_file)}' "
+        + "was not written (None).\n"
+    )
     expected_error = ""
     expected_return_code = 1
 

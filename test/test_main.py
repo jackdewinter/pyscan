@@ -15,7 +15,7 @@ def test_scanner_with_no_parameters():
     supplied_arguments = []
 
     expected_return_code = 2
-    expected_output = """usage: main.py [-h] [--version] [--junit path] [--cobertura path]
+    expected_output = """usage: main.py [-h] [--version] [--cobertura path] [--junit path]
                [--only-changes] [--publish]
 
 Summarize Python files.
@@ -23,8 +23,8 @@ Summarize Python files.
 optional arguments:
   -h, --help        show this help message and exit
   --version         show program's version number and exit
-  --junit path      source file for any reporting on test success
-  --cobertura path  source file for any reporting on test coverage
+  --cobertura path  source file name for cobertura test coverage reporting
+  --junit path      source file name for junit test result reporting
   --only-changes    only_changes
   --publish         publish
 """
@@ -50,7 +50,7 @@ def test_scanner_with_no_parameters_through_module():
     supplied_arguments = []
 
     expected_return_code = 2
-    expected_output = """usage: __main.py__ [-h] [--version] [--junit path] [--cobertura path]
+    expected_output = """usage: __main.py__ [-h] [--version] [--cobertura path] [--junit path]
                    [--only-changes] [--publish]
 
 Summarize Python files.
@@ -58,8 +58,8 @@ Summarize Python files.
 optional arguments:
   -h, --help        show this help message and exit
   --version         show program's version number and exit
-  --junit path      source file for any reporting on test success
-  --cobertura path  source file for any reporting on test coverage
+  --cobertura path  source file name for cobertura test coverage reporting
+  --junit path      source file name for junit test result reporting
   --only-changes    only_changes
   --publish         publish
 """
@@ -85,7 +85,7 @@ def test_scanner_with_no_parameters_through_main():
     supplied_arguments = []
 
     expected_return_code = 2
-    expected_output = """usage: main.py [-h] [--version] [--junit path] [--cobertura path]
+    expected_output = """usage: main.py [-h] [--version] [--cobertura path] [--junit path]
                [--only-changes] [--publish]
 
 Summarize Python files.
@@ -93,8 +93,8 @@ Summarize Python files.
 optional arguments:
   -h, --help        show this help message and exit
   --version         show program's version number and exit
-  --junit path      source file for any reporting on test success
-  --cobertura path  source file for any reporting on test coverage
+  --cobertura path  source file name for cobertura test coverage reporting
+  --junit path      source file name for junit test result reporting
   --only-changes    only_changes
   --publish         publish
 """
@@ -119,7 +119,7 @@ def test_scanner_with_dash_h():
     supplied_arguments = ["-h"]
 
     expected_return_code = 0
-    expected_output = """usage: main.py [-h] [--version] [--junit path] [--cobertura path]
+    expected_output = """usage: main.py [-h] [--version] [--cobertura path] [--junit path]
                [--only-changes] [--publish]
 
 Summarize Python files.
@@ -127,8 +127,8 @@ Summarize Python files.
 optional arguments:
   -h, --help        show this help message and exit
   --version         show program's version number and exit
-  --junit path      source file for any reporting on test success
-  --cobertura path  source file for any reporting on test coverage
+  --cobertura path  source file name for cobertura test coverage reporting
+  --junit path      source file name for junit test result reporting
   --only-changes    only_changes
   --publish         publish
 """
