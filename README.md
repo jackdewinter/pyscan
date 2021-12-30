@@ -80,6 +80,11 @@ But over half of the time, the summary information alone is enough to answer our
 It is recommended that projects do not commit the contents of the `report` directory to a repository, and only commit the contents of the `publish` directory.
 While the decision to follow that recommendation is up to development teams, our team has found that it provides a particularly useful summary of what has changed since the last commit.
 That information has helped our team ensure that the right tests have changed and that our code coverage is not negatively affected, all with a simple glance.
+To enforce this in out projects, we added the following line to our `.gitignore` files:
+
+```text
+report/
+```
 
 ## Sample Output
 
