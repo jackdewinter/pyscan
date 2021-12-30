@@ -1,5 +1,5 @@
 {
-    "projectName": "pyscan",
+    "projectName": "project_summarizer",
     "reportSource": "pytest",
     "branchLevel": {
         "totalMeasured": 184,

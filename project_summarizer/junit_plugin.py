@@ -9,11 +9,11 @@ import sys
 
 from columnar import columnar
 
-from pyscan.pyscan_plugin import PyScanPlugin
-from pyscan.test_results_model import TestMeasurement, TestTotals
+from project_summarizer.project_summarizer_plugin import ProjectSummarizerPlugin
+from project_summarizer.test_results_model import TestMeasurement, TestTotals
 
 
-class JUnitPlugin(PyScanPlugin):
+class JUnitPlugin(ProjectSummarizerPlugin):
     """
     Class to provide reporting for test files in the JUnit format.
     """

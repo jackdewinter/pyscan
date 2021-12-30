@@ -1,23 +1,23 @@
 {
     "disables-by-file": {
-        "pyscan/__init__.py": {},
-        "pyscan/__main__.py": {},
-        "pyscan/cobertura_plugin.py": {
+        "project_summarizer/__init__.py": {},
+        "project_summarizer/__main__.py": {},
+        "project_summarizer/cobertura_plugin.py": {
             "unused-private-member": 1
         },
-        "pyscan/coverage_model.py": {
+        "project_summarizer/coverage_model.py": {
             "too-many-instance-attributes": 1,
             "too-many-arguments": 1
         },
-        "pyscan/junit_plugin.py": {
+        "project_summarizer/junit_plugin.py": {
             "too-many-arguments": 2
         },
-        "pyscan/main.py": {},
-        "pyscan/pyscan_plugin.py": {},
-        "pyscan/test_results_model.py": {
+        "project_summarizer/main.py": {},
+        "project_summarizer/project_summarizer_plugin.py": {},
+        "project_summarizer/test_results_model.py": {
             "too-many-arguments": 1
         },
-        "pyscan/version.py": {}
+        "project_summarizer/version.py": {}
     },
     "disables-by-name": {
         "unused-private-member": 1,

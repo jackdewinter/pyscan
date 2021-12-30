@@ -1,5 +1,5 @@
 """
-Module for the base class for all pyscan plugins.
+Module for the base class for all project_summarizer plugins.
 """
 
 import json
@@ -11,9 +11,9 @@ import defusedxml.ElementTree as ET
 from defusedxml.ElementTree import ParseError
 
 
-class PyScanPlugin(ABC):
+class ProjectSummarizerPlugin(ABC):
     """
-    Base class for all pyscan plugins.
+    Base class for all project_summarizer plugins.
     """
 
     SUMMARY_PUBLISH_PATH = "publish"
@@ -101,5 +101,6 @@ class PyScanPlugin(ABC):
         """
 
         return os.path.join(
-            PyScanPlugin.SUMMARY_PUBLISH_PATH, os.path.basename(file_to_publish)
+            ProjectSummarizerPlugin.SUMMARY_PUBLISH_PATH,
+            os.path.basename(file_to_publish),
         )

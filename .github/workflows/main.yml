@@ -27,7 +27,7 @@ jobs:
       - name: Sync With Repository
         run: pipenv sync
       - name: Execute Tests
-        run: pipenv run pytest --cov --cov-branch --cov-report xml:report/coverage.xml --cov-report html:report/coverage
+        run: pipenv run pytest --timeout=10 --strict-markers --cov --cov-branch --cov-report xml:report/coverage.xml --cov-report html:report/coverage
       - name: Archive coverage artifacts
         uses: actions/upload-artifact@v2
         with:
@@ -62,6 +62,6 @@ jobs:
       - name: Execute Flake8
         run: pipenv run flake8 --exclude dist,build
       - name: Execute PyLint on Source
-        run: pipenv run pylint --rcfile=setup.cfg ./pyscan
+        run: pipenv run pylint --rcfile=setup.cfg ./project_summarizer
       - name: Execute PyLint on Tests
         run: pipenv run pylint --rcfile=setup.cfg ./test
