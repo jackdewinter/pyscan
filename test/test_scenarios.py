@@ -6,8 +6,8 @@ import sys
 import tempfile
 from test.pytest_execute import InProcessExecution
 
-from pyscan.__main__ import main
-from pyscan.main import PyScan
+from project_summarizer.__main__ import main
+from project_summarizer.main import ProjectSummarizer
 
 JUNIT_COMMAND_LINE_FLAG = "--junit"
 COBERTURA_COMMAND_LINE_FLAG = "--cobertura"
@@ -57,7 +57,7 @@ class MainlineExecutor(InProcessExecution):
         if self.__use_main:
             main()
         else:
-            PyScan().main()
+            ProjectSummarizer().main()
 
     def get_main_name(self):
         return self.__entry_point

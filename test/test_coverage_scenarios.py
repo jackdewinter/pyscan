@@ -23,7 +23,7 @@ def compose_coverage_summary_file():
     """
 
     return """{
-    "projectName": "pyscan",
+    "projectName": "project_summarizer",
     "reportSource": "pytest",
     "branchLevel": {
         "totalMeasured": 4,

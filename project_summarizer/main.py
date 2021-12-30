@@ -7,19 +7,19 @@ import runpy
 import sys
 from shutil import copyfile
 
-from pyscan.cobertura_plugin import CoberturaPlugin
-from pyscan.junit_plugin import JUnitPlugin
-from pyscan.pyscan_plugin import PyScanPlugin
+from project_summarizer.cobertura_plugin import CoberturaPlugin
+from project_summarizer.junit_plugin import JUnitPlugin
+from project_summarizer.project_summarizer_plugin import ProjectSummarizerPlugin
 
 
-class PyScan:
+class ProjectSummarizer:
     """
     Class to provide for a simple summarization of relevant output files from a build.
     """
 
     def __init__(self):
-        self.__version_number = PyScan.__get_semantic_version()
-        self.test_summary_publish_path = PyScanPlugin.SUMMARY_PUBLISH_PATH
+        self.__version_number = ProjectSummarizer.__get_semantic_version()
+        self.test_summary_publish_path = ProjectSummarizerPlugin.SUMMARY_PUBLISH_PATH
         self.debug = False
         self.__available_plugins = None
         self.__plugin_argument_names = {}
@@ -112,7 +112,9 @@ class PyScan:
             try:
                 copyfile(
                     file_to_publish,
-                    PyScanPlugin.compute_published_path_to_file(file_to_publish),
+                    ProjectSummarizerPlugin.compute_published_path_to_file(
+                        file_to_publish
+                    ),
                 )
             except IOError as ex:
                 print(f"Publishing file '{file_to_publish}' failed ({ex}).")
@@ -164,4 +166,4 @@ class PyScan:
 
 
 if __name__ == "__main__":
-    PyScan().main()
+    ProjectSummarizer().main()

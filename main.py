@@ -1,7 +1,7 @@
 """
 Module to provide for a simple bootstrap for the project.
 """
-from pyscan.main import PyScan
+from project_summarizer.main import ProjectSummarizer
 
 
 class Main:
@@ -13,7 +13,7 @@ class Main:
         """
         Main entrance point.
         """
-        PyScan().main()
+        ProjectSummarizer().main()
 
 
 if __name__ == "__main__":

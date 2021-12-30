@@ -8,11 +8,11 @@ import sys
 
 from columnar import columnar
 
-from pyscan.coverage_model import CoverageMeasurement, CoverageTotals
-from pyscan.pyscan_plugin import PyScanPlugin
+from project_summarizer.coverage_model import CoverageMeasurement, CoverageTotals
+from project_summarizer.project_summarizer_plugin import ProjectSummarizerPlugin
 
 
-class CoberturaPlugin(PyScanPlugin):
+class CoberturaPlugin(ProjectSummarizerPlugin):
     """
     Class to provide reporting for coverage files in the Cobertura format.
     """
@@ -61,8 +61,8 @@ class CoberturaPlugin(PyScanPlugin):
         new_stats = self.__compose_summary_from_cobertura_document(cobertura_document)
         self.save_summary_file(self.__output_path, new_stats, "test coverage")
 
-        published_coverage_summary_path = PyScanPlugin.compute_published_path_to_file(
-            self.__output_path
+        published_coverage_summary_path = (
+            ProjectSummarizerPlugin.compute_published_path_to_file(self.__output_path)
         )
         loaded_stats = self.__load_coverage_results_summary_file(
             published_coverage_summary_path

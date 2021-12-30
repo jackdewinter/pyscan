@@ -3,7 +3,7 @@ Module to test the classes for the coverage models.  This coverage is required
 as the CoverageMeasurement class and the CoverageTotals class both implement
 the _eq_ function.
 """
-from pyscan.coverage_model import CoverageMeasurement, CoverageTotals
+from project_summarizer.coverage_model import CoverageMeasurement, CoverageTotals
 
 
 def test_coverage_totals_equal():
