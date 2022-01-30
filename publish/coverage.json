@@ -1,13 +1,13 @@
 {
     "projectName": "project_summarizer",
-    "reportSource": "pytest",
+    "reportSource": "Coverage.py",
     "branchLevel": {
-        "totalMeasured": 184,
-        "totalCovered": 184
+        "totalMeasured": 186,
+        "totalCovered": 186
     },
     "lineLevel": {
-        "totalMeasured": 563,
-        "totalCovered": 563
+        "totalMeasured": 576,
+        "totalCovered": 576
     }
 }
 

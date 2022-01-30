@@ -24,7 +24,7 @@ def compose_coverage_summary_file():
 
     return """{
     "projectName": "project_summarizer",
-    "reportSource": "pytest",
+    "reportSource": "Coverage.py",
     "branchLevel": {
         "totalMeasured": 4,
         "totalCovered": 2
