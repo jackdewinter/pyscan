@@ -18,11 +18,14 @@ def test_pytest_cobertura_profile():
         total_covered=15, total_measured=20
     )
 
-    expected_dictionary = {"projectName": "?", "reportSource": "pytest"}
     g_branch = {"totalCovered": 5, "totalMeasured": 10}
     g_line = {"totalCovered": 15, "totalMeasured": 20}
-    expected_dictionary["branchLevel"] = g_branch
-    expected_dictionary["lineLevel"] = g_line
+    expected_dictionary = {
+        "projectName": "?",
+        "reportSource": "pytest",
+        "branchLevel": g_branch,
+        "lineLevel": g_line,
+    }
 
     # Act
     coverage_profile_as_dictionary = coverage_profile.to_dict()
@@ -59,19 +62,22 @@ def test_junit_jacoco_profile():
         total_covered=1, total_measured=1
     )
 
-    expected_dictionary = {"projectName": "?", "reportSource": "junit"}
     g_instructions = {"totalCovered": 25, "totalMeasured": 30}
     g_line = {"totalCovered": 15, "totalMeasured": 20}
     g_branch = {"totalCovered": 5, "totalMeasured": 10}
     g_complexity = {"totalCovered": 6, "totalMeasured": 11}
     g_method = {"totalCovered": 3, "totalMeasured": 4}
     g_class = {"totalCovered": 1, "totalMeasured": 1}
-    expected_dictionary["instructionLevel"] = g_instructions
-    expected_dictionary["lineLevel"] = g_line
-    expected_dictionary["branchLevel"] = g_branch
-    expected_dictionary["complexityLevel"] = g_complexity
-    expected_dictionary["methodLevel"] = g_method
-    expected_dictionary["classLevel"] = g_class
+    expected_dictionary = {
+        "projectName": "?",
+        "reportSource": "junit",
+        "instructionLevel": g_instructions,
+        "lineLevel": g_line,
+        "branchLevel": g_branch,
+        "complexityLevel": g_complexity,
+        "methodLevel": g_method,
+        "classLevel": g_class,
+    }
 
     # Act
     coverage_profile_as_dictionary = coverage_profile.to_dict()
@@ -94,9 +100,12 @@ def test_made_up_profile():
         total_covered=25, total_measured=30
     )
 
-    expected_dictionary = {"projectName": "?", "reportSource": "asmunit"}
     g_instructions = {"totalCovered": 25, "totalMeasured": 30}
-    expected_dictionary["instructionLevel"] = g_instructions
+    expected_dictionary = {
+        "projectName": "?",
+        "reportSource": "asmunit",
+        "instructionLevel": g_instructions,
+    }
 
     # Act
     coverage_profile_as_dictionary = coverage_profile.to_dict()
