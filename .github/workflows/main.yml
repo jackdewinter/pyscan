@@ -2,7 +2,11 @@ name: Main
 
 on:
   push:
+    branches:
+      - main
   pull_request:
+    branches:
+      - main
   schedule:
     - cron: '0 0 * * *'  # daily at midnight
 
@@ -53,8 +57,6 @@ jobs:
       - name: Install PipEnv
         run: |
           pip install pipenv==2022.1.8
-      - name: Install PipEnv
-        uses: dschep/install-pipenv-action@v1
       - name: Sync With Repository
         run: pipenv sync
       - name: Execute Flake8
