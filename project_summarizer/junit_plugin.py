@@ -50,7 +50,7 @@ class JUnitPlugin(ProjectSummarizerPlugin):
             JUnitPlugin.__COMMAND_LINE_OPTION,
         )
 
-    def generate_report(self, only_changes, report_file):
+    def generate_report(self, only_changes, column_width, report_file):
         """
         Generate the report and display it.
         """
@@ -63,16 +63,21 @@ class JUnitPlugin(ProjectSummarizerPlugin):
         )
         self.save_summary_file(self.__output_path, new_stats, "test report")
 
-        published_test_summary_path = self.compute_published_path_to_file(
-            self.__output_path
-        )
-        loaded_stats, loaded_totals = self.load_test_results_summary_file(
-            published_test_summary_path
-        )
-
-        self.__report_test_files(
-            new_stats, new_totals, loaded_stats, loaded_totals, only_changes
-        )
+        if column_width:
+            published_test_summary_path = self.compute_published_path_to_file(
+                self.__output_path
+            )
+            loaded_stats, loaded_totals = self.load_test_results_summary_file(
+                published_test_summary_path
+            )
+            self.__report_test_files(
+                new_stats,
+                new_totals,
+                loaded_stats,
+                loaded_totals,
+                only_changes,
+                column_width,
+            )
 
     def __compose_summary_from_junit_document(self, junit_document):
         """
@@ -158,9 +163,15 @@ class JUnitPlugin(ProjectSummarizerPlugin):
             grand_totals = self.__build_totals(test_totals)
         return test_totals, grand_totals
 
-    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-arguments, too-many-locals
     def __report_test_files(
-        self, new_stats, new_totals, loaded_stats, loaded_totals, only_report_changes
+        self,
+        new_stats,
+        new_totals,
+        loaded_stats,
+        loaded_totals,
+        only_report_changes,
+        column_width,
     ):
         """
         Generate a report comparing the current stats with the loaded/previous stats.
@@ -202,9 +213,11 @@ class JUnitPlugin(ProjectSummarizerPlugin):
                     row_to_add, test_report_rows, only_report_changes
                 )
 
-        self.print_test_summary(test_report_rows, new_totals, loaded_totals)
+        self.print_test_summary(
+            test_report_rows, new_totals, loaded_totals, column_width
+        )
 
-    # pylint: enable=too-many-arguments
+    # pylint: enable=too-many-arguments, too-many-locals
 
     @classmethod
     def __generate_match_column(cls, value_to_display, delta_to_display):
@@ -310,13 +323,15 @@ class JUnitPlugin(ProjectSummarizerPlugin):
             next_row[column_index] = new_value
             if max_width_2 != 0:
                 if split_row[1] != "0":
-                    new_value = "(" + split_row[1] + ")"
+                    new_value = f"({split_row[1]})"
                     new_value = new_value.rjust(max_width_2, " ")
                 else:
                     new_value = "".rjust(max_width_2, " ")
-                next_row[column_index] = next_row[column_index] + " " + new_value
+                next_row[column_index] = f"{next_row[column_index]} {new_value}"
 
-    def print_test_summary(self, test_report_rows, new_totals, loaded_totals):
+    def print_test_summary(
+        self, test_report_rows, new_totals, loaded_totals, column_width
+    ):
         """
         Print the actual test summaries.
         """
@@ -341,6 +356,7 @@ class JUnitPlugin(ProjectSummarizerPlugin):
                 headers=hdrs,
                 no_borders=True,
                 justify=["l", "r", "r", "r"],
+                terminal_width=column_width if column_width != -1 else None,
             )
             split_rows = table.split("\n")
             new_rows = [next_row.rstrip() for next_row in split_rows]

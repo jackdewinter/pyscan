@@ -75,7 +75,7 @@ class CoberturaPlugin(ProjectSummarizerPlugin):
             else "Unknown"
         )
 
-    def generate_report(self, only_changes, report_file):
+    def generate_report(self, only_changes, column_width, report_file):
         """
         Generate the report and display it.
         """
@@ -90,14 +90,18 @@ class CoberturaPlugin(ProjectSummarizerPlugin):
         )
         self.save_summary_file(self.__output_path, new_stats, "test coverage")
 
-        published_coverage_summary_path = (
-            ProjectSummarizerPlugin.compute_published_path_to_file(self.__output_path)
-        )
-        loaded_stats = self.__load_coverage_results_summary_file(
-            published_coverage_summary_path
-        )
-
-        self.__report_coverage_files(new_stats, loaded_stats, only_changes)
+        if column_width:
+            published_coverage_summary_path = (
+                ProjectSummarizerPlugin.compute_published_path_to_file(
+                    self.__output_path
+                )
+            )
+            loaded_stats = self.__load_coverage_results_summary_file(
+                published_coverage_summary_path
+            )
+            self.__report_coverage_files(
+                new_stats, loaded_stats, only_changes, column_width
+            )
 
     def __compose_summary_from_cobertura_document(
         self, cobertura_document, coverage_provider_name
@@ -183,7 +187,9 @@ class CoberturaPlugin(ProjectSummarizerPlugin):
             test_totals = CoverageTotals.from_dict(results_dictionary)
         return test_totals
 
-    def __report_coverage_files(self, new_stats, loaded_stats, only_report_changes):
+    def __report_coverage_files(
+        self, new_stats, loaded_stats, only_report_changes, column_width
+    ):
         """
         Create a report on coverage.
         """
@@ -204,6 +210,7 @@ class CoberturaPlugin(ProjectSummarizerPlugin):
                 headers=hdrs,
                 no_borders=True,
                 justify=["l", "r", "r", "r"],
+                terminal_width=column_width if column_width != -1 else None,
             )
             split_rows = table.split("\n")
             new_rows = [next_row.rstrip() for next_row in split_rows]
