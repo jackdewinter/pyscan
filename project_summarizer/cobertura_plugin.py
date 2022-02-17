@@ -75,7 +75,7 @@ class CoberturaPlugin(ProjectSummarizerPlugin):
             else "Unknown"
         )
 
-    def generate_report(self, only_changes, report_file):
+    def generate_report(self, only_changes, column_width, report_file):
         """
         Generate the report and display it.
         """
@@ -90,14 +90,18 @@ class CoberturaPlugin(ProjectSummarizerPlugin):
         )
         self.save_summary_file(self.__output_path, new_stats, "test coverage")
 
-        published_coverage_summary_path = (
-            ProjectSummarizerPlugin.compute_published_path_to_file(self.__output_path)
-        )
-        loaded_stats = self.__load_coverage_results_summary_file(
-            published_coverage_summary_path
-        )
-
-        self.__report_coverage_files(new_stats, loaded_stats, only_changes)
+        if column_width:
+            published_coverage_summary_path = (
+                ProjectSummarizerPlugin.compute_published_path_to_file(
+                    self.__output_path
+                )
+            )
+            loaded_stats = self.__load_coverage_results_summary_file(
+                published_coverage_summary_path
+            )
+            self.__report_coverage_files(
+                new_stats, loaded_stats, only_changes, column_width
+            )
 
     def __compose_summary_from_cobertura_document(
         self, cobertura_document, coverage_provider_name
@@ -183,7 +187,9 @@ class CoberturaPlugin(ProjectSummarizerPlugin):
             test_totals = CoverageTotals.from_dict(results_dictionary)
         return test_totals
 
-    def __report_coverage_files(self, new_stats, loaded_stats, only_report_changes):
+    def __report_coverage_files(
+        self, new_stats, loaded_stats, only_report_changes, column_width
+    ):
         """
         Create a report on coverage.
         """
@@ -204,6 +210,7 @@ class CoberturaPlugin(ProjectSummarizerPlugin):
                 headers=hdrs,
                 no_borders=True,
                 justify=["l", "r", "r", "r"],
+                terminal_width=column_width if column_width != -1 else None,
             )
             split_rows = table.split("\n")
             new_rows = [next_row.rstrip() for next_row in split_rows]
@@ -312,16 +319,14 @@ class CoberturaPlugin(ProjectSummarizerPlugin):
             column_value = next_row[primary_column_index].rjust(column_maximums[0], " ")
         if column_maximums[1] != 0:
             if next_row[primary_column_index + 1] == "-":
-                column_value = (
-                    column_value + " " + " ".rjust(column_maximums[1] + 2, " ")
-                )
+                column_value = (f'{column_value} ' + " ".rjust(column_maximums[1] + 2, " "))
             else:
                 partial_value = next_row[primary_column_index + 1]
                 has_changes = partial_value.startswith("+") or partial_value.startswith(
                     "-"
                 )
                 partial_value = partial_value.rjust(column_maximums[1], " ")
-                column_value = column_value + " (" + partial_value + ")"
+                column_value = f'{column_value} ({partial_value})'
         return column_value, has_changes
 
     @classmethod
@@ -384,8 +389,7 @@ class CoberturaPlugin(ProjectSummarizerPlugin):
                     f"{percentage_value:.2f}",
                 )
         else:
-            for _ in range(6):
-                new_row.append("-")
+            new_row.extend("-" for _ in range(6))
         return new_row
 
     # pylint: disable=unused-private-member
@@ -401,7 +405,7 @@ class CoberturaPlugin(ProjectSummarizerPlugin):
             and delta_value != "0.00"
             and not delta_value.startswith("-")
         ):
-            delta_value = "+" + delta_value
+            delta_value = f'+{delta_value}'
         new_row.append(delta_value)
 
     # pylint: enable=unused-private-member

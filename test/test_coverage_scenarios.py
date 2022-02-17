@@ -101,6 +101,135 @@ Test Coverage Summary
     )
 
 
+def test_summarize_simple_cobertura_report_with_reduced_columns(
+    create_publish_directory=False, temporary_work_directory=None
+):
+    """
+    Test the summarizing of a simple cobertura report with no previous summary.
+    """
+
+    # Arrange
+    executor = MainlineExecutor()
+    temporary_work_directory, report_directory, publish_directory = setup_directories(
+        create_publish_directory=create_publish_directory,
+        temporary_work_directory=temporary_work_directory,
+    )
+    cobertura_coverage_file = os.path.join(
+        temporary_work_directory.name, get_coverage_file_name()
+    )
+    copyfile(
+        os.path.join(executor.resource_directory, get_coverage_file_name()),
+        cobertura_coverage_file,
+    )
+    summary_coverage_file = os.path.join(report_directory, COVERAGE_SUMMARY_FILE_NAME)
+
+    suppplied_arguments = [
+        COBERTURA_COMMAND_LINE_FLAG,
+        cobertura_coverage_file,
+        "--columns",
+        "50",
+    ]
+
+    expected_output = """
+
+Test Coverage Summary
+---------------------
+
+
+  TYPE           COVERED  MEASURED    PERCENTAGE
+
+  Instructions  --        --        -----
+
+  Lines         10 (+10)  15 (+15)  66.67 (+66.6
+                                              7)
+  Branches       2 ( +2)   4 ( +4)  50.00 (+50.0
+                                              0)
+  Complexity    --        --        -----
+
+  Methods       --        --        -----
+
+  Classes       --        --        -----
+
+
+
+"""
+    expected_error = ""
+    expected_return_code = 0
+    expected_test_coverage_file = compose_coverage_summary_file()
+
+    # Act
+    execute_results = executor.invoke_main(
+        arguments=suppplied_arguments, cwd=temporary_work_directory.name
+    )
+
+    # Assert
+    execute_results.assert_results(
+        expected_output, expected_error, expected_return_code
+    )
+    execute_results.assert_resultant_file(
+        summary_coverage_file, expected_test_coverage_file
+    )
+    return (
+        executor,
+        temporary_work_directory,
+        publish_directory,
+        cobertura_coverage_file,
+    )
+
+
+def test_summarize_simple_cobertura_report_with_quiet(
+    create_publish_directory=False, temporary_work_directory=None
+):
+    """
+    Test the summarizing of a simple cobertura report with no previous summary.
+    """
+
+    # Arrange
+    executor = MainlineExecutor()
+    temporary_work_directory, report_directory, publish_directory = setup_directories(
+        create_publish_directory=create_publish_directory,
+        temporary_work_directory=temporary_work_directory,
+    )
+    cobertura_coverage_file = os.path.join(
+        temporary_work_directory.name, get_coverage_file_name()
+    )
+    copyfile(
+        os.path.join(executor.resource_directory, get_coverage_file_name()),
+        cobertura_coverage_file,
+    )
+    summary_coverage_file = os.path.join(report_directory, COVERAGE_SUMMARY_FILE_NAME)
+
+    suppplied_arguments = [
+        COBERTURA_COMMAND_LINE_FLAG,
+        cobertura_coverage_file,
+        "--quiet",
+    ]
+
+    expected_output = ""
+    expected_error = ""
+    expected_return_code = 0
+    expected_test_coverage_file = compose_coverage_summary_file()
+
+    # Act
+    execute_results = executor.invoke_main(
+        arguments=suppplied_arguments, cwd=temporary_work_directory.name
+    )
+
+    # Assert
+    execute_results.assert_results(
+        expected_output, expected_error, expected_return_code
+    )
+    execute_results.assert_resultant_file(
+        summary_coverage_file, expected_test_coverage_file
+    )
+    return (
+        executor,
+        temporary_work_directory,
+        publish_directory,
+        cobertura_coverage_file,
+    )
+
+
 def test_summarize_cobertura_report_with_bad_source():
     """
     Test to make sure that summarizing a test coverage file that does not exist.

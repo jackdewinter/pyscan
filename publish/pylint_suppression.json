@@ -10,9 +10,12 @@
             "too-many-arguments": 1
         },
         "project_summarizer/junit_plugin.py": {
-            "too-many-arguments": 2
+            "too-many-arguments": 2,
+            "too-many-locals": 1
         },
-        "project_summarizer/main.py": {},
+        "project_summarizer/main.py": {
+            "too-few-public-methods": 1
+        },
         "project_summarizer/project_summarizer_plugin.py": {},
         "project_summarizer/test_results_model.py": {
             "too-many-arguments": 1
@@ -22,6 +25,8 @@
     "disables-by-name": {
         "unused-private-member": 1,
         "too-many-instance-attributes": 1,
-        "too-many-arguments": 4
+        "too-many-arguments": 4,
+        "too-many-locals": 1,
+        "too-few-public-methods": 1
     }
 }

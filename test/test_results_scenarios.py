@@ -97,6 +97,108 @@ Test Results Summary
     return executor, temporary_work_directory, publish_directory, junit_test_file
 
 
+def test_summarize_simple_junit_report_with_reduced_columns(
+    create_publish_directory=False, temporary_work_directory=None
+):
+    """
+    Test the summarizing of a simple junit report with no previous summary with columns set.
+    """
+
+    # Arrange
+    executor = MainlineExecutor()
+    temporary_work_directory, report_directory, publish_directory = setup_directories(
+        create_publish_directory=create_publish_directory,
+        temporary_work_directory=temporary_work_directory,
+    )
+    junit_test_file = os.path.join(
+        temporary_work_directory.name, JUNIT_RESULTS_FILE_NAME
+    )
+    copyfile(
+        os.path.join(executor.resource_directory, JUNIT_RESULTS_FILE_NAME),
+        junit_test_file,
+    )
+    summary_result_file = os.path.join(report_directory, RESULTS_SUMMARY_FILE_NAME)
+
+    suppplied_arguments = [JUNIT_COMMAND_LINE_FLAG, junit_test_file, "--columns", "50"]
+
+    expected_output = """\
+
+Test Results Summary
+--------------------
+
+
+  CLASS NAME  TOTAL TEST  FAILED TES  SKIPPED TE
+                       S          TS         STS
+
+  test.test_      3 (+3)           0           0
+  scenarios
+  ---             -                -           -
+  TOTALS          3 (+3)           0           0
+
+"""
+    expected_error = ""
+    expected_return_code = 0
+    expected_test_results_file = compose_test_results(3)
+
+    # Act
+    execute_results = executor.invoke_main(
+        arguments=suppplied_arguments, cwd=temporary_work_directory.name
+    )
+
+    # Assert
+    execute_results.assert_results(
+        expected_output, expected_error, expected_return_code
+    )
+    execute_results.assert_resultant_file(
+        summary_result_file, expected_test_results_file
+    )
+    return executor, temporary_work_directory, publish_directory, junit_test_file
+
+
+def test_summarize_simple_junit_report_with_quiet(
+    create_publish_directory=False, temporary_work_directory=None
+):
+    """
+    Test the summarizing of a simple junit report with no previous summary with columns set.
+    """
+
+    # Arrange
+    executor = MainlineExecutor()
+    temporary_work_directory, report_directory, publish_directory = setup_directories(
+        create_publish_directory=create_publish_directory,
+        temporary_work_directory=temporary_work_directory,
+    )
+    junit_test_file = os.path.join(
+        temporary_work_directory.name, JUNIT_RESULTS_FILE_NAME
+    )
+    copyfile(
+        os.path.join(executor.resource_directory, JUNIT_RESULTS_FILE_NAME),
+        junit_test_file,
+    )
+    summary_result_file = os.path.join(report_directory, RESULTS_SUMMARY_FILE_NAME)
+
+    suppplied_arguments = [JUNIT_COMMAND_LINE_FLAG, junit_test_file, "--quiet"]
+
+    expected_output = ""
+    expected_error = ""
+    expected_return_code = 0
+    expected_test_results_file = compose_test_results(3)
+
+    # Act
+    execute_results = executor.invoke_main(
+        arguments=suppplied_arguments, cwd=temporary_work_directory.name
+    )
+
+    # Assert
+    execute_results.assert_results(
+        expected_output, expected_error, expected_return_code
+    )
+    execute_results.assert_resultant_file(
+        summary_result_file, expected_test_results_file
+    )
+    return executor, temporary_work_directory, publish_directory, junit_test_file
+
+
 def test_summarize_junit_report_with_bad_source():
     """
     Test to make sure that summarizing a test report file that does not exist.

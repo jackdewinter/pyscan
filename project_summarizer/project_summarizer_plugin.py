@@ -26,18 +26,26 @@ class ProjectSummarizerPlugin(ABC):
     def get_output_path(self):
         """
         Get the output path for the reporting file.
+
+        Used as the destination for the report. Also called from `__publish_summaries`
+        to denote the files that need to be published.
         """
 
     @abstractmethod
     def add_command_line_arguments(self, parser):
         """
         Add a command line argument to denote the file to scan.
+
+        Called from function `__parse_arguments` when building the command line.
         """
 
     @abstractmethod
-    def generate_report(self, only_changes, report_file):
+    def generate_report(self, only_changes, column_width, report_file):
         """
         Generate the report and display it.
+
+        Called from function `__create_sumamries` to create the summary file and
+        display any results on the console.
         """
 
     @classmethod
