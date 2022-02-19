@@ -9,6 +9,8 @@ import sys
 import traceback
 from abc import ABC, abstractmethod
 
+from project_summarizer.project_summarizer_plugin import ProjectSummarizerPlugin
+
 LOGGER = logging.getLogger(__name__)
 
 
@@ -194,7 +196,9 @@ class InProcessResult:
         """
 
         split_expected_contents = expected_contents.split("\n")
-        with open(file_path, "r", encoding="utf-8") as infile:
+        with open(
+            file_path, "r", encoding=ProjectSummarizerPlugin.DEFAULT_FILE_ENCODING
+        ) as infile:
             split_actual_contents = infile.readlines()
         for line_index, line_content in enumerate(split_actual_contents):
             if line_content[-1] == "\n":

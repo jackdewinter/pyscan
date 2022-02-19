@@ -17,6 +17,7 @@
             "too-few-public-methods": 1
         },
         "project_summarizer/project_summarizer_plugin.py": {},
+        "project_summarizer/summarize_context.py": {},
         "project_summarizer/test_results_model.py": {
             "too-many-arguments": 1
         },

@@ -8,6 +8,7 @@ from test.pytest_execute import InProcessExecution
 
 from project_summarizer.__main__ import main
 from project_summarizer.main import ProjectSummarizer
+from project_summarizer.project_summarizer_plugin import ProjectSummarizerPlugin
 
 JUNIT_COMMAND_LINE_FLAG = "--junit"
 COBERTURA_COMMAND_LINE_FLAG = "--cobertura"
@@ -15,13 +16,13 @@ COBERTURA_COMMAND_LINE_FLAG = "--cobertura"
 PUBLISH_COMMAND_LINE_FLAG = "--publish"
 ONLY_CHANGES_COMMAND_LINE_FLAG = "--only-changes"
 
-REPORT_DIRECTORY = "report"
-PUBLISH_DIRECTORY = "publish"
+REPORT_DIRECTORY = ProjectSummarizerPlugin.DEFAULT_REPORT_PUBLISH_PATH
+PUBLISH_DIRECTORY = ProjectSummarizerPlugin.DEFAULT_SUMMARY_PUBLISH_PATH
 
 JUNIT_RESULTS_FILE_NAME = "tests.xml"
 RESULTS_SUMMARY_FILE_NAME = "test-results.json"
-COVERAGE_SUMMARY_FILE_NAME = "coverage.json"
 
+COVERAGE_SUMMARY_FILE_NAME = "coverage.json"
 __COBERTURA_COVERAGE_FILE_NAME = "coverage.xml"
 __COBERTURA_NON_WINDOWS_COVERAGE_FILE_NAME = "coverage-non-windows.xml"
 
@@ -91,6 +92,7 @@ main.py 0.5.0
 def setup_directories(
     create_report_directory=True,
     create_publish_directory=False,
+    alternate_publish_directory=None,
     temporary_work_directory=None,
 ):
     """
@@ -100,12 +102,24 @@ def setup_directories(
 
     if not temporary_work_directory:
         temporary_work_directory = tempfile.TemporaryDirectory()
-    report_directory = os.path.join(temporary_work_directory.name, "report")
+
+    report_directory = os.path.join(
+        temporary_work_directory.name,
+        ProjectSummarizerPlugin.DEFAULT_REPORT_PUBLISH_PATH,
+    )
     if create_report_directory:
         os.makedirs(report_directory)
-    publish_directory = os.path.join(temporary_work_directory.name, "publish")
+
+    alternate_publish_directory = (
+        alternate_publish_directory
+        or ProjectSummarizerPlugin.DEFAULT_SUMMARY_PUBLISH_PATH
+    )
+    publish_directory = os.path.join(
+        temporary_work_directory.name, alternate_publish_directory
+    )
     if create_publish_directory:
         os.makedirs(publish_directory)
+
     return temporary_work_directory, report_directory, publish_directory
 
 

@@ -16,11 +16,20 @@ class ProjectSummarizerPlugin(ABC):
     Base class for all project_summarizer plugins.
     """
 
-    SUMMARY_PUBLISH_PATH = "publish"
-    REPORT_PUBLISH_PATH = "report"
+    DEFAULT_SUMMARY_PUBLISH_PATH = "publish"
+    DEFAULT_REPORT_PUBLISH_PATH = "report"
+    DEFAULT_FILE_ENCODING = "utf-8"
 
     def __init__(self):
         pass
+
+    @abstractmethod
+    def set_context(self, context):
+        """
+        Set the context for the plugins.
+
+        Called from `__main` to set any context in plugins, instead of doing it later.
+        """
 
     @abstractmethod
     def get_output_path(self):
@@ -85,14 +94,18 @@ class ProjectSummarizerPlugin(ABC):
         Save the specified summary file.
         """
 
-        summary_output_path = os.path.dirname(json_file_to_write)
-        if not os.path.exists(summary_output_path):
-            print(f"Summary output path '{summary_output_path}' does not exist.")
-            sys.exit(1)
+        # summary_output_path = os.path.dirname(json_file_to_write)
+        # if not os.path.exists(summary_output_path):
+        #     print(f"Summary output path '{summary_output_path}' does not exist.")
+        #     sys.exit(1)
 
         full_test_summary_output_path = os.path.abspath(json_file_to_write)
         try:
-            with open(full_test_summary_output_path, "w", encoding="utf-8") as outfile:
+            with open(
+                full_test_summary_output_path,
+                "w",
+                encoding=ProjectSummarizerPlugin.DEFAULT_FILE_ENCODING,
+            ) as outfile:
                 json.dump(object_to_write.to_dict(), outfile, indent=4)
                 outfile.write("\n\n")
         except IOError as ex:
@@ -101,14 +114,3 @@ class ProjectSummarizerPlugin(ABC):
                 + f"' was not written ({ex})."
             )
             sys.exit(1)
-
-    @staticmethod
-    def compute_published_path_to_file(file_to_publish):
-        """
-        Compute the path for the given file, assuming it will be placed in the publish directory.
-        """
-
-        return os.path.join(
-            ProjectSummarizerPlugin.SUMMARY_PUBLISH_PATH,
-            os.path.basename(file_to_publish),
-        )

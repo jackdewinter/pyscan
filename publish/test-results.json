@@ -28,7 +28,7 @@
         },
         {
             "name": "test.test_main",
-            "totalTests": 8,
+            "totalTests": 10,
             "failedTests": 0,
             "errorTests": 0,
             "skippedTests": 0,
@@ -36,7 +36,7 @@
         },
         {
             "name": "test.test_publish_scenarios",
-            "totalTests": 9,
+            "totalTests": 10,
             "failedTests": 0,
             "errorTests": 0,
             "skippedTests": 0,

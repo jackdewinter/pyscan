@@ -27,7 +27,7 @@ Project Summarizer is a tool used to summarize various files produced by other t
 This tool is intended to be executed after running a test script or a build script.
 The benefit to using the Project Summarizer tool is a quick summary of more terse information provided by other tools.
 The goal is to provide the minimum level of feedback on changes to the project, avoiding a more costly lookup of the summarized information.
-If that goal is met, then a simple look at that summarized information can replace a more costly lookup, such as having to switch focus to a locally hosted web page to determine impact.
+If that goal is met, then a simple look at that summarized information can replace a more costly lookup, such as having to switch focus to a locally hosted web page to figure out the impact of a change.
 
 Our hope is that we can help developers achieve that goal at least 50 percent of the time.
 
@@ -60,7 +60,7 @@ While the report files are not intended for human consumption, their summarized 
 
 While complete information on the current state of the project is useful, our development team finds that most often that they are looking for what has changed.
 That is where the Project Summarizer tool shines.
-But, to understand what has changed, a benchmark or snapshot of the previous "current" state must be placed somewhere.
+But, to understand what has changed, a benchmark or snapshot of an earlier "current" state must be placed somewhere.
 For the Project Summarizer tool, those summary files in the `report` directory are *published* to the `publish` directory using the `--publish` argument.
 In our team, publishing is performed as the last action before committing changes to a project's repository.
 The intent of that action is that we can always determine what changes have occurred since the last commit.
@@ -71,7 +71,7 @@ With that argument present, the summaries will not only display values that have
 If adding, removing, or enabling tests, this is useful to make sure that the count of changed tests is as expected.
 If making any changes to the code that the tests are covering, this is useful to see what effect the change has on code coverage metrics.
 
-Our team uses test driven development and maintains a high code coverage metric for all our projects.
+Our team uses test driven development and keeps a high code coverage metric for all our projects.
 The Project Summarizer tool allows us to see the impact of our current changes on the current existing tests, enabled and disabled.
 It also allows us to keep track of the impact of any code changes on our coverage metrics.
 With both summaries, if the reported information is outside of our expectations, we can then look at the more comprehensive reports to find that needed information.
@@ -88,7 +88,7 @@ report/
 
 ## Sample Output
 
-These samples were captured against the Project Summarizer project itself and have not been modified.
+These samples were captured against the Project Summarizer project itself and have not been changed.
 
 ### Full Output
 
@@ -172,13 +172,13 @@ Test Coverage Summary
 
 Our team's development is primarily done on Windows systems.
 As such, any examples that we present will typically be Windows CMD scripts.
-We have a project note to provide Bash scripts for the project soon.
+We have a project note to supply Bash scripts for the project soon.
 
 ## Using This Project On Itself - Setup
 
 For the Project Summarizer project itself, there is a `ptest.cmd` script that allows for various modes to be used in executing PyTest against the project.
 These different modes allow for more focused testing depending on the needs of the developer at the time.
-Those different modes use environment variables to specify how to execute PyTest, and for the purpose of this documentation, those variables are ignored to provide a clearer picture of how the Project Summarizer tool works.
+Those different modes use environment variables to specify how to execute PyTest, and for the purpose of this documentation, those variables are ignored to supply a clearer picture of how the Project Summarizer tool works.
 
 With those other environment variables out of the way, the heart of the script is the `PYTEST_ARGS` environment variable.
 Under normal operation, that environment variable is set to:
@@ -220,7 +220,7 @@ pipenv run %PTEST_PROJECT_SUMMARIZER_SCRIPT_PATH% %PTEST_PROJECT_SUMMARIZER_OPTI
 
 As the summarizer is being used in the same project as it is created in, the `PTEST_PROJECT_SUMMARIZER_SCRIPT_PATH` variable is set to point to the project's `main.py` module.
 Normally, that value would be the name of the Python package `project_summarizer`.
-The `PTEST_PROJECT_SUMMARIZER_OPTIONS` variable contains the `--only-changes` argument by default but can be turned off if desired.
+The `PTEST_PROJECT_SUMMARIZER_OPTIONS` variable holds the `--only-changes` argument by default but can be turned off if desired.
 The `PTEST_TEST_RESULTS_PATH` variable is set to `report\tests.xml` to correspond with the `--junitxml=report/tests.xml` argument passed to PyTest.
 The `PTEST_TEST_COVERAGE_PATH` variable is set to `report\coverage.xml` to match the `--cov-report xml:report/coverage.xml` argument passed to PyTest.
 
@@ -233,17 +233,37 @@ All the samples in the [Sample Output](#sample-output) section are generated usi
 
 - used as part of the normal development process, `ptest.cmd --publish` was previously invoked to benchmark the summaries for the last commit
   - this effectively invoked `project_summarizer --publish`
-- `ptest -c -f` was invoked to run tests with coverage and provide the [Full Output sample](#full-output)
+- `ptest -c -f` was invoked to run tests with coverage and supply the [Full Output sample](#full-output)
   - this ran PyTest with coverage enabled, and effectively invoked `project_summarizer --junit report\tests.xml --cobertura report\coverage.xml`
 - `ptest -c` was invoked to run tests with coverage and present the [No Change sample](#only-output-changes-with-no-changes)
   - this ran PyTest with coverage enabled, and effectively invoked `project_summarizer --only-changes --junit report\tests.xml --cobertura report\coverage.xml`
 - `ptest -c` was invoked to run tests with coverage and present the [Expected Change sample](#expected-change)
   - same as above, but with the test "missing", it reported that test as not being executed and reported the coverage that was missing
 
+## Advanced Features
+
+### Quiet Mode and Output Character Columns
+
+After use in different real-world scenarios, the ability to maintain better control on the report output became more apparent.
+To that extent, two new arguments were added to the command line: `--quiet` and `--columns`.
+The `--quiet` argument instructs the report summarizers to only generate their output files, and not to generate any console output.
+This feature is useful on servers where the tool is still executed to keep things coordinated with developer workflows, but the console output is not important.
+In those cases where the output on servers is relevant, the `--columns` argument is useful in specifying the number of character columns to use for the output.
+The integer value passed after the `--columns` argument is passed to the table formatting package that is suggested for plugins: `columnar`.
+In the past, when the tool has been run on server environments, there have been situations where the `columnar` package's determination of number of output columns has been wrong or had returned `0`.
+By using this setting, those situations can be sidestepped by hardwiring the number of columns from the command line.
+
+### Setting The Reporting and Publishing Directories
+
+As mentioned above, the `report` directory is used to generate summary reports in, and those reports can then be published into the `publish` directory.
+If different names are wanted for these two directories, they can be set with the `--report-dir` argument and the `--publish-dir` argument.
+Note that the report directory, either the default `report` or the value supplied with the `--report-dir` argument, must exist before this tool is called.
+However, the publish directory, either the default `publish` or the value supplied with the `--publish-dir` argument, will be created if it does not exist.
+
 ## Future Goals
 
-The initial 0.5.0 release is to get this project on the board.
-Once that is done, we have plans to implement an extension mechanism to provide for customized summaries.
+The 0.5.0 releases are to get this project on the board.
+Once that is done, we have plans to implement an extension mechanism to support customized summaries.
 
 ## When Did Things Change?
 

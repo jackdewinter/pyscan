@@ -10,6 +10,7 @@ from shutil import copyfile
 from project_summarizer.cobertura_plugin import CoberturaPlugin
 from project_summarizer.junit_plugin import JUnitPlugin
 from project_summarizer.project_summarizer_plugin import ProjectSummarizerPlugin
+from project_summarizer.summarize_context import SummarizeContext
 
 
 # pylint: disable=too-few-public-methods
@@ -23,7 +24,6 @@ class ProjectSummarizer:
 
     def __init__(self):
         self.__version_number = ProjectSummarizer.__get_semantic_version()
-        self.test_summary_publish_path = ProjectSummarizerPlugin.SUMMARY_PUBLISH_PATH
         self.debug = False
         self.__available_plugins = None
         self.__plugin_argument_names = {}
@@ -63,47 +63,71 @@ class ProjectSummarizer:
                 break
 
         if not are_plugin_arguments_present:
+            print(
+                "Error: Either --publish or one of the reporting arguments mush be specified."
+            )
             parser.print_help()
             sys.exit(2)
 
     def __parse_arguments(self):
         parser = argparse.ArgumentParser(
-            description="Summarize Python files.", allow_abbrev=False
+            description="Summarize Python files.", allow_abbrev=False, add_help=False
         )
-
+        parser.add_argument(
+            "-h", "--help", action="help", help="Show this help message and exit."
+        )
         parser.add_argument(
             "--version",
             action="version",
             version=f"%(prog)s {self.__version_number}",
+            help="Show program's version number and exit.",
         )
+        parser.add_argument(
+            "--report-dir",
+            dest="report_dir",
+            action="store",
+            default="report",
+            help="Directory to generate the summary reports in.",
+            type=ProjectSummarizer.__verify_directory_exists,
+        )
+        parser.add_argument(
+            "--publish-dir",
+            dest="publish_dir",
+            action="store",
+            default=None,
+            help="Directory to publish the summary reports to.",
+            type=ProjectSummarizer.__verify_directory_exists,
+        )
+
         self.__add_command_line_arguments_for_plugins(parser)
+
         parser.add_argument(
             "--only-changes",
             dest="only_changes",
             action="store_true",
             default=False,
-            help="only_changes",
+            help="Only the summary items that have changed are displayed in the console summary.",
         )
         parser.add_argument(
             "--publish",
             dest="publish_summaries",
             action="store_true",
             default=False,
-            help="publish",
+            help="Publish the summaries to the publish directory and exit.",
         )
         parser.add_argument(
             "--quiet",
             dest="quiet_mode",
             action="store_true",
             default=False,
-            help="quiet_mode",
+            help="The report summary files will be generated, but no summary will be output to the console.",
         )
         parser.add_argument(
             "--columns",
             dest="display_columns",
             action="store",
             default=-1,
-            help="display_columns",
+            help="Specifies the number of character columns to use in the console summary.",
             type=ProjectSummarizer.__verify_display_columns,
         )
 
@@ -125,31 +149,29 @@ class ProjectSummarizer:
             )
         return argument_as_integer
 
-    def __publish_file(self, file_to_publish):
-        if not os.path.exists(self.test_summary_publish_path):
-            print(
-                f"Publish directory '{self.test_summary_publish_path}' does not exist.  Creating."
-            )
-            os.makedirs(self.test_summary_publish_path)
-        elif not os.path.isdir(self.test_summary_publish_path):
-            print(
-                f"Publish directory '{self.test_summary_publish_path}' already exists, but as a file."
-            )
-            sys.exit(1)
+    @staticmethod
+    def __verify_directory_exists(argument):
+        if not os.path.exists(argument):
+            raise ValueError(f"Path '{argument}' does not exist.")
+        if not os.path.isdir(argument):
+            raise ValueError(f"Path '{argument}' is not an existing directory.")
+        return argument
 
+    @classmethod
+    def __publish_file(cls, file_to_publish, context):
         if os.path.exists(file_to_publish):
             try:
+                publish_path = context.compute_published_path_to_file(file_to_publish)
                 copyfile(
                     file_to_publish,
-                    ProjectSummarizerPlugin.compute_published_path_to_file(
-                        file_to_publish
-                    ),
+                    publish_path,
                 )
+                print(f"Published: {publish_path}")
             except IOError as ex:
                 print(f"Publishing file '{file_to_publish}' failed ({ex}).")
                 sys.exit(1)
 
-    def __publish_summaries(self):
+    def __publish_summaries(self, context):
         """
         Respond to a request to publish any existing summaries.
         """
@@ -165,8 +187,19 @@ class ProjectSummarizer:
                 sys.exit(1)
             valid_paths.append(plugin_output_path)
 
+        if not os.path.exists(context.publish_dir):
+            print(
+                f"Publish directory '{context.publish_dir}' does not exist.  Creating."
+            )
+            os.makedirs(context.publish_dir)
+        elif not os.path.isdir(context.publish_dir):
+            print(
+                f"Publish directory '{context.publish_dir}' already exists, but as a file."
+            )
+            sys.exit(1)
+
         for plugin_output_path in valid_paths:
-            self.__publish_file(plugin_output_path)
+            self.__publish_file(plugin_output_path, context)
 
     def __create_summaries(self, args):
         arguments_as_dictionary = vars(args)
@@ -193,11 +226,23 @@ class ProjectSummarizer:
 
         args = self.__parse_arguments()
 
+        context = SummarizeContext(
+            report_dir=args.report_dir
+            or ProjectSummarizerPlugin.DEFAULT_REPORT_PUBLISH_PATH,
+            publish_dir=args.publish_dir
+            or ProjectSummarizerPlugin.DEFAULT_SUMMARY_PUBLISH_PATH,
+        )
+
+        for next_plugin in self.__available_plugins:
+            next_plugin.set_context(context)
+        # report_dir
+
         if args.publish_summaries:
-            self.__publish_summaries()
+            self.__publish_summaries(context)
             sys.exit(0)
 
         self.__create_summaries(args)
+        sys.exit(0)
 
 
 if __name__ == "__main__":
