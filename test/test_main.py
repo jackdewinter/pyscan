@@ -2,7 +2,7 @@
 Module to provide tests related to the basic parts of the scanner.
 """
 import os
-from test.test_scenarios import MainlineExecutor
+from test.test_scenarios import MainlineExecutor, setup_directories
 
 
 def test_scanner_with_no_parameters():
@@ -12,6 +12,7 @@ def test_scanner_with_no_parameters():
 
     # Arrange
     scanner = MainlineExecutor()
+    temporary_work_directory, _, _ = setup_directories()
     supplied_arguments = []
 
     expected_return_code = 2
@@ -45,7 +46,9 @@ optional arguments:
     expected_error = ""
 
     # Act
-    execute_results = scanner.invoke_main(arguments=supplied_arguments)
+    execute_results = scanner.invoke_main(
+        arguments=supplied_arguments, cwd=temporary_work_directory.name
+    )
 
     # Assert
     execute_results.assert_results(
@@ -61,6 +64,7 @@ def test_scanner_with_no_parameters_through_module():
 
     # Arrange
     scanner = MainlineExecutor(use_module=True)
+    temporary_work_directory, _, _ = setup_directories()
     supplied_arguments = []
 
     expected_return_code = 2
@@ -94,7 +98,9 @@ optional arguments:
                         the console summary."""
 
     # Act
-    execute_results = scanner.invoke_main(arguments=supplied_arguments)
+    execute_results = scanner.invoke_main(
+        arguments=supplied_arguments, cwd=temporary_work_directory.name
+    )
 
     # Assert
     execute_results.assert_results(
@@ -110,6 +116,7 @@ def test_scanner_with_no_parameters_through_main():
 
     # Arrange
     scanner = MainlineExecutor(use_main=True)
+    temporary_work_directory, _, _ = setup_directories()
     supplied_arguments = []
 
     expected_return_code = 2
@@ -143,7 +150,9 @@ optional arguments:
     expected_error = ""
 
     # Act
-    execute_results = scanner.invoke_main(arguments=supplied_arguments)
+    execute_results = scanner.invoke_main(
+        arguments=supplied_arguments, cwd=temporary_work_directory.name
+    )
 
     # Assert
     execute_results.assert_results(
@@ -158,6 +167,7 @@ def test_scanner_with_dash_h():
 
     # Arrange
     scanner = MainlineExecutor()
+    temporary_work_directory, _, _ = setup_directories()
     supplied_arguments = ["-h"]
 
     expected_return_code = 0
@@ -190,7 +200,9 @@ optional arguments:
     expected_error = ""
 
     # Act
-    execute_results = scanner.invoke_main(arguments=supplied_arguments)
+    execute_results = scanner.invoke_main(
+        arguments=supplied_arguments, cwd=temporary_work_directory.name
+    )
 
     # Assert
     execute_results.assert_results(
@@ -205,6 +217,7 @@ def test_scanner_with_dash_dash_quiet():
 
     # Arrange
     scanner = MainlineExecutor()
+    temporary_work_directory, _, _ = setup_directories()
     supplied_arguments = ["--quiet"]
 
     expected_return_code = 2
@@ -238,7 +251,9 @@ optional arguments:
     expected_error = ""
 
     # Act
-    execute_results = scanner.invoke_main(arguments=supplied_arguments)
+    execute_results = scanner.invoke_main(
+        arguments=supplied_arguments, cwd=temporary_work_directory.name
+    )
 
     # Assert
     execute_results.assert_results(
@@ -253,6 +268,7 @@ def test_scanner_with_dash_dash_columns():
 
     # Arrange
     scanner = MainlineExecutor()
+    temporary_work_directory, _, _ = setup_directories()
     supplied_arguments = ["--columns"]
 
     expected_return_code = 2
@@ -264,7 +280,9 @@ def test_scanner_with_dash_dash_columns():
 main.py: error: argument --columns: expected one argument"""
 
     # Act
-    execute_results = scanner.invoke_main(arguments=supplied_arguments)
+    execute_results = scanner.invoke_main(
+        arguments=supplied_arguments, cwd=temporary_work_directory.name
+    )
 
     # Assert
     execute_results.assert_results(
@@ -279,8 +297,9 @@ def test_scanner_with_dash_dash_columns_good_number():
 
     # Arrange
     scanner = MainlineExecutor()
-    supplied_arguments = ["--columns", "100"]
+    temporary_work_directory, _, _ = setup_directories()
 
+    supplied_arguments = ["--columns", "100"]
     expected_return_code = 2
     expected_output = """Error: Either --publish or one of the reporting arguments mush be specified.
 usage: main.py [-h] [--version] [--report-dir REPORT_DIR]
@@ -312,7 +331,9 @@ optional arguments:
     expected_error = ""
 
     # Act
-    execute_results = scanner.invoke_main(arguments=supplied_arguments)
+    execute_results = scanner.invoke_main(
+        arguments=supplied_arguments, cwd=temporary_work_directory.name
+    )
 
     # Assert
     execute_results.assert_results(
@@ -327,6 +348,7 @@ def test_scanner_with_dash_dash_columns_bad_number():
 
     # Arrange
     scanner = MainlineExecutor()
+    temporary_work_directory, _, _ = setup_directories()
     supplied_arguments = ["--columns", "20"]
 
     expected_return_code = 2
@@ -335,10 +357,12 @@ def test_scanner_with_dash_dash_columns_bad_number():
                [--publish-dir PUBLISH_DIR] [--cobertura path] [--junit path]
                [--only-changes] [--publish] [--quiet]
                [--columns DISPLAY_COLUMNS]
-main.py: error: argument --columns: invalid __verify_display_columns value: '20'"""
+main.py: error: argument --columns: Value '20' is not an integer between between 50 and 200."""
 
     # Act
-    execute_results = scanner.invoke_main(arguments=supplied_arguments)
+    execute_results = scanner.invoke_main(
+        arguments=supplied_arguments, cwd=temporary_work_directory.name
+    )
 
     # Assert
     execute_results.assert_results(
@@ -353,6 +377,7 @@ def test_scanner_with_dash_dash_report_dir_with_non_existant():
 
     # Arrange
     scanner = MainlineExecutor()
+    temporary_work_directory, _, _ = setup_directories()
     supplied_arguments = ["--report-dir", "alternate-reports"]
 
     assert not os.path.exists("alternate-reports")
@@ -363,11 +388,13 @@ def test_scanner_with_dash_dash_report_dir_with_non_existant():
                [--publish-dir PUBLISH_DIR] [--cobertura path] [--junit path]
                [--only-changes] [--publish] [--quiet]
                [--columns DISPLAY_COLUMNS]
-main.py: error: argument --report-dir: invalid __verify_directory_exists value: 'alternate-reports'
+main.py: error: argument --report-dir: Path 'alternate-reports' does not exist.
 """
 
     # Act
-    execute_results = scanner.invoke_main(arguments=supplied_arguments)
+    execute_results = scanner.invoke_main(
+        arguments=supplied_arguments, cwd=temporary_work_directory.name
+    )
 
     # Assert
     execute_results.assert_results(
@@ -382,9 +409,10 @@ def test_scanner_with_dash_dash_report_dir_with_non_directory():
 
     # Arrange
     scanner = MainlineExecutor()
-    supplied_arguments = ["--report-dir", "README.md"]
-
+    temporary_work_directory, _, _ = setup_directories()
     assert os.path.exists("README.md") and os.path.isfile("README.md")
+    readme_path = os.path.abspath("README.md")
+    supplied_arguments = ["--report-dir", readme_path]
 
     expected_return_code = 2
     expected_output = ""
@@ -392,11 +420,15 @@ def test_scanner_with_dash_dash_report_dir_with_non_directory():
                [--publish-dir PUBLISH_DIR] [--cobertura path] [--junit path]
                [--only-changes] [--publish] [--quiet]
                [--columns DISPLAY_COLUMNS]
-main.py: error: argument --report-dir: invalid __verify_directory_exists value: 'README.md'
-"""
+main.py: error: argument --report-dir: Path '{path}' is not an existing directory.
+""".replace(
+        "{path}", readme_path
+    )
 
     # Act
-    execute_results = scanner.invoke_main(arguments=supplied_arguments)
+    execute_results = scanner.invoke_main(
+        arguments=supplied_arguments, cwd=temporary_work_directory.name
+    )
 
     # Assert
     execute_results.assert_results(

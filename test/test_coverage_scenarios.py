@@ -536,7 +536,7 @@ def test_summarize_bad_report_directory():
                [--publish-dir PUBLISH_DIR] [--cobertura path] [--junit path]
                [--only-changes] [--publish] [--quiet]
                [--columns DISPLAY_COLUMNS]
-main.py: error: argument --report-dir: invalid __verify_directory_exists value: 'report'"""
+main.py: error: argument --report-dir: Path 'report' does not exist."""
     expected_return_code = 2
 
     # Act

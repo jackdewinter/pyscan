@@ -142,7 +142,7 @@ class ProjectSummarizer:
             argument_as_integer < ProjectSummarizer.__MINIMUM_DISPLAY_COLUMNS
             or argument_as_integer > ProjectSummarizer.__MAXIMUM_DISPLAY_COLUMNS
         ):
-            raise ValueError(
+            raise argparse.ArgumentTypeError(
                 f"Value '{argument}' is not an integer between "
                 + f"between {ProjectSummarizer.__MINIMUM_DISPLAY_COLUMNS} "
                 + f"and {ProjectSummarizer.__MAXIMUM_DISPLAY_COLUMNS}."
@@ -151,10 +151,15 @@ class ProjectSummarizer:
 
     @staticmethod
     def __verify_directory_exists(argument):
+        report_argument = argument.replace("\\\\", "\\")
         if not os.path.exists(argument):
-            raise ValueError(f"Path '{argument}' does not exist.")
+            raise argparse.ArgumentTypeError(
+                f"Path '{report_argument}' does not exist."
+            )
         if not os.path.isdir(argument):
-            raise ValueError(f"Path '{argument}' is not an existing directory.")
+            raise argparse.ArgumentTypeError(
+                f"Path '{report_argument}' is not an existing directory."
+            )
         return argument
 
     @classmethod
