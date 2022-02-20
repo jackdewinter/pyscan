@@ -10,7 +10,6 @@ from test.test_scenarios import (
     ONLY_CHANGES_COMMAND_LINE_FLAG,
     PUBLISH_COMMAND_LINE_FLAG,
     PUBLISH_DIRECTORY,
-    REPORT_DIRECTORY,
     MainlineExecutor,
     get_coverage_file_name,
     setup_directories,
@@ -320,7 +319,8 @@ def test_summarize_simple_cobertura_report_and_publish(
     suppplied_arguments = [PUBLISH_COMMAND_LINE_FLAG]
 
     expected_output = (
-        f"Publish directory '{PUBLISH_DIRECTORY}' does not exist.  Creating."
+        f"Publish directory '{PUBLISH_DIRECTORY}' does not exist.  Creating.\n"
+        + f"Published: {os.path.join(PUBLISH_DIRECTORY, COVERAGE_SUMMARY_FILE_NAME)}"
     )
     expected_error = ""
     expected_return_code = 0
@@ -531,9 +531,13 @@ def test_summarize_bad_report_directory():
 
     suppplied_arguments = [COBERTURA_COMMAND_LINE_FLAG, cobertura_coverage_file]
 
-    expected_output = f"Summary output path '{REPORT_DIRECTORY}' does not exist."
-    expected_error = ""
-    expected_return_code = 1
+    expected_output = ""
+    expected_error = """usage: main.py [-h] [--version] [--report-dir REPORT_DIR]
+               [--publish-dir PUBLISH_DIR] [--cobertura path] [--junit path]
+               [--only-changes] [--publish] [--quiet]
+               [--columns DISPLAY_COLUMNS]
+main.py: error: argument --report-dir: Path 'report' does not exist."""
+    expected_return_code = 2
 
     # Act
     execute_results = executor.invoke_main(

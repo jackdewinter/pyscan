@@ -10,11 +10,12 @@ from test.test_scenarios import (
     ONLY_CHANGES_COMMAND_LINE_FLAG,
     PUBLISH_COMMAND_LINE_FLAG,
     PUBLISH_DIRECTORY,
-    REPORT_DIRECTORY,
     RESULTS_SUMMARY_FILE_NAME,
     MainlineExecutor,
     setup_directories,
 )
+
+from project_summarizer.project_summarizer_plugin import ProjectSummarizerPlugin
 
 
 def compose_test_results(total_tests):
@@ -43,7 +44,9 @@ def compose_test_results(total_tests):
 
 
 def test_summarize_simple_junit_report(
-    create_publish_directory=False, temporary_work_directory=None
+    create_publish_directory=False,
+    temporary_work_directory=None,
+    alternate_publish_directory=None,
 ):
     """
     Test the summarizing of a simple junit report with no previous summary.
@@ -53,6 +56,7 @@ def test_summarize_simple_junit_report(
     executor = MainlineExecutor()
     temporary_work_directory, report_directory, publish_directory = setup_directories(
         create_publish_directory=create_publish_directory,
+        alternate_publish_directory=alternate_publish_directory,
         temporary_work_directory=temporary_work_directory,
     )
     junit_test_file = os.path.join(
@@ -285,7 +289,8 @@ def test_summarize_simple_junit_report_and_publish(
     suppplied_arguments = [PUBLISH_COMMAND_LINE_FLAG]
 
     expected_output = (
-        f"Publish directory '{PUBLISH_DIRECTORY}' does not exist.  Creating."
+        f"Publish directory '{PUBLISH_DIRECTORY}' does not exist.  Creating.\n"
+        + f"Published: {os.path.join(PUBLISH_DIRECTORY, RESULTS_SUMMARY_FILE_NAME)}"
     )
     expected_error = ""
     expected_return_code = 0
@@ -763,9 +768,13 @@ def test_summarize_bad_report_directory():
 
     suppplied_arguments = [JUNIT_COMMAND_LINE_FLAG, junit_test_file]
 
-    expected_output = f"Summary output path '{REPORT_DIRECTORY}' does not exist."
-    expected_error = ""
-    expected_return_code = 1
+    expected_output = ""
+    expected_error = """usage: main.py [-h] [--version] [--report-dir REPORT_DIR]
+               [--publish-dir PUBLISH_DIR] [--cobertura path] [--junit path]
+               [--only-changes] [--publish] [--quiet]
+               [--columns DISPLAY_COLUMNS]
+main.py: error: argument --report-dir: Path 'report' does not exist."""
+    expected_return_code = 2
 
     # Act
     execute_results = executor.invoke_main(
@@ -797,7 +806,9 @@ def test_summarize_invalid_published_summary_file():
     )
     summary_result_file = os.path.join(publish_directory, RESULTS_SUMMARY_FILE_NAME)
 
-    with open(summary_result_file, "w", encoding="utf-8") as outfile:
+    with open(
+        summary_result_file, "w", encoding=ProjectSummarizerPlugin.DEFAULT_FILE_ENCODING
+    ) as outfile:
         outfile.write("this is not a json file")
 
     suppplied_arguments = [JUNIT_COMMAND_LINE_FLAG, junit_test_file]
@@ -939,7 +950,9 @@ def test_sample_1():
         + '"errorTests": 0, "skippedTests": 0, "elapsedTimeInMilliseconds": 0}'
         + "]}"
     )
-    with open(summary_result_file, "w", encoding="utf-8") as outfile:
+    with open(
+        summary_result_file, "w", encoding=ProjectSummarizerPlugin.DEFAULT_FILE_ENCODING
+    ) as outfile:
         outfile.write(previous_test_summary_contents)
 
     suppplied_arguments = [JUNIT_COMMAND_LINE_FLAG, junit_test_file]

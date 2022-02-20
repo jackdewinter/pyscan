@@ -26,7 +26,15 @@ class CoberturaPlugin(ProjectSummarizerPlugin):
 
     def __init__(self):
         super().__init__()
-        self.__output_path = os.path.join(self.REPORT_PUBLISH_PATH, "coverage.json")
+        self.__output_path = None
+        self.__context = None
+
+    def set_context(self, context):
+        """
+        Set the context for the plugins.
+        """
+        self.__context = context
+        self.__output_path = os.path.join(self.__context.report_dir, "coverage.json")
 
     def get_output_path(self):
         """
@@ -46,7 +54,7 @@ class CoberturaPlugin(ProjectSummarizerPlugin):
             metavar="path",
             action="store",
             default="",
-            help="source file name for cobertura test coverage reporting",
+            help="Source file name for cobertura test coverage reporting.",
         )
         return (
             CoberturaPlugin.__COMMAND_LINE_ARGUMENT,
@@ -58,7 +66,9 @@ class CoberturaPlugin(ProjectSummarizerPlugin):
 
         line_count = 0
         combined_lines = None
-        with open(report_file, "rt", encoding="utf-8") as infile:
+        with open(
+            report_file, "rt", encoding=ProjectSummarizerPlugin.DEFAULT_FILE_ENCODING
+        ) as infile:
             next_line = infile.readline()
             while next_line and next_line.strip() != "<sources>" and line_count < 10:
                 combined_lines = (
@@ -92,9 +102,7 @@ class CoberturaPlugin(ProjectSummarizerPlugin):
 
         if column_width:
             published_coverage_summary_path = (
-                ProjectSummarizerPlugin.compute_published_path_to_file(
-                    self.__output_path
-                )
+                self.__context.compute_published_path_to_file(self.__output_path)
             )
             loaded_stats = self.__load_coverage_results_summary_file(
                 published_coverage_summary_path
@@ -171,7 +179,9 @@ class CoberturaPlugin(ProjectSummarizerPlugin):
         ):
             try:
                 with open(
-                    os.path.abspath(test_results_to_load), "r", encoding="utf-8"
+                    os.path.abspath(test_results_to_load),
+                    "r",
+                    encoding=ProjectSummarizerPlugin.DEFAULT_FILE_ENCODING,
                 ) as infile:
                     results_dictionary = json.load(infile)
             except json.decoder.JSONDecodeError as ex:
@@ -319,14 +329,16 @@ class CoberturaPlugin(ProjectSummarizerPlugin):
             column_value = next_row[primary_column_index].rjust(column_maximums[0], " ")
         if column_maximums[1] != 0:
             if next_row[primary_column_index + 1] == "-":
-                column_value = (f'{column_value} ' + " ".rjust(column_maximums[1] + 2, " "))
+                column_value = f"{column_value} " + " ".rjust(
+                    column_maximums[1] + 2, " "
+                )
             else:
                 partial_value = next_row[primary_column_index + 1]
                 has_changes = partial_value.startswith("+") or partial_value.startswith(
                     "-"
                 )
                 partial_value = partial_value.rjust(column_maximums[1], " ")
-                column_value = f'{column_value} ({partial_value})'
+                column_value = f"{column_value} ({partial_value})"
         return column_value, has_changes
 
     @classmethod
@@ -405,7 +417,7 @@ class CoberturaPlugin(ProjectSummarizerPlugin):
             and delta_value != "0.00"
             and not delta_value.startswith("-")
         ):
-            delta_value = f'+{delta_value}'
+            delta_value = f"+{delta_value}"
         new_row.append(delta_value)
 
     # pylint: enable=unused-private-member

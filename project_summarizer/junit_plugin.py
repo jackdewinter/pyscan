@@ -23,7 +23,17 @@ class JUnitPlugin(ProjectSummarizerPlugin):
 
     def __init__(self):
         super().__init__()
-        self.__output_path = os.path.join(self.REPORT_PUBLISH_PATH, "test-results.json")
+        self.__output_path = None
+        self.__context = None
+
+    def set_context(self, context):
+        """
+        Set the context for the plugins.
+        """
+        self.__context = context
+        self.__output_path = os.path.join(
+            self.__context.report_dir, "test-results.json"
+        )
 
     def get_output_path(self):
         """
@@ -43,7 +53,7 @@ class JUnitPlugin(ProjectSummarizerPlugin):
             metavar="path",
             action="store",
             default="",
-            help="source file name for junit test result reporting",
+            help="Source file name for junit test result reporting.",
         )
         return (
             JUnitPlugin.__COMMAND_LINE_ARGUMENT,
@@ -64,7 +74,7 @@ class JUnitPlugin(ProjectSummarizerPlugin):
         self.save_summary_file(self.__output_path, new_stats, "test report")
 
         if column_width:
-            published_test_summary_path = self.compute_published_path_to_file(
+            published_test_summary_path = self.__context.compute_published_path_to_file(
                 self.__output_path
             )
             loaded_stats, loaded_totals = self.load_test_results_summary_file(
@@ -146,7 +156,9 @@ class JUnitPlugin(ProjectSummarizerPlugin):
         ):
             try:
                 with open(
-                    os.path.abspath(test_results_to_load), "r", encoding="utf-8"
+                    os.path.abspath(test_results_to_load),
+                    "r",
+                    encoding=ProjectSummarizerPlugin.DEFAULT_FILE_ENCODING,
                 ) as infile:
                     results_dictionary = json.load(infile)
             except json.decoder.JSONDecodeError as ex:

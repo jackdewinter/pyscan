@@ -24,6 +24,8 @@ from test.test_scenarios import (
     setup_directories,
 )
 
+from project_summarizer.project_summarizer_plugin import ProjectSummarizerPlugin
+
 
 def test_summarize_simple_junit_report_and_publish_with_existing_publish():
     """
@@ -40,8 +42,54 @@ def test_summarize_simple_junit_report_and_publish_with_existing_publish():
     summary_result_file = os.path.join(publish_directory, RESULTS_SUMMARY_FILE_NAME)
 
     suppplied_arguments = [PUBLISH_COMMAND_LINE_FLAG]
+    publish_path = os.path.join(
+        ProjectSummarizerPlugin.DEFAULT_SUMMARY_PUBLISH_PATH, "test-results.json"
+    )
 
-    expected_output = ""
+    expected_output = f"Published: {publish_path}"
+    expected_error = ""
+    expected_return_code = 0
+    expected_test_results_file = compose_test_results(3)
+
+    # Act
+    execute_results = executor.invoke_main(
+        arguments=suppplied_arguments, cwd=temporary_work_directory.name
+    )
+
+    # Assert
+    execute_results.assert_results(
+        expected_output, expected_error, expected_return_code
+    )
+    execute_results.assert_resultant_file(
+        summary_result_file, expected_test_results_file
+    )
+
+
+def test_summarize_simple_junit_report_and_publish_with_alternate_publish():
+    """
+    Test to make sure that publishing with a publish directory that already exists.
+    """
+
+    # Arrange
+    alternate_publish_directory = "alt-publish"
+    (
+        executor,
+        temporary_work_directory,
+        publish_directory,
+        _,
+    ) = test_summarize_simple_junit_report(
+        create_publish_directory=True,
+        alternate_publish_directory=alternate_publish_directory,
+    )
+    summary_result_file = os.path.join(publish_directory, RESULTS_SUMMARY_FILE_NAME)
+
+    suppplied_arguments = [
+        PUBLISH_COMMAND_LINE_FLAG,
+        "--publish-dir",
+        alternate_publish_directory,
+    ]
+
+    expected_output = f"Published: {os.path.join(alternate_publish_directory, RESULTS_SUMMARY_FILE_NAME)}"
     expected_error = ""
     expected_return_code = 0
     expected_test_results_file = compose_test_results(3)
@@ -76,7 +124,10 @@ def test_summarize_simple_cobertura_report_and_publish_with_existing_publish():
 
     suppplied_arguments = [PUBLISH_COMMAND_LINE_FLAG]
 
-    expected_output = ""
+    output_file = os.path.join(
+        ProjectSummarizerPlugin.DEFAULT_SUMMARY_PUBLISH_PATH, COVERAGE_SUMMARY_FILE_NAME
+    )
+    expected_output = f"Published: {output_file}"
     expected_error = ""
     expected_return_code = 0
     expected_test_coverage_file = compose_coverage_summary_file()
@@ -104,7 +155,9 @@ def test_publish_with_existing_publish_as_file():
     executor = MainlineExecutor()
     temporary_work_directory, _, publish_directory = setup_directories()
 
-    with open(publish_directory, "w", encoding="utf-8") as outfile:
+    with open(
+        publish_directory, "w", encoding=ProjectSummarizerPlugin.DEFAULT_FILE_ENCODING
+    ) as outfile:
         outfile.write("test")
 
     suppplied_arguments = [PUBLISH_COMMAND_LINE_FLAG]
