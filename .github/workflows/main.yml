@@ -28,7 +28,10 @@ jobs:
         run: |
           pip install pipenv==2022.1.8
       - name: Sync With Repository
-        run: pipenv sync
+        run: |
+          pipenv lock
+          pipenv sync
+          pipenv graph
       - name: Execute Tests
         run: pipenv run pytest --timeout=10 --strict-markers --cov --cov-branch --cov-report xml:report/coverage.xml --cov-report html:report/coverage
       - name: Archive coverage artifacts
@@ -54,11 +57,18 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@master
+      - name: Setup Python 3.8
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.8
       - name: Install PipEnv
         run: |
           pip install pipenv==2022.1.8
       - name: Sync With Repository
-        run: pipenv sync
+        run: |
+          pipenv lock
+          pipenv sync
+          pipenv graph
       - name: Execute Flake8
         run: pipenv run flake8 --exclude dist,build
       - name: Execute PyLint on Source

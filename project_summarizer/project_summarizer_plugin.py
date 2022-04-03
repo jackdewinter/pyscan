@@ -2,13 +2,17 @@
 Module for the base class for all project_summarizer plugins.
 """
 
+import argparse
 import json
 import os
 import sys
 from abc import ABC, abstractmethod
+from typing import Any, Tuple
 
-import defusedxml.ElementTree as ET
+import defusedxml.ElementTree as ET  # type: ignore
 from defusedxml.ElementTree import ParseError
+
+from project_summarizer.summarize_context import SummarizeContext
 
 
 class ProjectSummarizerPlugin(ABC):
@@ -20,11 +24,11 @@ class ProjectSummarizerPlugin(ABC):
     DEFAULT_REPORT_PUBLISH_PATH = "report"
     DEFAULT_FILE_ENCODING = "utf-8"
 
-    def __init__(self):
+    def __init__(self) -> None:
         pass
 
     @abstractmethod
-    def set_context(self, context):
+    def set_context(self, context: SummarizeContext) -> None:
         """
         Set the context for the plugins.
 
@@ -32,7 +36,7 @@ class ProjectSummarizerPlugin(ABC):
         """
 
     @abstractmethod
-    def get_output_path(self):
+    def get_output_path(self) -> str:
         """
         Get the output path for the reporting file.
 
@@ -41,7 +45,9 @@ class ProjectSummarizerPlugin(ABC):
         """
 
     @abstractmethod
-    def add_command_line_arguments(self, parser):
+    def add_command_line_arguments(
+        self, parser: argparse.ArgumentParser
+    ) -> Tuple[str, str]:
         """
         Add a command line argument to denote the file to scan.
 
@@ -49,7 +55,9 @@ class ProjectSummarizerPlugin(ABC):
         """
 
     @abstractmethod
-    def generate_report(self, only_changes, column_width, report_file):
+    def generate_report(
+        self, only_changes: bool, column_width: int, report_file: str
+    ) -> None:
         """
         Generate the report and display it.
 
@@ -59,8 +67,12 @@ class ProjectSummarizerPlugin(ABC):
 
     @classmethod
     def load_xml_docment(
-        cls, xml_file_to_load, xml_root_element_name, file_type_name, format_type_name
-    ):
+        cls,
+        xml_file_to_load: str,
+        xml_root_element_name: str,
+        file_type_name: str,
+        format_type_name: str,
+    ) -> Any:
         """
         Load a given XML document, check for various formalities along the way.
         """
@@ -89,7 +101,12 @@ class ProjectSummarizerPlugin(ABC):
         return xml_document
 
     @classmethod
-    def save_summary_file(cls, json_file_to_write, object_to_write, file_type_name):
+    def save_summary_file(
+        cls,
+        json_file_to_write: str,
+        object_to_write: Any,
+        file_type_name: str,
+    ) -> None:
         """
         Save the specified summary file.
         """

@@ -2,14 +2,17 @@
 Module to provide reporting for test files in the JUnit format.
 """
 
+import argparse
 import difflib
 import json
 import os
 import sys
+from typing import Any, List, Optional, Tuple
 
 from columnar import columnar
 
 from project_summarizer.project_summarizer_plugin import ProjectSummarizerPlugin
+from project_summarizer.summarize_context import SummarizeContext
 from project_summarizer.test_results_model import TestMeasurement, TestTotals
 
 
@@ -21,12 +24,12 @@ class JUnitPlugin(ProjectSummarizerPlugin):
     __COMMAND_LINE_ARGUMENT = "--junit"
     __COMMAND_LINE_OPTION = "test_report_file"
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
-        self.__output_path = None
-        self.__context = None
+        self.__output_path: str = ""
+        self.__context: Optional[SummarizeContext] = None
 
-    def set_context(self, context):
+    def set_context(self, context: SummarizeContext) -> None:
         """
         Set the context for the plugins.
         """
@@ -35,14 +38,16 @@ class JUnitPlugin(ProjectSummarizerPlugin):
             self.__context.report_dir, "test-results.json"
         )
 
-    def get_output_path(self):
+    def get_output_path(self) -> str:
         """
         Get the output path for the reporting file.
         """
         return self.__output_path
 
     @classmethod
-    def add_command_line_arguments(cls, parser):
+    def add_command_line_arguments(
+        cls, parser: argparse.ArgumentParser
+    ) -> Tuple[str, str]:
         """
         Add a command line argument to denote the file to scan.
         """
@@ -60,7 +65,9 @@ class JUnitPlugin(ProjectSummarizerPlugin):
             JUnitPlugin.__COMMAND_LINE_OPTION,
         )
 
-    def generate_report(self, only_changes, column_width, report_file):
+    def generate_report(
+        self, only_changes: bool, column_width: int, report_file: str
+    ) -> None:
         """
         Generate the report and display it.
         """
@@ -71,9 +78,11 @@ class JUnitPlugin(ProjectSummarizerPlugin):
         new_stats, new_totals = self.__compose_summary_from_junit_document(
             junit_document
         )
+        assert self.__output_path is not None
         self.save_summary_file(self.__output_path, new_stats, "test report")
 
         if column_width:
+            assert self.__context is not None
             published_test_summary_path = self.__context.compute_published_path_to_file(
                 self.__output_path
             )
@@ -89,7 +98,9 @@ class JUnitPlugin(ProjectSummarizerPlugin):
                 column_width,
             )
 
-    def __compose_summary_from_junit_document(self, junit_document):
+    def __compose_summary_from_junit_document(
+        self, junit_document: Any
+    ) -> Tuple[TestTotals, TestMeasurement]:
         """
         Read the values from the junit document and construct a TestTotals instance
         summary from the data.
@@ -128,7 +139,7 @@ class JUnitPlugin(ProjectSummarizerPlugin):
         return test_totals, grand_totals
 
     @classmethod
-    def __build_totals(cls, test_totals):
+    def __build_totals(cls, test_totals: TestTotals) -> TestMeasurement:
         """
         Calculate the grand totals based on the test totals object presented.
         """
@@ -145,7 +156,9 @@ class JUnitPlugin(ProjectSummarizerPlugin):
             )
         return grand_totals
 
-    def load_test_results_summary_file(self, test_results_to_load):
+    def load_test_results_summary_file(
+        self, test_results_to_load: str
+    ) -> Tuple[Optional[TestTotals], Optional[TestMeasurement]]:
         """
         Attempt to load a previously published test summary.
         """
@@ -178,13 +191,13 @@ class JUnitPlugin(ProjectSummarizerPlugin):
     # pylint: disable=too-many-arguments, too-many-locals
     def __report_test_files(
         self,
-        new_stats,
-        new_totals,
-        loaded_stats,
-        loaded_totals,
-        only_report_changes,
-        column_width,
-    ):
+        new_stats: TestTotals,
+        new_totals: TestMeasurement,
+        loaded_stats: Optional[TestTotals],
+        loaded_totals: Optional[TestMeasurement],
+        only_report_changes: bool,
+        column_width: int,
+    ) -> None:
         """
         Generate a report comparing the current stats with the loaded/previous stats.
         """
@@ -197,12 +210,12 @@ class JUnitPlugin(ProjectSummarizerPlugin):
         new_stats_keys = sorted(list(new_stats.measurements.keys()))
         loaded_stats_keys = sorted(list(loaded_stats.measurements.keys()))
 
-        test_report_rows = []
+        test_report_rows: List[List[str]] = []
         for next_output in difflib.ndiff(new_stats_keys, loaded_stats_keys):
             next_output_prefix = next_output[:2]
             next_output_name = next_output[2:]
 
-            row_to_add = None
+            row_to_add: Optional[List[str]] = None
             if next_output_prefix == "  ":
                 new_measurement = new_stats.measurements[next_output_name]
                 loaded_measurement = loaded_stats.measurements[next_output_name]
@@ -232,7 +245,9 @@ class JUnitPlugin(ProjectSummarizerPlugin):
     # pylint: enable=too-many-arguments, too-many-locals
 
     @classmethod
-    def __generate_match_column(cls, value_to_display, delta_to_display):
+    def __generate_match_column(
+        cls, value_to_display: int, delta_to_display: int
+    ) -> str:
         """
         Given a value column and a delta column, combine these two values into one value to display.
         """
@@ -244,14 +259,14 @@ class JUnitPlugin(ProjectSummarizerPlugin):
     # pylint: disable=too-many-arguments
     def __generate_match(
         self,
-        class_name,
-        total_value,
-        total_delta,
-        failed_value,
-        failed_delta,
-        skipped_value,
-        skipped_delta,
-    ):
+        class_name: str,
+        total_value: int,
+        total_delta: int,
+        failed_value: int,
+        failed_delta: int,
+        skipped_value: int,
+        skipped_delta: int,
+    ) -> List[str]:
         """
         Helper method to generate the columns based on previous inputs.
         """
@@ -265,7 +280,12 @@ class JUnitPlugin(ProjectSummarizerPlugin):
 
     # pylint: enable=too-many-arguments
 
-    def __generate_full_match(self, class_name, newer_measure, older_measure):
+    def __generate_full_match(
+        self,
+        class_name: str,
+        newer_measure: TestMeasurement,
+        older_measure: TestMeasurement,
+    ) -> List[str]:
         """
         Helper method to generate a match with both a newer measurement and an older measurement.
         """
@@ -280,7 +300,9 @@ class JUnitPlugin(ProjectSummarizerPlugin):
             newer_measure.skipped_tests - older_measure.skipped_tests,
         )
 
-    def __generate_older_match(self, class_name, older_measure):
+    def __generate_older_match(
+        self, class_name: str, older_measure: TestMeasurement
+    ) -> List[str]:
         """
         Helper method to generate a match with only an older measurement.
         """
@@ -295,7 +317,9 @@ class JUnitPlugin(ProjectSummarizerPlugin):
             -older_measure.skipped_tests,
         )
 
-    def __generate_newer_match(self, class_name, newer_measure):
+    def __generate_newer_match(
+        self, class_name: str, newer_measure: TestMeasurement
+    ) -> List[str]:
         """
         Helper method to generate a match with only a newer measurement.
         """
@@ -311,7 +335,9 @@ class JUnitPlugin(ProjectSummarizerPlugin):
         )
 
     @classmethod
-    def __format_test_totals_column(cls, source_array, column_index):
+    def __format_test_totals_column(
+        cls, source_array: List[List[str]], column_index: int
+    ) -> None:
         """
         For a given column in "1 0" or "-1 2" format, ensure that the right
         replacements are done to show the column properly and properly formatted.
@@ -342,8 +368,12 @@ class JUnitPlugin(ProjectSummarizerPlugin):
                 next_row[column_index] = f"{next_row[column_index]} {new_value}"
 
     def print_test_summary(
-        self, test_report_rows, new_totals, loaded_totals, column_width
-    ):
+        self,
+        test_report_rows: List[List[str]],
+        new_totals: TestMeasurement,
+        loaded_totals: TestMeasurement,
+        column_width: int,
+    ) -> None:
         """
         Print the actual test summaries.
         """
@@ -375,7 +405,12 @@ class JUnitPlugin(ProjectSummarizerPlugin):
             print("\n".join(new_rows))
 
     @classmethod
-    def __add_row_to_report(cls, row_to_add, test_report_rows, only_report_changes):
+    def __add_row_to_report(
+        cls,
+        row_to_add: List[str],
+        test_report_rows: List[List[str]],
+        only_report_changes: bool,
+    ) -> None:
         """
         Determine if adequate requirements exist to add the specified row to the report.
         """

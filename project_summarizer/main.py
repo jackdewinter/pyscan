@@ -6,6 +6,7 @@ import os
 import runpy
 import sys
 from shutil import copyfile
+from typing import Dict, List
 
 from project_summarizer.cobertura_plugin import CoberturaPlugin
 from project_summarizer.junit_plugin import JUnitPlugin
@@ -22,24 +23,26 @@ class ProjectSummarizer:
     __MINIMUM_DISPLAY_COLUMNS = 50
     __MAXIMUM_DISPLAY_COLUMNS = 200
 
-    def __init__(self):
-        self.__version_number = ProjectSummarizer.__get_semantic_version()
-        self.debug = False
-        self.__available_plugins = None
-        self.__plugin_argument_names = {}
-        self.__plugin_variable_names = {}
+    def __init__(self) -> None:
+        self.__version_number: str = ProjectSummarizer.__get_semantic_version()
+        self.debug: bool = False
+        self.__available_plugins: List[ProjectSummarizerPlugin] = []
+        self.__plugin_argument_names: Dict[str, ProjectSummarizerPlugin] = {}
+        self.__plugin_variable_names: Dict[str, str] = {}
 
     @staticmethod
-    def __get_semantic_version():
+    def __get_semantic_version() -> str:
         file_path = __file__
         assert os.path.isabs(file_path)
         file_path = file_path.replace(os.sep, "/")
         last_index = file_path.rindex("/")
         file_path = f"{file_path[: last_index + 1]}version.py"
         version_meta = runpy.run_path(file_path)
-        return version_meta["__version__"]
+        return str(version_meta["__version__"])
 
-    def __add_command_line_arguments_for_plugins(self, parser):
+    def __add_command_line_arguments_for_plugins(
+        self, parser: argparse.ArgumentParser
+    ) -> None:
         for next_plugin_instance in self.__available_plugins:
             (
                 plugin_argument_name,
@@ -48,7 +51,9 @@ class ProjectSummarizer:
             self.__plugin_argument_names[plugin_argument_name] = next_plugin_instance
             self.__plugin_variable_names[plugin_argument_name] = plugin_variable_name
 
-    def __show_help_if_no_meaningful_arguments_found(self, args, parser):
+    def __show_help_if_no_meaningful_arguments_found(
+        self, args: argparse.Namespace, parser: argparse.ArgumentParser
+    ) -> None:
         if args.publish_summaries:
             return
 
@@ -69,7 +74,7 @@ class ProjectSummarizer:
             parser.print_help()
             sys.exit(2)
 
-    def __parse_arguments(self):
+    def __parse_arguments(self) -> argparse.Namespace:
         parser = argparse.ArgumentParser(
             description="Summarize Python files.", allow_abbrev=False, add_help=False
         )
@@ -136,7 +141,7 @@ class ProjectSummarizer:
         return args
 
     @staticmethod
-    def __verify_display_columns(argument):
+    def __verify_display_columns(argument: str) -> int:
         argument_as_integer = int(argument)
         if (
             argument_as_integer < ProjectSummarizer.__MINIMUM_DISPLAY_COLUMNS
@@ -150,7 +155,7 @@ class ProjectSummarizer:
         return argument_as_integer
 
     @staticmethod
-    def __verify_directory_exists(argument):
+    def __verify_directory_exists(argument: str) -> str:
         report_argument = argument.replace("\\\\", "\\")
         if not os.path.exists(argument):
             raise argparse.ArgumentTypeError(
@@ -163,7 +168,7 @@ class ProjectSummarizer:
         return argument
 
     @classmethod
-    def __publish_file(cls, file_to_publish, context):
+    def __publish_file(cls, file_to_publish: str, context: SummarizeContext) -> None:
         if os.path.exists(file_to_publish):
             try:
                 publish_path = context.compute_published_path_to_file(file_to_publish)
@@ -176,7 +181,7 @@ class ProjectSummarizer:
                 print(f"Publishing file '{file_to_publish}' failed ({ex}).")
                 sys.exit(1)
 
-    def __publish_summaries(self, context):
+    def __publish_summaries(self, context: SummarizeContext) -> None:
         """
         Respond to a request to publish any existing summaries.
         """
@@ -206,7 +211,7 @@ class ProjectSummarizer:
         for plugin_output_path in valid_paths:
             self.__publish_file(plugin_output_path, context)
 
-    def __create_summaries(self, args):
+    def __create_summaries(self, args: argparse.Namespace) -> None:
         arguments_as_dictionary = vars(args)
         column_width = 0 if args.quiet_mode else args.display_columns
         for next_command_line_argument in sys.argv:
@@ -223,7 +228,7 @@ class ProjectSummarizer:
                     arguments_as_dictionary[plugin_variable_name],
                 )
 
-    def main(self):
+    def main(self) -> None:
         """
         Main entrance point.
         """
@@ -252,4 +257,5 @@ class ProjectSummarizer:
 
 if __name__ == "__main__":
     ProjectSummarizer().main()
+
 # pylint: enable=too-few-public-methods

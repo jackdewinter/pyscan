@@ -2,15 +2,15 @@
 Module to provide for "-m project_summarizer" access to the module,
 as if it was run from the console.
 """
-import project_summarizer
+from project_summarizer.main import ProjectSummarizer
 
 
-def main():
+def main() -> None:
     """
     Main entry point.  Exposed in this manner so that the setup
     entry_points configuration has something to execute.
     """
-    project_summarizer.ProjectSummarizer().main()
+    ProjectSummarizer().main()
 
 
 if __name__ == "__main__":

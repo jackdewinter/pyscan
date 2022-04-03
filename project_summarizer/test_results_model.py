@@ -3,22 +3,27 @@ Module to contain the model objects used to contain test results information.
 """
 
 
+from typing import Any, Dict, Optional
+
+
 class TestTotals:
     """
     Class to provide an encapsulation of the test totals.
     """
 
-    def __init__(self, project_name=None, report_source=None):
+    def __init__(
+        self, project_name: Optional[str] = None, report_source: Optional[str] = None
+    ) -> None:
         self.project_name = project_name
         self.report_source = report_source
-        self.measurements = {}
+        self.measurements: Dict[str, TestMeasurement] = {}
 
-    def to_dict(self):
+    def to_dict(self) -> Dict[str, Any]:
         """
         Convert the current totals into a vanilla dictionary.
         """
 
-        serialized_dictionary = {
+        serialized_dictionary: Dict[str, Any] = {
             "projectName": self.project_name,
             "reportSource": self.report_source,
         }
@@ -28,13 +33,13 @@ class TestTotals:
             for _, next_measurement in self.measurements.items()
         ]
 
-        measurements_array = sorted(measurements_array, key=lambda item: item["name"])
+        measurements_array.sort(key=lambda item: item["name"])  # type: ignore
 
         serialized_dictionary["measurements"] = measurements_array
         return serialized_dictionary
 
     @staticmethod
-    def from_dict(input_dictionary):
+    def from_dict(input_dictionary: Dict[str, Any]) -> "TestTotals":
         """
         Read the totals in from the specified dictionary.
         """
@@ -57,13 +62,13 @@ class TestMeasurement:
     # pylint: disable=too-many-arguments
     def __init__(
         self,
-        name,
-        total_tests=0,
-        failed_tests=0,
-        skipped_tests=0,
-        error_tests=0,
-        elapsed_time_ms=0,
-    ):
+        name: str,
+        total_tests: int = 0,
+        failed_tests: int = 0,
+        skipped_tests: int = 0,
+        error_tests: int = 0,
+        elapsed_time_ms: int = 0,
+    ) -> None:
         self.name = name
         self.total_tests = total_tests
         self.failed_tests = failed_tests
@@ -73,7 +78,7 @@ class TestMeasurement:
 
     # pylint: enable=too-many-arguments
 
-    def to_dict(self):
+    def to_dict(self) -> Dict[str, Any]:
         """
         Convert the current measurement into a vanilla dictionary.
         """
@@ -88,7 +93,7 @@ class TestMeasurement:
         }
 
     @staticmethod
-    def from_dict(input_dictionary):
+    def from_dict(input_dictionary: Dict[str, Any]) -> "TestMeasurement":
         """
         Read the measurement in from the specified dictionary.
         """
