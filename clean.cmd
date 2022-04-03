@@ -57,6 +57,14 @@ if ERRORLEVEL 1 (
 	goto error_end
 )
 
+echo {Executing pre-commit hooks on Python code.}
+pipenv run pre-commit run --all
+if ERRORLEVEL 1 (
+	echo.
+	echo {Executing pre-commit hooks on Python code failed.}
+	goto error_end
+)
+
 echo {Executing flake8 static analyzer on Python code.}
 pipenv run flake8 -j 4 --exclude dist,build %MY_VERBOSE%
 if ERRORLEVEL 1 (
@@ -72,6 +80,17 @@ if ERRORLEVEL 1 (
 	echo {Executing pylint static analyzer on Python source code failed.}
 	goto error_end
 )
+
+echo {Executing mypy static analyzer on Python source code.}
+pipenv run mypy --strict %PYTHON_MODULE_NAME% stubs
+if ERRORLEVEL 1 (
+	echo.
+	echo {Executing mypy static analyzer on Python source code failed.}
+	goto error_end
+)
+
+
+
 
 echo {Executing pylint utils analyzer on Python source code to verify suppressions and document them.}
 pipenv run python ..\pylint_utils\main.py --config setup.cfg -r publish\pylint_suppression.json  %PYTHON_MODULE_NAME%

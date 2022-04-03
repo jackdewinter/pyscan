@@ -3,6 +3,9 @@ Module to contain the model objects used to contain various summary information.
 """
 
 
+from typing import Any, Dict, Optional
+
+
 class CoverageMeasurement:
     """
     Class to contain information about coverage measurements.
@@ -10,13 +13,13 @@ class CoverageMeasurement:
 
     def __init__(
         self,
-        total_covered,
-        total_measured,
-    ):
+        total_covered: int,
+        total_measured: int,
+    ) -> None:
         self.total_covered = total_covered
         self.total_measured = total_measured
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         """
         Overrides the default implementation
         """
@@ -27,7 +30,7 @@ class CoverageMeasurement:
             )
         return NotImplemented
 
-    def to_dict(self):
+    def to_dict(self) -> Dict[str, Any]:
         """
         Convert the current measurement into a vanilla dictionary.
         """
@@ -38,7 +41,7 @@ class CoverageMeasurement:
         }
 
     @staticmethod
-    def from_dict(input_dictionary):
+    def from_dict(input_dictionary: Dict[str, Any]) -> "CoverageMeasurement":
         """
         Read the measurement in from the specified dictionary.
         """
@@ -60,15 +63,15 @@ class CoverageTotals:
     # pylint: disable=too-many-arguments
     def __init__(
         self,
-        project_name=None,
-        report_source=None,
-        instruction_level=None,
-        branch_level=None,
-        line_level=None,
-        complexity_level=None,
-        method_level=None,
-        class_level=None,
-    ):
+        project_name: Optional[str] = None,
+        report_source: Optional[str] = None,
+        instruction_level: Optional[CoverageMeasurement] = None,
+        branch_level: Optional[CoverageMeasurement] = None,
+        line_level: Optional[CoverageMeasurement] = None,
+        complexity_level: Optional[CoverageMeasurement] = None,
+        method_level: Optional[CoverageMeasurement] = None,
+        class_level: Optional[CoverageMeasurement] = None,
+    ) -> None:
         self.project_name = project_name
         self.report_source = report_source
         self.instruction_level = instruction_level
@@ -80,7 +83,7 @@ class CoverageTotals:
 
     # pylint: enable=too-many-arguments
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         """
         Overrides the default implementation
         """
@@ -97,12 +100,12 @@ class CoverageTotals:
             )
         return NotImplemented
 
-    def to_dict(self):
+    def to_dict(self) -> Dict[str, Any]:
         """
         Convert the current measurement into a vanilla dictionary.
         """
 
-        serialized_dictionary = {
+        serialized_dictionary: Dict[str, Any] = {
             "projectName": self.project_name,
             "reportSource": self.report_source,
         }
@@ -122,7 +125,7 @@ class CoverageTotals:
         return serialized_dictionary
 
     @staticmethod
-    def from_dict(input_dictionary):
+    def from_dict(input_dictionary: Dict[str, Any]) -> "CoverageTotals":
         """
         Read the measurement in from the specified dictionary.
         """

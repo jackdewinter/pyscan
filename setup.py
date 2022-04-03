@@ -34,7 +34,9 @@ PACKAGE_NAME = "project_summarizer"
 SEMANTIC_VERSION = __get_semantic_version()
 MINIMUM_PYTHON_VERSION = "3.8.0"
 
-ONE_LINE_DESCRIPTION = "TBD"
+ONE_LINE_DESCRIPTION = (
+    "A simple tool for summarizing information about the current project."
+)
 LONG_DESCRIPTION = __load_readme_file()
 LONG_DESCRIPTION_CONTENT_TYPE = "text/markdown"
 
