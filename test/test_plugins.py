@@ -223,33 +223,36 @@ def test_add_plugin_bad_generate_report():
     """
 
     # Arrange
-    executor = MainlineExecutor()
-    root_pathname = os.path.abspath(os.path.dirname(__file__))
-    plugin_file_name = os.path.join(
-        root_pathname, "../test/resources/plugins/bad_generate_report.py"
-    )
-    assert os.path.exists(plugin_file_name)
-    suppplied_arguments = [
-        "--add-plugin",
-        plugin_file_name,
-        "--bad-generate-report",
-        "beta",
-    ]
+    with tempfile.TemporaryDirectory() as temporary_work_directory:
+        executor = MainlineExecutor()
+        root_pathname = os.path.abspath(os.path.dirname(__file__))
+        plugin_file_name = os.path.join(
+            root_pathname, "../test/resources/plugins/bad_generate_report.py"
+        )
+        assert os.path.exists(plugin_file_name)
+        suppplied_arguments = [
+            "--add-plugin",
+            plugin_file_name,
+            "--report-dir",
+            temporary_work_directory,
+            "--bad-generate-report",
+            "beta",
+        ]
 
-    expected_output = ""
-    expected_error = (
-        "Plugin class 'BadGenerateReport' had a critical failure: "
-        + "Bad Plugin Error calling generate_report."
-    )
-    expected_return_code = 1
+        expected_output = ""
+        expected_error = (
+            "Plugin class 'BadGenerateReport' had a critical failure: "
+            + "Bad Plugin Error calling generate_report."
+        )
+        expected_return_code = 1
 
-    # Act
-    execute_results = executor.invoke_main(arguments=suppplied_arguments)
+        # Act
+        execute_results = executor.invoke_main(arguments=suppplied_arguments)
 
-    # Assert
-    execute_results.assert_results(
-        expected_output, expected_error, expected_return_code
-    )
+        # Assert
+        execute_results.assert_results(
+            expected_output, expected_error, expected_return_code
+        )
 
 
 def test_add_plugin_bad_get_details():
