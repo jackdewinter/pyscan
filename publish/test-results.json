@@ -35,6 +35,14 @@
             "elapsedTimeInMilliseconds": 0
         },
         {
+            "name": "test.test_plugins",
+            "totalTests": 14,
+            "failedTests": 0,
+            "errorTests": 0,
+            "skippedTests": 0,
+            "elapsedTimeInMilliseconds": 0
+        },
+        {
             "name": "test.test_publish_scenarios",
             "totalTests": 10,
             "failedTests": 0,

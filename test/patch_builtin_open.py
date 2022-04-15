@@ -70,7 +70,11 @@ class PatchBuiltinOpen:
         self.mock_patcher.stop()
         try:
             self.open_file_args.append((args, "passthrough"))
-            return open(filename, filemode, **kwargs)
+            return open(
+                filename,
+                filemode,
+                **kwargs,
+            )
         finally:
             self.patched_open = self.mock_patcher.start()
             self.patched_open.side_effect = self.my_open

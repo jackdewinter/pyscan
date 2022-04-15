@@ -17,16 +17,19 @@ def test_scanner_with_no_parameters():
 
     expected_return_code = 2
     expected_output = """Error: Either --publish or one of the reporting arguments mush be specified.
-usage: main.py [-h] [--version] [--report-dir REPORT_DIR]
-               [--publish-dir PUBLISH_DIR] [--cobertura path] [--junit path]
-               [--only-changes] [--publish] [--quiet]
-               [--columns DISPLAY_COLUMNS]
+usage: main.py [-h] [--version] [--add-plugin ADD_PLUGIN]
+               [--report-dir REPORT_DIR] [--publish-dir PUBLISH_DIR]
+               [--cobertura path] [--junit path] [--only-changes] [--publish]
+               [--quiet] [--columns DISPLAY_COLUMNS]
 
 Summarize Python files.
 
 optional arguments:
   -h, --help            Show this help message and exit.
   --version             Show program's version number and exit.
+  --add-plugin ADD_PLUGIN
+                        Add a plugin file to provide additional project
+                        summaries.
   --report-dir REPORT_DIR
                         Directory to generate the summary reports in.
   --publish-dir PUBLISH_DIR
@@ -70,16 +73,19 @@ def test_scanner_with_no_parameters_through_module():
     expected_return_code = 2
     expected_error = ""
     expected_output = """Error: Either --publish or one of the reporting arguments mush be specified.
-usage: __main.py__ [-h] [--version] [--report-dir REPORT_DIR]
-                   [--publish-dir PUBLISH_DIR] [--cobertura path]
-                   [--junit path] [--only-changes] [--publish] [--quiet]
-                   [--columns DISPLAY_COLUMNS]
+usage: __main.py__ [-h] [--version] [--add-plugin ADD_PLUGIN]
+                   [--report-dir REPORT_DIR] [--publish-dir PUBLISH_DIR]
+                   [--cobertura path] [--junit path] [--only-changes]
+                   [--publish] [--quiet] [--columns DISPLAY_COLUMNS]
 
 Summarize Python files.
 
 optional arguments:
   -h, --help            Show this help message and exit.
   --version             Show program's version number and exit.
+  --add-plugin ADD_PLUGIN
+                        Add a plugin file to provide additional project
+                        summaries.
   --report-dir REPORT_DIR
                         Directory to generate the summary reports in.
   --publish-dir PUBLISH_DIR
@@ -121,16 +127,19 @@ def test_scanner_with_no_parameters_through_main():
 
     expected_return_code = 2
     expected_output = """Error: Either --publish or one of the reporting arguments mush be specified.
-usage: main.py [-h] [--version] [--report-dir REPORT_DIR]
-               [--publish-dir PUBLISH_DIR] [--cobertura path] [--junit path]
-               [--only-changes] [--publish] [--quiet]
-               [--columns DISPLAY_COLUMNS]
+usage: main.py [-h] [--version] [--add-plugin ADD_PLUGIN]
+               [--report-dir REPORT_DIR] [--publish-dir PUBLISH_DIR]
+               [--cobertura path] [--junit path] [--only-changes] [--publish]
+               [--quiet] [--columns DISPLAY_COLUMNS]
 
 Summarize Python files.
 
 optional arguments:
   -h, --help            Show this help message and exit.
   --version             Show program's version number and exit.
+  --add-plugin ADD_PLUGIN
+                        Add a plugin file to provide additional project
+                        summaries.
   --report-dir REPORT_DIR
                         Directory to generate the summary reports in.
   --publish-dir PUBLISH_DIR
@@ -171,16 +180,19 @@ def test_scanner_with_dash_h():
     supplied_arguments = ["-h"]
 
     expected_return_code = 0
-    expected_output = """usage: main.py [-h] [--version] [--report-dir REPORT_DIR]
-               [--publish-dir PUBLISH_DIR] [--cobertura path] [--junit path]
-               [--only-changes] [--publish] [--quiet]
-               [--columns DISPLAY_COLUMNS]
+    expected_output = """usage: main.py [-h] [--version] [--add-plugin ADD_PLUGIN]
+               [--report-dir REPORT_DIR] [--publish-dir PUBLISH_DIR]
+               [--cobertura path] [--junit path] [--only-changes] [--publish]
+               [--quiet] [--columns DISPLAY_COLUMNS]
 
 Summarize Python files.
 
 optional arguments:
   -h, --help            Show this help message and exit.
   --version             Show program's version number and exit.
+  --add-plugin ADD_PLUGIN
+                        Add a plugin file to provide additional project
+                        summaries.
   --report-dir REPORT_DIR
                         Directory to generate the summary reports in.
   --publish-dir PUBLISH_DIR
@@ -222,16 +234,19 @@ def test_scanner_with_dash_dash_quiet():
 
     expected_return_code = 2
     expected_output = """Error: Either --publish or one of the reporting arguments mush be specified.
-usage: main.py [-h] [--version] [--report-dir REPORT_DIR]
-               [--publish-dir PUBLISH_DIR] [--cobertura path] [--junit path]
-               [--only-changes] [--publish] [--quiet]
-               [--columns DISPLAY_COLUMNS]
+usage: main.py [-h] [--version] [--add-plugin ADD_PLUGIN]
+               [--report-dir REPORT_DIR] [--publish-dir PUBLISH_DIR]
+               [--cobertura path] [--junit path] [--only-changes] [--publish]
+               [--quiet] [--columns DISPLAY_COLUMNS]
 
 Summarize Python files.
 
 optional arguments:
   -h, --help            Show this help message and exit.
   --version             Show program's version number and exit.
+  --add-plugin ADD_PLUGIN
+                        Add a plugin file to provide additional project
+                        summaries.
   --report-dir REPORT_DIR
                         Directory to generate the summary reports in.
   --publish-dir PUBLISH_DIR
@@ -273,10 +288,10 @@ def test_scanner_with_dash_dash_columns():
 
     expected_return_code = 2
     expected_output = ""
-    expected_error = """ usage: main.py [-h] [--version] [--report-dir REPORT_DIR]
-               [--publish-dir PUBLISH_DIR] [--cobertura path] [--junit path]
-               [--only-changes] [--publish] [--quiet]
-               [--columns DISPLAY_COLUMNS]
+    expected_error = """usage: main.py [-h] [--version] [--add-plugin ADD_PLUGIN]
+               [--report-dir REPORT_DIR] [--publish-dir PUBLISH_DIR]
+               [--cobertura path] [--junit path] [--only-changes] [--publish]
+               [--quiet] [--columns DISPLAY_COLUMNS]
 main.py: error: argument --columns: expected one argument"""
 
     # Act
@@ -302,16 +317,19 @@ def test_scanner_with_dash_dash_columns_good_number():
     supplied_arguments = ["--columns", "100"]
     expected_return_code = 2
     expected_output = """Error: Either --publish or one of the reporting arguments mush be specified.
-usage: main.py [-h] [--version] [--report-dir REPORT_DIR]
-               [--publish-dir PUBLISH_DIR] [--cobertura path] [--junit path]
-               [--only-changes] [--publish] [--quiet]
-               [--columns DISPLAY_COLUMNS]
+usage: main.py [-h] [--version] [--add-plugin ADD_PLUGIN]
+               [--report-dir REPORT_DIR] [--publish-dir PUBLISH_DIR]
+               [--cobertura path] [--junit path] [--only-changes] [--publish]
+               [--quiet] [--columns DISPLAY_COLUMNS]
 
 Summarize Python files.
 
 optional arguments:
   -h, --help            Show this help message and exit.
   --version             Show program's version number and exit.
+  --add-plugin ADD_PLUGIN
+                        Add a plugin file to provide additional project
+                        summaries.
   --report-dir REPORT_DIR
                         Directory to generate the summary reports in.
   --publish-dir PUBLISH_DIR
@@ -353,10 +371,10 @@ def test_scanner_with_dash_dash_columns_bad_number():
 
     expected_return_code = 2
     expected_output = ""
-    expected_error = """usage: main.py [-h] [--version] [--report-dir REPORT_DIR]
-               [--publish-dir PUBLISH_DIR] [--cobertura path] [--junit path]
-               [--only-changes] [--publish] [--quiet]
-               [--columns DISPLAY_COLUMNS]
+    expected_error = """usage: main.py [-h] [--version] [--add-plugin ADD_PLUGIN]
+               [--report-dir REPORT_DIR] [--publish-dir PUBLISH_DIR]
+               [--cobertura path] [--junit path] [--only-changes] [--publish]
+               [--quiet] [--columns DISPLAY_COLUMNS]
 main.py: error: argument --columns: Value '20' is not an integer between between 50 and 200."""
 
     # Act
@@ -384,10 +402,10 @@ def test_scanner_with_dash_dash_report_dir_with_non_existant():
 
     expected_return_code = 2
     expected_output = ""
-    expected_error = """usage: main.py [-h] [--version] [--report-dir REPORT_DIR]
-               [--publish-dir PUBLISH_DIR] [--cobertura path] [--junit path]
-               [--only-changes] [--publish] [--quiet]
-               [--columns DISPLAY_COLUMNS]
+    expected_error = """usage: main.py [-h] [--version] [--add-plugin ADD_PLUGIN]
+               [--report-dir REPORT_DIR] [--publish-dir PUBLISH_DIR]
+               [--cobertura path] [--junit path] [--only-changes] [--publish]
+               [--quiet] [--columns DISPLAY_COLUMNS]
 main.py: error: argument --report-dir: Path 'alternate-reports' does not exist.
 """
 
@@ -416,10 +434,10 @@ def test_scanner_with_dash_dash_report_dir_with_non_directory():
 
     expected_return_code = 2
     expected_output = ""
-    expected_error = """usage: main.py [-h] [--version] [--report-dir REPORT_DIR]
-               [--publish-dir PUBLISH_DIR] [--cobertura path] [--junit path]
-               [--only-changes] [--publish] [--quiet]
-               [--columns DISPLAY_COLUMNS]
+    expected_error = """usage: main.py [-h] [--version] [--add-plugin ADD_PLUGIN]
+               [--report-dir REPORT_DIR] [--publish-dir PUBLISH_DIR]
+               [--cobertura path] [--junit path] [--only-changes] [--publish]
+               [--quiet] [--columns DISPLAY_COLUMNS]
 main.py: error: argument --report-dir: Path '{path}' is not an existing directory.
 """.replace(
         "{path}", readme_path
