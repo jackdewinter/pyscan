@@ -413,9 +413,9 @@ def test_add_plugin_good_class():
     executor = MainlineExecutor()
     with tempfile.TemporaryDirectory() as temporary_work_directory:
 
-        root_pathname = os.path.abspath(os.path.dirname(sys.argv[0]))
+        root_pathname = os.path.abspath(os.path.dirname(__file__))
         plugin_file_name = os.path.join(
-            root_pathname, "test/resources/plugins/tester_one.py"
+            root_pathname, "../test/resources/plugins/tester_one.py"
         )
         assert os.path.exists(plugin_file_name)
         suppplied_arguments = [
