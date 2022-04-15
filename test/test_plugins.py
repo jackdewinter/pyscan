@@ -2,7 +2,6 @@
 Module to provide tests of the plugins and different failure modes.
 """
 import os
-import sys
 import tempfile
 from test.test_scenarios import MainlineExecutor
 
@@ -18,7 +17,7 @@ def test_add_plugin_bad_file_name():
 
     # Arrange
     executor = MainlineExecutor()
-    root_pathname = os.path.abspath(os.path.dirname(sys.argv[0]))
+    root_pathname = os.path.abspath(os.path.dirname(__file__))
     plugin_file_name = os.path.join(root_pathname, "not-a-valid-file-name")
     suppplied_arguments = ["--add-plugin", plugin_file_name]
 
@@ -45,9 +44,9 @@ def test_add_plugin_bad_python_file():
 
     # Arrange
     executor = MainlineExecutor()
-    root_pathname = os.path.abspath(os.path.dirname(sys.argv[0]))
+    root_pathname = os.path.abspath(os.path.dirname(__file__))
     plugin_file_name = os.path.join(
-        root_pathname, "test/resources/plugins/not_a_python_file"
+        root_pathname, "../test/resources/plugins/not_a_python_file"
     )
     suppplied_arguments = ["--add-plugin", plugin_file_name]
     assert os.path.exists(plugin_file_name)
@@ -76,8 +75,10 @@ def test_add_plugin_bad_class_name():
 
     # Arrange
     executor = MainlineExecutor()
-    root_pathname = os.path.abspath(os.path.dirname(sys.argv[0]))
-    plugin_file_name = os.path.join(root_pathname, "test/resources/plugins/misnamed.py")
+    root_pathname = os.path.abspath(os.path.dirname(__file__))
+    plugin_file_name = os.path.join(
+        root_pathname, "../test/resources/plugins/misnamed.py"
+    )
     assert os.path.exists(plugin_file_name)
     full_plugin_file_name = os.path.abspath(plugin_file_name)
     suppplied_arguments = ["--add-plugin", plugin_file_name]
@@ -105,9 +106,9 @@ def test_add_plugin_bad_constructor():
 
     # Arrange
     executor = MainlineExecutor()
-    root_pathname = os.path.abspath(os.path.dirname(sys.argv[0]))
+    root_pathname = os.path.abspath(os.path.dirname(__file__))
     plugin_file_name = os.path.join(
-        root_pathname, "test/resources/plugins/bad_constructor.py"
+        root_pathname, "../test/resources/plugins/bad_constructor.py"
     )
     assert os.path.exists(plugin_file_name)
     full_plugin_file_name = os.path.abspath(plugin_file_name)
@@ -136,9 +137,9 @@ def test_add_plugin_bad_set_context():
 
     # Arrange
     executor = MainlineExecutor()
-    root_pathname = os.path.abspath(os.path.dirname(sys.argv[0]))
+    root_pathname = os.path.abspath(os.path.dirname(__file__))
     plugin_file_name = os.path.join(
-        root_pathname, "test/resources/plugins/bad_set_context.py"
+        root_pathname, "../test/resources/plugins/bad_set_context.py"
     )
     assert os.path.exists(plugin_file_name)
     suppplied_arguments = ["--add-plugin", plugin_file_name, "--publish"]
@@ -163,9 +164,9 @@ def test_add_plugin_bad_get_output_path():
 
     # Arrange
     executor = MainlineExecutor()
-    root_pathname = os.path.abspath(os.path.dirname(sys.argv[0]))
+    root_pathname = os.path.abspath(os.path.dirname(__file__))
     plugin_file_name = os.path.join(
-        root_pathname, "test/resources/plugins/bad_output_path.py"
+        root_pathname, "../test/resources/plugins/bad_output_path.py"
     )
     assert os.path.exists(plugin_file_name)
     suppplied_arguments = ["--add-plugin", plugin_file_name, "--publish"]
@@ -193,9 +194,9 @@ def test_add_plugin_bad_add_arguments():
 
     # Arrange
     executor = MainlineExecutor()
-    root_pathname = os.path.abspath(os.path.dirname(sys.argv[0]))
+    root_pathname = os.path.abspath(os.path.dirname(__file__))
     plugin_file_name = os.path.join(
-        root_pathname, "test/resources/plugins/bad_add_arguments.py"
+        root_pathname, "../test/resources/plugins/bad_add_arguments.py"
     )
     assert os.path.exists(plugin_file_name)
     suppplied_arguments = ["--add-plugin", plugin_file_name, "--publish"]
@@ -223,9 +224,9 @@ def test_add_plugin_bad_generate_report():
 
     # Arrange
     executor = MainlineExecutor()
-    root_pathname = os.path.abspath(os.path.dirname(sys.argv[0]))
+    root_pathname = os.path.abspath(os.path.dirname(__file__))
     plugin_file_name = os.path.join(
-        root_pathname, "test/resources/plugins/bad_generate_report.py"
+        root_pathname, "../test/resources/plugins/bad_generate_report.py"
     )
     assert os.path.exists(plugin_file_name)
     suppplied_arguments = [
