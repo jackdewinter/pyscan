@@ -143,10 +143,13 @@ def test_add_plugin_bad_set_context():
             root_pathname, "../test/resources/plugins/bad_set_context.py"
         )
         assert os.path.exists(plugin_file_name)
-        suppplied_arguments = ["--add-plugin", plugin_file_name,
+        suppplied_arguments = [
+            "--add-plugin",
+            plugin_file_name,
             "--report-dir",
             temporary_work_directory,
-            "--publish"]
+            "--publish",
+        ]
 
         expected_output = ""
         expected_error = """Plugin class 'BadSetContext' had a critical failure: Bad Plugin Error calling set_context."""
@@ -174,10 +177,13 @@ def test_add_plugin_bad_get_output_path():
             root_pathname, "../test/resources/plugins/bad_output_path.py"
         )
         assert os.path.exists(plugin_file_name)
-        suppplied_arguments = ["--add-plugin", plugin_file_name,
+        suppplied_arguments = [
+            "--add-plugin",
+            plugin_file_name,
             "--report-dir",
             temporary_work_directory,
-            "--publish"]
+            "--publish",
+        ]
 
         expected_output = ""
         expected_error = (
