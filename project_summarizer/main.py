@@ -6,11 +6,13 @@ import os
 import runpy
 import sys
 from shutil import copyfile
-from typing import Dict, List
+from typing import List
 
-from project_summarizer.cobertura_plugin import CoberturaPlugin
-from project_summarizer.junit_plugin import JUnitPlugin
-from project_summarizer.project_summarizer_plugin import ProjectSummarizerPlugin
+from project_summarizer.plugin_manager.bad_plugin_error import BadPluginError
+from project_summarizer.plugin_manager.plugin_manager import PluginManager
+from project_summarizer.plugin_manager.project_summarizer_plugin import (
+    ProjectSummarizerPlugin,
+)
 from project_summarizer.summarize_context import SummarizeContext
 
 
@@ -26,9 +28,7 @@ class ProjectSummarizer:
     def __init__(self) -> None:
         self.__version_number: str = ProjectSummarizer.__get_semantic_version()
         self.debug: bool = False
-        self.__available_plugins: List[ProjectSummarizerPlugin] = []
-        self.__plugin_argument_names: Dict[str, ProjectSummarizerPlugin] = {}
-        self.__plugin_variable_names: Dict[str, str] = {}
+        self.__plugin_manager = PluginManager()
 
     @staticmethod
     def __get_semantic_version() -> str:
@@ -40,33 +40,15 @@ class ProjectSummarizer:
         version_meta = runpy.run_path(file_path)
         return str(version_meta["__version__"])
 
-    def __add_command_line_arguments_for_plugins(
-        self, parser: argparse.ArgumentParser
-    ) -> None:
-        for next_plugin_instance in self.__available_plugins:
-            (
-                plugin_argument_name,
-                plugin_variable_name,
-            ) = next_plugin_instance.add_command_line_arguments(parser)
-            self.__plugin_argument_names[plugin_argument_name] = next_plugin_instance
-            self.__plugin_variable_names[plugin_argument_name] = plugin_variable_name
-
     def __show_help_if_no_meaningful_arguments_found(
         self, args: argparse.Namespace, parser: argparse.ArgumentParser
     ) -> None:
         if args.publish_summaries:
             return
 
-        are_plugin_arguments_present = False
-        arguments_as_dictionary = vars(args)
-        for next_plugin_argument in self.__plugin_argument_names:
-            plugin_variable_name = self.__plugin_variable_names[next_plugin_argument]
-            assert plugin_variable_name in arguments_as_dictionary
-            argument_value = arguments_as_dictionary[plugin_variable_name]
-            are_plugin_arguments_present = bool(argument_value.strip())
-            if are_plugin_arguments_present:
-                break
-
+        are_plugin_arguments_present = self.__plugin_manager.find_any_plugins_arguments(
+            args
+        )
         if not are_plugin_arguments_present:
             print(
                 "Error: Either --publish or one of the reporting arguments mush be specified."
@@ -74,7 +56,7 @@ class ProjectSummarizer:
             parser.print_help()
             sys.exit(2)
 
-    def __parse_arguments(self) -> argparse.Namespace:
+    def __parse_arguments(self, unused_arguments: List[str]) -> argparse.Namespace:
         parser = argparse.ArgumentParser(
             description="Summarize Python files.", allow_abbrev=False, add_help=False
         )
@@ -87,6 +69,7 @@ class ProjectSummarizer:
             version=f"%(prog)s {self.__version_number}",
             help="Show program's version number and exit.",
         )
+        PluginManager.add_plugin_arguments(parser)
         parser.add_argument(
             "--report-dir",
             dest="report_dir",
@@ -104,7 +87,7 @@ class ProjectSummarizer:
             type=ProjectSummarizer.__verify_directory_exists,
         )
 
-        self.__add_command_line_arguments_for_plugins(parser)
+        self.__plugin_manager.add_command_line_arguments_for_plugins(parser)
 
         parser.add_argument(
             "--only-changes",
@@ -136,7 +119,7 @@ class ProjectSummarizer:
             type=ProjectSummarizer.__verify_display_columns,
         )
 
-        args = parser.parse_args()
+        args = parser.parse_args(args=unused_arguments)
         self.__show_help_if_no_meaningful_arguments_found(args, parser)
         return args
 
@@ -186,16 +169,7 @@ class ProjectSummarizer:
         Respond to a request to publish any existing summaries.
         """
 
-        valid_paths = []
-        for plugin_instance in self.__available_plugins:
-            plugin_output_path = plugin_instance.get_output_path()
-
-            if os.path.exists(plugin_output_path) and not os.path.isfile(
-                plugin_output_path
-            ):
-                print(f"Summary path '{plugin_output_path}' is not a file.")
-                sys.exit(1)
-            valid_paths.append(plugin_output_path)
+        valid_paths = self.__plugin_manager.get_output_paths()
 
         if not os.path.exists(context.publish_dir):
             print(
@@ -215,44 +189,50 @@ class ProjectSummarizer:
         arguments_as_dictionary = vars(args)
         column_width = 0 if args.quiet_mode else args.display_columns
         for next_command_line_argument in sys.argv:
-            if next_command_line_argument in self.__plugin_argument_names:
-                plugin_instance = self.__plugin_argument_names[
-                    next_command_line_argument
-                ]
-                plugin_variable_name = self.__plugin_variable_names[
-                    next_command_line_argument
-                ]
-                plugin_instance.generate_report(
-                    args.only_changes,
-                    column_width,
-                    arguments_as_dictionary[plugin_variable_name],
-                )
+            self.__plugin_manager.generate_report(
+                next_command_line_argument, arguments_as_dictionary, column_width, args
+            )
+
+    @classmethod
+    def __report_error(
+        cls, error_to_report: BadPluginError, is_loading: bool = False
+    ) -> None:
+        if is_loading:
+            print("BadPluginError encountered while loading plugins:", file=sys.stderr)
+        print(error_to_report, file=sys.stderr)
+        sys.exit(1)
+
+    def __initialize_plugins(self) -> List[str]:
+        try:
+            remaining_arguments = self.__plugin_manager.initialize_plugins()
+        except BadPluginError as this_exception:
+            self.__report_error(this_exception, True)
+        return remaining_arguments
 
     def main(self) -> None:
         """
         Main entrance point.
         """
-        self.__available_plugins = [CoberturaPlugin(), JUnitPlugin()]
+        try:
+            remaining_arguments = self.__initialize_plugins()
+            args = self.__parse_arguments(remaining_arguments)
 
-        args = self.__parse_arguments()
+            context = SummarizeContext(
+                report_dir=args.report_dir
+                or ProjectSummarizerPlugin.DEFAULT_REPORT_PUBLISH_PATH,
+                publish_dir=args.publish_dir
+                or ProjectSummarizerPlugin.DEFAULT_SUMMARY_PUBLISH_PATH,
+            )
 
-        context = SummarizeContext(
-            report_dir=args.report_dir
-            or ProjectSummarizerPlugin.DEFAULT_REPORT_PUBLISH_PATH,
-            publish_dir=args.publish_dir
-            or ProjectSummarizerPlugin.DEFAULT_SUMMARY_PUBLISH_PATH,
-        )
+            self.__plugin_manager.set_context(context)
 
-        for next_plugin in self.__available_plugins:
-            next_plugin.set_context(context)
-        # report_dir
-
-        if args.publish_summaries:
-            self.__publish_summaries(context)
+            if args.publish_summaries:
+                self.__publish_summaries(context)
+            else:
+                self.__create_summaries(args)
             sys.exit(0)
-
-        self.__create_summaries(args)
-        sys.exit(0)
+        except BadPluginError as this_exception:
+            self.__report_error(this_exception)
 
 
 if __name__ == "__main__":

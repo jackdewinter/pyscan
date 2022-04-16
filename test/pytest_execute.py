@@ -9,7 +9,9 @@ import sys
 import traceback
 from abc import ABC, abstractmethod
 
-from project_summarizer.project_summarizer_plugin import ProjectSummarizerPlugin
+from project_summarizer.plugin_manager.project_summarizer_plugin import (
+    ProjectSummarizerPlugin,
+)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -61,7 +63,6 @@ class InProcessResult:
             diff = difflib.ndiff(
                 expected_text.splitlines(), actual_stream.getvalue().splitlines()
             )
-
             diff_values = "\n".join(list(diff)) + "\n---\n"
 
             LOGGER.warning(
@@ -73,7 +74,7 @@ class InProcessResult:
             print(f"WARN>expect>>{cls.__make_value_visible(expected_text)}")
             if log_extra:
                 print(f"log_extra:{log_extra}")
-                raise AssertionError(f"{stream_name} not as expected:\n{diff_values}")
+            raise AssertionError(f"{stream_name} not as expected:\n{diff_values}")
 
     # pylint: enable=too-many-arguments
 

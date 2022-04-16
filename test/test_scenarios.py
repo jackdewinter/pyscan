@@ -8,7 +8,9 @@ from test.pytest_execute import InProcessExecution
 
 from project_summarizer.__main__ import main
 from project_summarizer.main import ProjectSummarizer
-from project_summarizer.project_summarizer_plugin import ProjectSummarizerPlugin
+from project_summarizer.plugin_manager.project_summarizer_plugin import (
+    ProjectSummarizerPlugin,
+)
 
 JUNIT_COMMAND_LINE_FLAG = "--junit"
 COBERTURA_COMMAND_LINE_FLAG = "--cobertura"

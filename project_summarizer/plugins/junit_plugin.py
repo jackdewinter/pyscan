@@ -11,12 +11,16 @@ from typing import Any, List, Optional, Tuple
 
 from columnar import columnar
 
-from project_summarizer.project_summarizer_plugin import ProjectSummarizerPlugin
+from project_summarizer.plugin_manager.plugin_details import PluginDetails
+from project_summarizer.plugin_manager.project_summarizer_plugin import (
+    ProjectSummarizerPlugin,
+)
+from project_summarizer.plugins.test_measurement import TestMeasurement
+from project_summarizer.plugins.test_totals import TestTotals
 from project_summarizer.summarize_context import SummarizeContext
-from project_summarizer.test_results_model import TestMeasurement, TestTotals
 
 
-class JUnitPlugin(ProjectSummarizerPlugin):
+class JunitPlugin(ProjectSummarizerPlugin):
     """
     Class to provide reporting for test files in the JUnit format.
     """
@@ -24,10 +28,25 @@ class JUnitPlugin(ProjectSummarizerPlugin):
     __COMMAND_LINE_ARGUMENT = "--junit"
     __COMMAND_LINE_OPTION = "test_report_file"
 
+    __PLUGIN_ID = "JUNIT"
+    __PLUGIN_NAME = "JUnit Test Results"
+    __PLUGIN_VERSION = "0.5.0"
+
     def __init__(self) -> None:
         super().__init__()
         self.__output_path: str = ""
         self.__context: Optional[SummarizeContext] = None
+
+    def get_details(self) -> PluginDetails:
+        """
+        Get the details for the plugin.
+        """
+        return PluginDetails(
+            JunitPlugin.__PLUGIN_ID,
+            JunitPlugin.__PLUGIN_NAME,
+            JunitPlugin.__PLUGIN_VERSION,
+            ProjectSummarizerPlugin.VERSION_BASIC,
+        )
 
     def set_context(self, context: SummarizeContext) -> None:
         """
@@ -53,16 +72,16 @@ class JUnitPlugin(ProjectSummarizerPlugin):
         """
 
         parser.add_argument(
-            JUnitPlugin.__COMMAND_LINE_ARGUMENT,
-            dest=JUnitPlugin.__COMMAND_LINE_OPTION,
+            JunitPlugin.__COMMAND_LINE_ARGUMENT,
+            dest=JunitPlugin.__COMMAND_LINE_OPTION,
             metavar="path",
             action="store",
             default="",
             help="Source file name for junit test result reporting.",
         )
         return (
-            JUnitPlugin.__COMMAND_LINE_ARGUMENT,
-            JUnitPlugin.__COMMAND_LINE_OPTION,
+            JunitPlugin.__COMMAND_LINE_ARGUMENT,
+            JunitPlugin.__COMMAND_LINE_OPTION,
         )
 
     def generate_report(

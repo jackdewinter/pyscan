@@ -24,7 +24,9 @@ from test.test_scenarios import (
     setup_directories,
 )
 
-from project_summarizer.project_summarizer_plugin import ProjectSummarizerPlugin
+from project_summarizer.plugin_manager.project_summarizer_plugin import (
+    ProjectSummarizerPlugin,
+)
 
 
 def test_summarize_simple_junit_report_and_publish_with_existing_publish():
@@ -201,8 +203,8 @@ def test_publish_with_test_file_as_directory():
     suppplied_arguments = [PUBLISH_COMMAND_LINE_FLAG]
 
     results_path = os.path.join(REPORT_DIRECTORY, RESULTS_SUMMARY_FILE_NAME)
-    expected_output = f"Summary path '{results_path}' is not a file.\n"
-    expected_error = ""
+    expected_output = ""
+    expected_error = f"Summary path '{results_path}' is not a file."
     expected_return_code = 1
 
     # Act
@@ -238,8 +240,8 @@ def test_publish_with_coverage_file_as_directory():
     suppplied_arguments = [PUBLISH_COMMAND_LINE_FLAG]
 
     coverage_path = os.path.join(REPORT_DIRECTORY, COVERAGE_SUMMARY_FILE_NAME)
-    expected_output = f"Summary path '{coverage_path}' is not a file.\n"
-    expected_error = ""
+    expected_output = ""
+    expected_error = f"Summary path '{coverage_path}' is not a file."
     expected_return_code = 1
 
     # Act

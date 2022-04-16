@@ -1,7 +1,10 @@
 """
 Module to test the various profiles seen with various coverage tools.
 """
-from project_summarizer.coverage_model import CoverageMeasurement, CoverageTotals
+from project_summarizer.plugins.coverage_model import (
+    CoverageMeasurement,
+    CoverageTotals,
+)
 
 
 def test_pytest_cobertura_profile():

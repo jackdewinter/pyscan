@@ -15,7 +15,9 @@ from test.test_scenarios import (
     setup_directories,
 )
 
-from project_summarizer.project_summarizer_plugin import ProjectSummarizerPlugin
+from project_summarizer.plugin_manager.project_summarizer_plugin import (
+    ProjectSummarizerPlugin,
+)
 
 
 def compose_test_results(total_tests):
@@ -769,10 +771,10 @@ def test_summarize_bad_report_directory():
     suppplied_arguments = [JUNIT_COMMAND_LINE_FLAG, junit_test_file]
 
     expected_output = ""
-    expected_error = """usage: main.py [-h] [--version] [--report-dir REPORT_DIR]
-               [--publish-dir PUBLISH_DIR] [--cobertura path] [--junit path]
-               [--only-changes] [--publish] [--quiet]
-               [--columns DISPLAY_COLUMNS]
+    expected_error = """usage: main.py [-h] [--version] [--add-plugin ADD_PLUGIN]
+               [--report-dir REPORT_DIR] [--publish-dir PUBLISH_DIR]
+               [--cobertura path] [--junit path] [--only-changes] [--publish]
+               [--quiet] [--columns DISPLAY_COLUMNS]
 main.py: error: argument --report-dir: Path 'report' does not exist."""
     expected_return_code = 2
 

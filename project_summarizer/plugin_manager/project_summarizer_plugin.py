@@ -12,6 +12,7 @@ from typing import Any, Tuple
 import defusedxml.ElementTree as ET  # type: ignore
 from defusedxml.ElementTree import ParseError
 
+from project_summarizer.plugin_manager.plugin_details import PluginDetails
 from project_summarizer.summarize_context import SummarizeContext
 
 
@@ -24,8 +25,16 @@ class ProjectSummarizerPlugin(ABC):
     DEFAULT_REPORT_PUBLISH_PATH = "report"
     DEFAULT_FILE_ENCODING = "utf-8"
 
+    VERSION_BASIC = 1
+
     def __init__(self) -> None:
         pass
+
+    @abstractmethod
+    def get_details(self) -> PluginDetails:
+        """
+        Get the details for the plugin.
+        """
 
     @abstractmethod
     def set_context(self, context: SummarizeContext) -> None:
