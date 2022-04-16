@@ -136,25 +136,29 @@ def test_add_plugin_bad_set_context():
     """
 
     # Arrange
-    executor = MainlineExecutor()
-    root_pathname = os.path.abspath(os.path.dirname(__file__))
-    plugin_file_name = os.path.join(
-        root_pathname, "../test/resources/plugins/bad_set_context.py"
-    )
-    assert os.path.exists(plugin_file_name)
-    suppplied_arguments = ["--add-plugin", plugin_file_name, "--publish"]
+    with tempfile.TemporaryDirectory() as temporary_work_directory:
+        executor = MainlineExecutor()
+        root_pathname = os.path.abspath(os.path.dirname(__file__))
+        plugin_file_name = os.path.join(
+            root_pathname, "../test/resources/plugins/bad_set_context.py"
+        )
+        assert os.path.exists(plugin_file_name)
+        suppplied_arguments = ["--add-plugin", plugin_file_name,
+            "--report-dir",
+            temporary_work_directory,
+            "--publish"]
 
-    expected_output = ""
-    expected_error = """Plugin class 'BadSetContext' had a critical failure: Bad Plugin Error calling set_context."""
-    expected_return_code = 1
+        expected_output = ""
+        expected_error = """Plugin class 'BadSetContext' had a critical failure: Bad Plugin Error calling set_context."""
+        expected_return_code = 1
 
-    # Act
-    execute_results = executor.invoke_main(arguments=suppplied_arguments)
+        # Act
+        execute_results = executor.invoke_main(arguments=suppplied_arguments)
 
-    # Assert
-    execute_results.assert_results(
-        expected_output, expected_error, expected_return_code
-    )
+        # Assert
+        execute_results.assert_results(
+            expected_output, expected_error, expected_return_code
+        )
 
 
 def test_add_plugin_bad_get_output_path():
@@ -163,28 +167,32 @@ def test_add_plugin_bad_get_output_path():
     """
 
     # Arrange
-    executor = MainlineExecutor()
-    root_pathname = os.path.abspath(os.path.dirname(__file__))
-    plugin_file_name = os.path.join(
-        root_pathname, "../test/resources/plugins/bad_output_path.py"
-    )
-    assert os.path.exists(plugin_file_name)
-    suppplied_arguments = ["--add-plugin", plugin_file_name, "--publish"]
+    with tempfile.TemporaryDirectory() as temporary_work_directory:
+        executor = MainlineExecutor()
+        root_pathname = os.path.abspath(os.path.dirname(__file__))
+        plugin_file_name = os.path.join(
+            root_pathname, "../test/resources/plugins/bad_output_path.py"
+        )
+        assert os.path.exists(plugin_file_name)
+        suppplied_arguments = ["--add-plugin", plugin_file_name,
+            "--report-dir",
+            temporary_work_directory,
+            "--publish"]
 
-    expected_output = ""
-    expected_error = (
-        "Plugin class 'BadOutputPath' had a critical failure: "
-        + "Bad Plugin Error calling get_output_path."
-    )
-    expected_return_code = 1
+        expected_output = ""
+        expected_error = (
+            "Plugin class 'BadOutputPath' had a critical failure: "
+            + "Bad Plugin Error calling get_output_path."
+        )
+        expected_return_code = 1
 
-    # Act
-    execute_results = executor.invoke_main(arguments=suppplied_arguments)
+        # Act
+        execute_results = executor.invoke_main(arguments=suppplied_arguments)
 
-    # Assert
-    execute_results.assert_results(
-        expected_output, expected_error, expected_return_code
-    )
+        # Assert
+        execute_results.assert_results(
+            expected_output, expected_error, expected_return_code
+        )
 
 
 def test_add_plugin_bad_add_arguments():
