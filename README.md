@@ -1,25 +1,12 @@
 # Project Summarizer
 
-[![GitHub top language](https://img.shields.io/github/languages/top/jackdewinter/pyscan)](https://github.com/jackdewinter/pyscan)
-![platforms](https://img.shields.io/badge/platform-windows%20%7C%20macos%20%7C%20linux-lightgrey)
-[![Python Versions](https://img.shields.io/pypi/pyversions/project_summarizer.svg)](https://pypi.org/project/project_summarizer)
-[![Version](https://img.shields.io/pypi/v/project_summarizer.svg)](https://pypi.org/project/project_summarizer)
-
-[![GitHub Workflow Status (event)](https://img.shields.io/github/workflow/status/jackdewinter/pyscan/Main)](https://github.com/jackdewinter/pyscan/actions/workflows/main.yml)
-[![codecov](https://codecov.io/gh/jackdewinter/pymarkdown/branch/main/graph/badge.svg?token=PD5TKS8NQQ)](https://codecov.io/gh/jackdewinter/pyscan)
-![GitHub Pipenv locked dependency version (branch)](https://img.shields.io/github/pipenv/locked/dependency-version/jackdewinter/pyscan/black/master)
-![GitHub Pipenv locked dependency version (branch)](https://img.shields.io/github/pipenv/locked/dependency-version/jackdewinter/pyscan/flake8/master)
-![GitHub Pipenv locked dependency version (branch)](https://img.shields.io/github/pipenv/locked/dependency-version/jackdewinter/pyscan/pylint/master)
-[![Sourcery](https://img.shields.io/badge/Sourcery-enabled-brightgreen)](https://sourcery.ai)
-[![Stars](https://img.shields.io/github/stars/jackdewinter/pyscan.svg)](https://github.com/jackdewinter/pyscan/stargazers)
-[![Downloads](https://img.shields.io/pypi/dm/project_summarizer.svg)](https://pypistats.org/packages/project_summarizer)
-
-[![Issues](https://img.shields.io/github/issues/jackdewinter/pyscan.svg)](https://github.com/jackdewinter/pyscan/issues)
-[![License](https://img.shields.io/github/license/jackdewinter/pyscan.svg)](https://github.com/jackdewinter/pyscan/blob/main/LICENSE.txt)
-[![Contributors](https://img.shields.io/github/contributors/jackdewinter/pyscan.svg)](https://github.com/jackdewinter/pyscan/graphs/contributors)
-[![Forks](https://img.shields.io/github/forks/jackdewinter/pyscan.svg)](https://github.com/jackdewinter/pyscan/network/members)
-
-[![LinkedIn](https://img.shields.io/badge/-LinkedIn-black.svg?logo=linkedin&colorB=555)](https://www.linkedin.com/in/jackdewinter/)
+|   |   |
+|---|---|
+|Project|[![Version](https://img.shields.io/pypi/v/project_summarizer.svg)](https://pypi.org/project/project_summarizer)  [![Python Versions](https://img.shields.io/pypi/pyversions/project_summarizer.svg)](https://pypi.org/project/project_summarizer)  ![platforms](https://img.shields.io/badge/platform-windows%20%7C%20macos%20%7C%20linux-lightgrey)  [![License](https://img.shields.io/github/license/jackdewinter/pyscan.svg)](https://github.com/jackdewinter/pyscan/blob/master/LICENSE.txt)  [![GitHub top language](https://img.shields.io/github/languages/top/jackdewinter/pyscan)](https://github.com/jackdewinter/pyscan)|
+|Quality|[![GitHub Workflow Status (event)](https://img.shields.io/github/workflow/status/jackdewinter/pyscan/Main)](https://github.com/jackdewinter/pyscan/actions/workflows/main.yml)  [![Issues](https://img.shields.io/github/issues/jackdewinter/pyscan.svg)](https://github.com/jackdewinter/pyscan/issues)  [![codecov](https://codecov.io/gh/jackdewinter/pymarkdown/branch/main/graph/badge.svg?token=PD5TKS8NQQ)](https://codecov.io/gh/jackdewinter/pyscan)  [![Sourcery](https://img.shields.io/badge/Sourcery-enabled-brightgreen)](https://sourcery.ai)  ![snyk](https://img.shields.io/snyk/vulnerabilities/github/jackdewinter/pyscan) |
+|  |![GitHub Pipenv locked dependency version (branch)](https://img.shields.io/github/pipenv/locked/dependency-version/jackdewinter/pyscan/black/master)  ![GitHub Pipenv locked dependency version (branch)](https://img.shields.io/github/pipenv/locked/dependency-version/jackdewinter/pyscan/flake8/master)  ![GitHub Pipenv locked dependency version (branch)](https://img.shields.io/github/pipenv/locked/dependency-version/jackdewinter/pyscan/pylint/master)  ![GitHub Pipenv locked dependency version (branch)](https://img.shields.io/github/pipenv/locked/dependency-version/jackdewinter/pyscan/mypy/master)  ![GitHub Pipenv locked dependency version (branch)](https://img.shields.io/github/pipenv/locked/dependency-version/jackdewinter/pyscan/pyroma/master)  ![GitHub Pipenv locked dependency version (branch)](https://img.shields.io/github/pipenv/locked/dependency-version/jackdewinter/pyscan/pre-commit/master)|
+|Community|[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/jackdewinter/pyscan/graphs/commit-activity) [![Stars](https://img.shields.io/github/stars/jackdewinter/pyscan.svg)](https://github.com/jackdewinter/pyscan/stargazers)  [![Forks](https://img.shields.io/github/forks/jackdewinter/pyscan.svg)](https://github.com/jackdewinter/pyscan/network/members)  [![Contributors](https://img.shields.io/github/contributors/jackdewinter/pyscan.svg)](https://github.com/jackdewinter/pyscan/graphs/contributors)  [![Downloads](https://img.shields.io/pypi/dm/project_summarizer.svg)](https://pypistats.org/packages/project_summarizer)|
+|Maintainers|[![LinkedIn](https://img.shields.io/badge/-LinkedIn-black.svg?logo=linkedin&colorB=555)](https://www.linkedin.com/in/jackdewinter/)|
 
 ## TL;DR
 
