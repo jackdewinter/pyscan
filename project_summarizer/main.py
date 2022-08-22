@@ -5,6 +5,7 @@ import argparse
 import os
 import runpy
 import sys
+import traceback
 from shutil import copyfile
 from typing import List
 
@@ -29,6 +30,7 @@ class ProjectSummarizer:
         self.__version_number: str = ProjectSummarizer.__get_semantic_version()
         self.debug: bool = False
         self.__plugin_manager = PluginManager()
+        self.__show_stack_trace = False
 
     @staticmethod
     def __get_semantic_version() -> str:
@@ -69,6 +71,14 @@ class ProjectSummarizer:
             version=f"%(prog)s {self.__version_number}",
             help="Show program's version number and exit.",
         )
+        parser.add_argument(
+            "--stack-trace",
+            dest="show_stack_trace",
+            action="store_true",
+            default=False,
+            help="if an error occurs, print out the stack trace for debug purposes",
+        )
+
         PluginManager.add_plugin_arguments(parser)
         parser.add_argument(
             "--report-dir",
@@ -193,13 +203,14 @@ class ProjectSummarizer:
                 next_command_line_argument, arguments_as_dictionary, column_width, args
             )
 
-    @classmethod
     def __report_error(
-        cls, error_to_report: BadPluginError, is_loading: bool = False
+        self, error_to_report: BadPluginError, is_loading: bool = False
     ) -> None:
         if is_loading:
             print("BadPluginError encountered while loading plugins:", file=sys.stderr)
         print(error_to_report, file=sys.stderr)
+        if self.__show_stack_trace:
+            traceback.print_exc(file=sys.stderr)
         sys.exit(1)
 
     def __initialize_plugins(self) -> List[str]:
@@ -216,6 +227,7 @@ class ProjectSummarizer:
         try:
             remaining_arguments = self.__initialize_plugins()
             args = self.__parse_arguments(remaining_arguments)
+            self.__show_stack_trace = args.show_stack_trace
 
             context = SummarizeContext(
                 report_dir=args.report_dir

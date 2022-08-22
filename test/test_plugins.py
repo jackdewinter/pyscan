@@ -269,6 +269,54 @@ def test_add_plugin_bad_generate_report():
         )
 
 
+def test_add_plugin_bad_generate_report_exception():
+    """
+    Test the addition of a plugin with a file that has a bad generate_report function
+    that throws the bad plguin error.
+    """
+
+    # Arrange
+    with tempfile.TemporaryDirectory() as temporary_work_directory:
+        executor = MainlineExecutor()
+        root_pathname = os.path.abspath(os.path.dirname(__file__))
+        plugin_file_name = os.path.join(
+            root_pathname, "../test/resources/plugins/bad_generate_report_exception.py"
+        )
+        assert os.path.exists(plugin_file_name)
+        suppplied_arguments = [
+            "--add-plugin",
+            plugin_file_name,
+            "--stack-trace",
+            "--report-dir",
+            temporary_work_directory,
+            "--bad-generate-report",
+            "beta",
+        ]
+
+        expected_output = ""
+        expected_error = """bad_generate_report
+Traceback (most recent call last):
+  File """
+        additional_error = [
+            """, in generate_report
+    raise BadPluginError(formatted_message="bad_generate_report")
+project_summarizer.plugin_manager.bad_plugin_error.BadPluginError: bad_generate_report
+"""
+        ]
+        expected_return_code = 1
+
+        # Act
+        execute_results = executor.invoke_main(arguments=suppplied_arguments)
+
+        # Assert
+        execute_results.assert_results(
+            expected_output,
+            expected_error,
+            expected_return_code,
+            additional_error=additional_error,
+        )
+
+
 def test_add_plugin_bad_get_details():
     """
     Test the addition of a plugin with a file that has a bad get_details function.
@@ -470,3 +518,55 @@ def test_add_plugin_good_class():
         assert all_lines
         assert len(all_lines) == 1
         assert all_lines[0] == "The file to report on was: file"
+
+
+def test_add_plugin_good_class_with_dictionary():
+    """
+    Test the addition of a plugin with a file that is just fine but does nothing.
+    """
+
+    # Arrange
+    executor = MainlineExecutor()
+    with tempfile.TemporaryDirectory() as temporary_work_directory:
+
+        root_pathname = os.path.abspath(os.path.dirname(__file__))
+        plugin_file_name = os.path.join(
+            root_pathname,
+            "../test/resources/plugins/tester_one_with_dictionary_object.py",
+        )
+        assert os.path.exists(plugin_file_name)
+        suppplied_arguments = [
+            "--add-plugin",
+            plugin_file_name,
+            "--report-dir",
+            temporary_work_directory,
+            "--tester-one",
+            "file",
+        ]
+        expected_report_file_name = os.path.join(
+            temporary_work_directory, "tester-one.json"
+        )
+
+        expected_output = ""
+        expected_error = ""
+        expected_return_code = 0
+        expected_data = ["{\n", '    "some_stat": 1\n', "}\n", "\n"]
+
+        # Act
+        execute_results = executor.invoke_main(arguments=suppplied_arguments)
+
+        # Assert
+        execute_results.assert_results(
+            expected_output, expected_error, expected_return_code
+        )
+
+        all_lines = None
+        with open(
+            os.path.abspath(expected_report_file_name),
+            "r",
+            encoding=ProjectSummarizerPlugin.DEFAULT_FILE_ENCODING,
+        ) as data_file:
+            all_lines = data_file.readlines()
+        assert all_lines
+        assert len(all_lines) == len(expected_data)
+        assert all_lines == expected_data

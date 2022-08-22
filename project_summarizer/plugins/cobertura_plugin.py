@@ -8,8 +8,6 @@ import os
 import sys
 from typing import Any, List, Optional, Tuple
 
-from columnar import columnar
-
 from project_summarizer.plugin_manager.plugin_details import PluginDetails
 from project_summarizer.plugin_manager.project_summarizer_plugin import (
     ProjectSummarizerPlugin,
@@ -114,7 +112,7 @@ class CoberturaPlugin(ProjectSummarizerPlugin):
 
     def generate_report(
         self, only_changes: bool, column_width: int, report_file: str
-    ) -> None:
+    ) -> Optional[Tuple[List[str], List[str], List[List[str]]]]:
         """
         Generate the report and display it.
         """
@@ -129,17 +127,17 @@ class CoberturaPlugin(ProjectSummarizerPlugin):
         )
         self.save_summary_file(self.__output_path, new_stats, "test coverage")
 
-        if column_width:
-            assert self.__context is not None
-            published_coverage_summary_path = (
-                self.__context.compute_published_path_to_file(self.__output_path)
-            )
-            loaded_stats = self.__load_coverage_results_summary_file(
-                published_coverage_summary_path
-            )
-            self.__report_coverage_files(
-                new_stats, loaded_stats, only_changes, column_width
-            )
+        if not column_width:
+            return None
+
+        assert self.__context is not None
+        published_coverage_summary_path = self.__context.compute_published_path_to_file(
+            self.__output_path
+        )
+        loaded_stats = self.__load_coverage_results_summary_file(
+            published_coverage_summary_path
+        )
+        return self.__report_coverage_files(new_stats, loaded_stats, only_changes)
 
     def __compose_summary_from_cobertura_document(
         self, cobertura_document: Any, coverage_provider_name: str
@@ -234,8 +232,7 @@ class CoberturaPlugin(ProjectSummarizerPlugin):
         new_stats: CoverageTotals,
         loaded_stats: Optional[CoverageTotals],
         only_report_changes: bool,
-        column_width: int,
-    ) -> None:
+    ) -> Optional[Tuple[List[str], List[str], List[List[str]]]]:
         """
         Create a report on coverage.
         """
@@ -249,19 +246,11 @@ class CoberturaPlugin(ProjectSummarizerPlugin):
         print("\nTest Coverage Summary\n---------------------\n")
         if not test_report_rows:
             print("Test coverage has not changed since last published test coverage.")
-        else:
-            hdrs = ["Type", "Covered", "Measured", "Percentage"]
-            table = columnar(
-                test_report_rows,
-                headers=hdrs,
-                no_borders=True,
-                justify=["l", "r", "r", "r"],
-                terminal_width=column_width if column_width != -1 else None,
-            )
-            split_rows = table.split("\n")
-            new_rows = [next_row.rstrip() for next_row in split_rows]
-            print("\n".join(new_rows))
-        print()
+            print()
+            return None
+        justify_columns = ["l", "r", "r", "r"]
+        column_headers = ["Type", "Covered", "Measured", "Percentage"]
+        return (column_headers, justify_columns, test_report_rows)
 
     def __calculate_coverage_rows(
         self, new_stats: CoverageTotals, loaded_stats: CoverageTotals

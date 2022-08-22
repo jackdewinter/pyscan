@@ -532,7 +532,7 @@ def test_summarize_bad_report_directory():
     suppplied_arguments = [COBERTURA_COMMAND_LINE_FLAG, cobertura_coverage_file]
 
     expected_output = ""
-    expected_error = """usage: main.py [-h] [--version] [--add-plugin ADD_PLUGIN]
+    expected_error = """usage: main.py [-h] [--version] [--stack-trace] [--add-plugin ADD_PLUGIN]
                [--report-dir REPORT_DIR] [--publish-dir PUBLISH_DIR]
                [--cobertura path] [--junit path] [--only-changes] [--publish]
                [--quiet] [--columns DISPLAY_COLUMNS]

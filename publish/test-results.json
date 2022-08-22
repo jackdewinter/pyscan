@@ -36,7 +36,7 @@
         },
         {
             "name": "test.test_plugins",
-            "totalTests": 14,
+            "totalTests": 16,
             "failedTests": 0,
             "errorTests": 0,
             "skippedTests": 0,

@@ -17,7 +17,7 @@ def test_scanner_with_no_parameters():
 
     expected_return_code = 2
     expected_output = """Error: Either --publish or one of the reporting arguments mush be specified.
-usage: main.py [-h] [--version] [--add-plugin ADD_PLUGIN]
+usage: main.py [-h] [--version] [--stack-trace] [--add-plugin ADD_PLUGIN]
                [--report-dir REPORT_DIR] [--publish-dir PUBLISH_DIR]
                [--cobertura path] [--junit path] [--only-changes] [--publish]
                [--quiet] [--columns DISPLAY_COLUMNS]
@@ -27,6 +27,8 @@ Summarize Python files.
 optional arguments:
   -h, --help            Show this help message and exit.
   --version             Show program's version number and exit.
+  --stack-trace         if an error occurs, print out the stack trace for
+                        debug purposes
   --add-plugin ADD_PLUGIN
                         Add a plugin file to provide additional project
                         summaries.
@@ -73,7 +75,7 @@ def test_scanner_with_no_parameters_through_module():
     expected_return_code = 2
     expected_error = ""
     expected_output = """Error: Either --publish or one of the reporting arguments mush be specified.
-usage: __main.py__ [-h] [--version] [--add-plugin ADD_PLUGIN]
+usage: __main.py__ [-h] [--version] [--stack-trace] [--add-plugin ADD_PLUGIN]
                    [--report-dir REPORT_DIR] [--publish-dir PUBLISH_DIR]
                    [--cobertura path] [--junit path] [--only-changes]
                    [--publish] [--quiet] [--columns DISPLAY_COLUMNS]
@@ -83,6 +85,8 @@ Summarize Python files.
 optional arguments:
   -h, --help            Show this help message and exit.
   --version             Show program's version number and exit.
+  --stack-trace         if an error occurs, print out the stack trace for
+                        debug purposes
   --add-plugin ADD_PLUGIN
                         Add a plugin file to provide additional project
                         summaries.
@@ -127,7 +131,7 @@ def test_scanner_with_no_parameters_through_main():
 
     expected_return_code = 2
     expected_output = """Error: Either --publish or one of the reporting arguments mush be specified.
-usage: main.py [-h] [--version] [--add-plugin ADD_PLUGIN]
+usage: main.py [-h] [--version] [--stack-trace] [--add-plugin ADD_PLUGIN]
                [--report-dir REPORT_DIR] [--publish-dir PUBLISH_DIR]
                [--cobertura path] [--junit path] [--only-changes] [--publish]
                [--quiet] [--columns DISPLAY_COLUMNS]
@@ -137,6 +141,8 @@ Summarize Python files.
 optional arguments:
   -h, --help            Show this help message and exit.
   --version             Show program's version number and exit.
+  --stack-trace         if an error occurs, print out the stack trace for
+                        debug purposes
   --add-plugin ADD_PLUGIN
                         Add a plugin file to provide additional project
                         summaries.
@@ -180,7 +186,7 @@ def test_scanner_with_dash_h():
     supplied_arguments = ["-h"]
 
     expected_return_code = 0
-    expected_output = """usage: main.py [-h] [--version] [--add-plugin ADD_PLUGIN]
+    expected_output = """usage: main.py [-h] [--version] [--stack-trace] [--add-plugin ADD_PLUGIN]
                [--report-dir REPORT_DIR] [--publish-dir PUBLISH_DIR]
                [--cobertura path] [--junit path] [--only-changes] [--publish]
                [--quiet] [--columns DISPLAY_COLUMNS]
@@ -190,6 +196,8 @@ Summarize Python files.
 optional arguments:
   -h, --help            Show this help message and exit.
   --version             Show program's version number and exit.
+  --stack-trace         if an error occurs, print out the stack trace for
+                        debug purposes
   --add-plugin ADD_PLUGIN
                         Add a plugin file to provide additional project
                         summaries.
@@ -234,7 +242,7 @@ def test_scanner_with_dash_dash_quiet():
 
     expected_return_code = 2
     expected_output = """Error: Either --publish or one of the reporting arguments mush be specified.
-usage: main.py [-h] [--version] [--add-plugin ADD_PLUGIN]
+usage: main.py [-h] [--version] [--stack-trace] [--add-plugin ADD_PLUGIN]
                [--report-dir REPORT_DIR] [--publish-dir PUBLISH_DIR]
                [--cobertura path] [--junit path] [--only-changes] [--publish]
                [--quiet] [--columns DISPLAY_COLUMNS]
@@ -244,6 +252,8 @@ Summarize Python files.
 optional arguments:
   -h, --help            Show this help message and exit.
   --version             Show program's version number and exit.
+  --stack-trace         if an error occurs, print out the stack trace for
+                        debug purposes
   --add-plugin ADD_PLUGIN
                         Add a plugin file to provide additional project
                         summaries.
@@ -288,7 +298,7 @@ def test_scanner_with_dash_dash_columns():
 
     expected_return_code = 2
     expected_output = ""
-    expected_error = """usage: main.py [-h] [--version] [--add-plugin ADD_PLUGIN]
+    expected_error = """usage: main.py [-h] [--version] [--stack-trace] [--add-plugin ADD_PLUGIN]
                [--report-dir REPORT_DIR] [--publish-dir PUBLISH_DIR]
                [--cobertura path] [--junit path] [--only-changes] [--publish]
                [--quiet] [--columns DISPLAY_COLUMNS]
@@ -317,7 +327,7 @@ def test_scanner_with_dash_dash_columns_good_number():
     supplied_arguments = ["--columns", "100"]
     expected_return_code = 2
     expected_output = """Error: Either --publish or one of the reporting arguments mush be specified.
-usage: main.py [-h] [--version] [--add-plugin ADD_PLUGIN]
+usage: main.py [-h] [--version] [--stack-trace] [--add-plugin ADD_PLUGIN]
                [--report-dir REPORT_DIR] [--publish-dir PUBLISH_DIR]
                [--cobertura path] [--junit path] [--only-changes] [--publish]
                [--quiet] [--columns DISPLAY_COLUMNS]
@@ -327,6 +337,8 @@ Summarize Python files.
 optional arguments:
   -h, --help            Show this help message and exit.
   --version             Show program's version number and exit.
+  --stack-trace         if an error occurs, print out the stack trace for
+                        debug purposes
   --add-plugin ADD_PLUGIN
                         Add a plugin file to provide additional project
                         summaries.
@@ -371,7 +383,7 @@ def test_scanner_with_dash_dash_columns_bad_number():
 
     expected_return_code = 2
     expected_output = ""
-    expected_error = """usage: main.py [-h] [--version] [--add-plugin ADD_PLUGIN]
+    expected_error = """usage: main.py [-h] [--version] [--stack-trace] [--add-plugin ADD_PLUGIN]
                [--report-dir REPORT_DIR] [--publish-dir PUBLISH_DIR]
                [--cobertura path] [--junit path] [--only-changes] [--publish]
                [--quiet] [--columns DISPLAY_COLUMNS]
@@ -402,7 +414,7 @@ def test_scanner_with_dash_dash_report_dir_with_non_existant():
 
     expected_return_code = 2
     expected_output = ""
-    expected_error = """usage: main.py [-h] [--version] [--add-plugin ADD_PLUGIN]
+    expected_error = """usage: main.py [-h] [--version] [--stack-trace] [--add-plugin ADD_PLUGIN]
                [--report-dir REPORT_DIR] [--publish-dir PUBLISH_DIR]
                [--cobertura path] [--junit path] [--only-changes] [--publish]
                [--quiet] [--columns DISPLAY_COLUMNS]
@@ -434,7 +446,7 @@ def test_scanner_with_dash_dash_report_dir_with_non_directory():
 
     expected_return_code = 2
     expected_output = ""
-    expected_error = """usage: main.py [-h] [--version] [--add-plugin ADD_PLUGIN]
+    expected_error = """usage: main.py [-h] [--version] [--stack-trace] [--add-plugin ADD_PLUGIN]
                [--report-dir REPORT_DIR] [--publish-dir PUBLISH_DIR]
                [--cobertura path] [--junit path] [--only-changes] [--publish]
                [--quiet] [--columns DISPLAY_COLUMNS]
