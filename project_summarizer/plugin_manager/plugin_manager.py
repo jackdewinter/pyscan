@@ -10,6 +10,8 @@ import sys
 from importlib.util import module_from_spec
 from typing import Any, Dict, List, Tuple, cast
 
+from columnar import columnar
+
 from project_summarizer.plugin_manager.bad_plugin_error import BadPluginError
 from project_summarizer.plugin_manager.plugin_details import PluginDetails
 from project_summarizer.plugin_manager.project_summarizer_plugin import (
@@ -48,7 +50,6 @@ class PluginManager:
             os.path.join(base_plugin_path, "cobertura_plugin.py"),
             os.path.join(base_plugin_path, "junit_plugin.py"),
         ]
-        # print(f"remaining_arguments>>{str(remaining_arguments)}")
         while remaining_arguments:
             last_args = remaining_arguments[:]
             parser = argparse.ArgumentParser(allow_abbrev=False, add_help=False)
@@ -59,8 +60,6 @@ class PluginManager:
             remaining_arguments = known_args[1]
             if len(last_args) == len(remaining_arguments):
                 break
-        # print(f"remaining_arguments>>{str(remaining_arguments)}")
-        # print("additional_plugins_to_load>>" + str(additional_plugins_to_load))
         self.__load_plugins(additional_plugins_to_load)
 
         return remaining_arguments
@@ -104,6 +103,8 @@ class PluginManager:
         """
         Attempt to cleanly load the specified plugin.
         """
+        # print(f"pwd:{os.getcwd()}")
+        # print(f"next_plugin_file:{next_plugin_file}")
         if not os.path.exists(next_plugin_file):
             raise BadPluginError(
                 formatted_message=f"Plugin file '{next_plugin_file}' does not exist."
@@ -243,6 +244,7 @@ class PluginManager:
         old_directory = os.getcwd()
         try:
             for next_plugin_file in plugin_files:
+                os.chdir(old_directory)
                 file_base_name = os.path.basename(next_plugin_file)
                 next_plugin_module = (
                     file_base_name[:-3]
@@ -285,16 +287,31 @@ class PluginManager:
                 next_command_line_argument
             ]
             try:
-                plugin_instance.generate_report(
+                columnar_data_tuple = plugin_instance.generate_report(
                     args.only_changes,
                     column_width,
                     arguments_as_dictionary[plugin_variable_name],
                 )
+            except BadPluginError:
+                raise
             except Exception as this_exception:
                 raise BadPluginError(
                     class_name=type(plugin_instance).__name__,
                     formatted_message="Bad Plugin Error calling generate_report.",
                 ) from this_exception
+
+            if columnar_data_tuple:
+                table = columnar(
+                    columnar_data_tuple[2],
+                    headers=columnar_data_tuple[0],
+                    no_borders=True,
+                    justify=columnar_data_tuple[1],
+                    terminal_width=column_width if column_width != -1 else None,
+                )
+                split_rows = table.split("\n")
+                new_rows = [next_row.rstrip() for next_row in split_rows]
+                print("\n".join(new_rows))
+                print()
 
     def get_output_paths(self) -> List[str]:
         """
