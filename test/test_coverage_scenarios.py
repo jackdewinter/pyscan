@@ -6,14 +6,14 @@ from shutil import copyfile
 from test.patch_builtin_open import PatchBuiltinOpen
 from test.test_scenarios import (
     COBERTURA_COMMAND_LINE_FLAG,
+    COVERAGE_SUMMARY_FILE_NAME,
     ONLY_CHANGES_COMMAND_LINE_FLAG,
     PUBLISH_COMMAND_LINE_FLAG,
+    PUBLISH_DIRECTORY,
     MainlineExecutor,
+    get_coverage_file_name,
     setup_directories,
 )
-
-COBERTURA_COVERAGE_FILE_NAME = "coverage.xml"
-COVERAGE_SUMMARY_FILE_NAME = "coverage.json"
 
 
 def compose_coverage_summary_file():
@@ -21,8 +21,19 @@ def compose_coverage_summary_file():
     Create a test coverage file for a sample report.
     """
 
-    expected_coverage_file = """{"projectName": "pyscan", "reportSource": "pytest", "branchLevel": {"totalMeasured": 4, "totalCovered": 2}, "lineLevel": {"totalMeasured": 15, "totalCovered": 10}}"""
-    return expected_coverage_file
+    return """{
+    "projectName": "project_summarizer",
+    "reportSource": "Coverage.py",
+    "branchLevel": {
+        "totalMeasured": 4,
+        "totalCovered": 2
+    },
+    "lineLevel": {
+        "totalMeasured": 15,
+        "totalCovered": 10
+    }
+}
+"""
 
 
 def test_summarize_simple_cobertura_report(
@@ -39,31 +50,161 @@ def test_summarize_simple_cobertura_report(
         temporary_work_directory=temporary_work_directory,
     )
     cobertura_coverage_file = os.path.join(
-        temporary_work_directory.name, COBERTURA_COVERAGE_FILE_NAME
+        temporary_work_directory.name, get_coverage_file_name()
     )
     copyfile(
-        os.path.join(executor.resource_directory, COBERTURA_COVERAGE_FILE_NAME),
+        os.path.join(executor.resource_directory, get_coverage_file_name()),
         cobertura_coverage_file,
     )
     summary_coverage_file = os.path.join(report_directory, COVERAGE_SUMMARY_FILE_NAME)
 
     suppplied_arguments = [COBERTURA_COMMAND_LINE_FLAG, cobertura_coverage_file]
 
-    expected_output = """\
+    expected_output = """
 
 Test Coverage Summary
 ---------------------
 
-Type           Covered   Measured      Percentage
-------------  --------  ---------  --------------
-Instructions  --         --        -----
-Lines         10 (+10)   15 (+15)  66.67 (+66.67)
-Branches       2 ( +2)    4 ( +4)  50.00 (+50.00)
-Complexity    --         --        -----
-Methods       --         --        -----
-Classes       --         --        -----
+
+  TYPE           COVERED  MEASURED      PERCENTAGE
+
+  Instructions  --        --        -----
+  Lines         10 (+10)  15 (+15)  66.67 (+66.67)
+  Branches       2 ( +2)   4 ( +4)  50.00 (+50.00)
+  Complexity    --        --        -----
+  Methods       --        --        -----
+  Classes       --        --        -----
 
 """
+    expected_error = ""
+    expected_return_code = 0
+    expected_test_coverage_file = compose_coverage_summary_file()
+
+    # Act
+    execute_results = executor.invoke_main(
+        arguments=suppplied_arguments, cwd=temporary_work_directory.name
+    )
+
+    # Assert
+    execute_results.assert_results(
+        expected_output, expected_error, expected_return_code
+    )
+    execute_results.assert_resultant_file(
+        summary_coverage_file, expected_test_coverage_file
+    )
+    return (
+        executor,
+        temporary_work_directory,
+        publish_directory,
+        cobertura_coverage_file,
+    )
+
+
+def test_summarize_simple_cobertura_report_with_reduced_columns(
+    create_publish_directory=False, temporary_work_directory=None
+):
+    """
+    Test the summarizing of a simple cobertura report with no previous summary.
+    """
+
+    # Arrange
+    executor = MainlineExecutor()
+    temporary_work_directory, report_directory, publish_directory = setup_directories(
+        create_publish_directory=create_publish_directory,
+        temporary_work_directory=temporary_work_directory,
+    )
+    cobertura_coverage_file = os.path.join(
+        temporary_work_directory.name, get_coverage_file_name()
+    )
+    copyfile(
+        os.path.join(executor.resource_directory, get_coverage_file_name()),
+        cobertura_coverage_file,
+    )
+    summary_coverage_file = os.path.join(report_directory, COVERAGE_SUMMARY_FILE_NAME)
+
+    suppplied_arguments = [
+        COBERTURA_COMMAND_LINE_FLAG,
+        cobertura_coverage_file,
+        "--columns",
+        "50",
+    ]
+
+    expected_output = """
+
+Test Coverage Summary
+---------------------
+
+
+  TYPE           COVERED  MEASURED    PERCENTAGE
+
+  Instructions  --        --        -----
+
+  Lines         10 (+10)  15 (+15)  66.67 (+66.6
+                                              7)
+  Branches       2 ( +2)   4 ( +4)  50.00 (+50.0
+                                              0)
+  Complexity    --        --        -----
+
+  Methods       --        --        -----
+
+  Classes       --        --        -----
+
+
+
+"""
+    expected_error = ""
+    expected_return_code = 0
+    expected_test_coverage_file = compose_coverage_summary_file()
+
+    # Act
+    execute_results = executor.invoke_main(
+        arguments=suppplied_arguments, cwd=temporary_work_directory.name
+    )
+
+    # Assert
+    execute_results.assert_results(
+        expected_output, expected_error, expected_return_code
+    )
+    execute_results.assert_resultant_file(
+        summary_coverage_file, expected_test_coverage_file
+    )
+    return (
+        executor,
+        temporary_work_directory,
+        publish_directory,
+        cobertura_coverage_file,
+    )
+
+
+def test_summarize_simple_cobertura_report_with_quiet(
+    create_publish_directory=False, temporary_work_directory=None
+):
+    """
+    Test the summarizing of a simple cobertura report with no previous summary.
+    """
+
+    # Arrange
+    executor = MainlineExecutor()
+    temporary_work_directory, report_directory, publish_directory = setup_directories(
+        create_publish_directory=create_publish_directory,
+        temporary_work_directory=temporary_work_directory,
+    )
+    cobertura_coverage_file = os.path.join(
+        temporary_work_directory.name, get_coverage_file_name()
+    )
+    copyfile(
+        os.path.join(executor.resource_directory, get_coverage_file_name()),
+        cobertura_coverage_file,
+    )
+    summary_coverage_file = os.path.join(report_directory, COVERAGE_SUMMARY_FILE_NAME)
+
+    suppplied_arguments = [
+        COBERTURA_COMMAND_LINE_FLAG,
+        cobertura_coverage_file,
+        "--quiet",
+    ]
+
+    expected_output = ""
     expected_error = ""
     expected_return_code = 0
     expected_test_coverage_file = compose_coverage_summary_file()
@@ -97,14 +238,14 @@ def test_summarize_cobertura_report_with_bad_source():
     executor = MainlineExecutor()
     temporary_work_directory, _, _ = setup_directories()
     cobertura_coverage_file = os.path.join(
-        temporary_work_directory.name, COBERTURA_COVERAGE_FILE_NAME
+        temporary_work_directory.name, get_coverage_file_name()
     )
 
     assert not os.path.exists(cobertura_coverage_file)
     suppplied_arguments = [COBERTURA_COMMAND_LINE_FLAG, cobertura_coverage_file]
 
     expected_output = (
-        "Project test coverage file '" + cobertura_coverage_file + "' does not exist.\n"
+        f"Project test coverage file '{cobertura_coverage_file}' does not exist.\n"
     )
     expected_error = ""
     expected_return_code = 1
@@ -129,7 +270,7 @@ def test_summarize_cobertura_report_with_source_as_directory():
     executor = MainlineExecutor()
     temporary_work_directory, _, _ = setup_directories()
     cobertura_coverage_file = os.path.join(
-        temporary_work_directory.name, COBERTURA_COVERAGE_FILE_NAME
+        temporary_work_directory.name, get_coverage_file_name()
     )
 
     os.makedirs(cobertura_coverage_file)
@@ -137,7 +278,7 @@ def test_summarize_cobertura_report_with_source_as_directory():
     suppplied_arguments = [COBERTURA_COMMAND_LINE_FLAG, cobertura_coverage_file]
 
     expected_output = (
-        "Project test coverage file '" + cobertura_coverage_file + "' is not a file.\n"
+        f"Project test coverage file '{cobertura_coverage_file}' is not a file.\n"
     )
     expected_error = ""
     expected_return_code = 1
@@ -177,9 +318,10 @@ def test_summarize_simple_cobertura_report_and_publish(
 
     suppplied_arguments = [PUBLISH_COMMAND_LINE_FLAG]
 
-    expected_output = """\
-Publish directory 'publish' does not exist.  Creating.
-"""
+    expected_output = (
+        f"Publish directory '{PUBLISH_DIRECTORY}' does not exist.  Creating.\n"
+        + f"Published: {os.path.join(PUBLISH_DIRECTORY, COVERAGE_SUMMARY_FILE_NAME)}"
+    )
     expected_error = ""
     expected_return_code = 0
     expected_test_coverage_file = compose_coverage_summary_file()
@@ -226,19 +368,20 @@ def test_summarize_simple_cobertura_report_and_publish_and_summarize_again(
 
     suppplied_arguments = [COBERTURA_COMMAND_LINE_FLAG, cobertura_coverage_file]
 
-    expected_output = """\
+    expected_output = """
 
 Test Coverage Summary
 ---------------------
 
-Type           Covered   Measured   Percentage
-------------  --------  ---------  -----------
-Instructions        --         --        -----
-Lines               10         15        66.67
-Branches             2          4        50.00
-Complexity          --         --        -----
-Methods             --         --        -----
-Classes             --         --        -----
+
+  TYPE          COVERED  MEASURED  PERCENTAGE
+
+  Instructions       --        --       -----
+  Lines              10        15       66.67
+  Branches            2         4       50.00
+  Complexity         --        --       -----
+  Methods            --        --       -----
+  Classes            --        --       -----
 
 """
     expected_error = ""
@@ -279,7 +422,7 @@ def test_summarize_simple_cobertura_report_and_publish_and_summarize_again_only_
         cobertura_coverage_file,
     ]
 
-    expected_output = """\
+    expected_output = """
 
 Test Coverage Summary
 ---------------------
@@ -310,7 +453,7 @@ def test_summarize_bad_xml_test_coverage():
     executor = MainlineExecutor()
     temporary_work_directory, _, _ = setup_directories()
     cobertura_coverage_file = os.path.join(
-        temporary_work_directory.name, COBERTURA_COVERAGE_FILE_NAME
+        temporary_work_directory.name, get_coverage_file_name()
     )
     copyfile(
         os.path.join(executor.resource_directory, "coverage-bad.xml"),
@@ -320,9 +463,8 @@ def test_summarize_bad_xml_test_coverage():
     suppplied_arguments = [COBERTURA_COMMAND_LINE_FLAG, cobertura_coverage_file]
 
     expected_output = (
-        "Project test coverage file '"
-        + cobertura_coverage_file
-        + "' is not a proper Cobertura-format test coverage file.\n"
+        f"Project test coverage file '{cobertura_coverage_file}' is not a "
+        + "proper Cobertura-format test coverage file.\n"
     )
     expected_error = ""
     expected_return_code = 1
@@ -347,7 +489,7 @@ def test_summarize_bad_test_coverage():
     executor = MainlineExecutor()
     temporary_work_directory, _, _ = setup_directories()
     cobertura_coverage_file = os.path.join(
-        temporary_work_directory.name, COBERTURA_COVERAGE_FILE_NAME
+        temporary_work_directory.name, get_coverage_file_name()
     )
     copyfile(
         os.path.join(executor.resource_directory, "coverage-bad.txt"),
@@ -356,11 +498,7 @@ def test_summarize_bad_test_coverage():
 
     suppplied_arguments = [COBERTURA_COMMAND_LINE_FLAG, cobertura_coverage_file]
 
-    expected_output = (
-        "Project test coverage file '"
-        + cobertura_coverage_file
-        + "' is not a valid test coverage file.\n"
-    )
+    expected_output = f"Project test coverage file '{cobertura_coverage_file}' is not a valid test coverage file.\n"
     expected_error = ""
     expected_return_code = 1
 
@@ -384,20 +522,22 @@ def test_summarize_bad_report_directory():
     executor = MainlineExecutor()
     temporary_work_directory, _, _ = setup_directories(create_report_directory=False)
     cobertura_coverage_file = os.path.join(
-        temporary_work_directory.name, COBERTURA_COVERAGE_FILE_NAME
+        temporary_work_directory.name, get_coverage_file_name()
     )
     copyfile(
-        os.path.join(executor.resource_directory, COBERTURA_COVERAGE_FILE_NAME),
+        os.path.join(executor.resource_directory, get_coverage_file_name()),
         cobertura_coverage_file,
     )
 
     suppplied_arguments = [COBERTURA_COMMAND_LINE_FLAG, cobertura_coverage_file]
 
-    expected_output = """\
-Summary output path 'report' does not exist.
-"""
-    expected_error = ""
-    expected_return_code = 1
+    expected_output = ""
+    expected_error = """usage: main.py [-h] [--version] [--add-plugin ADD_PLUGIN]
+               [--report-dir REPORT_DIR] [--publish-dir PUBLISH_DIR]
+               [--cobertura path] [--junit path] [--only-changes] [--publish]
+               [--quiet] [--columns DISPLAY_COLUMNS]
+main.py: error: argument --report-dir: Path 'report' does not exist."""
+    expected_return_code = 2
 
     # Act
     execute_results = executor.invoke_main(
@@ -421,22 +561,24 @@ def test_summarize_invalid_published_summary_file():
         create_publish_directory=True
     )
     cobertura_coverage_file = os.path.join(
-        temporary_work_directory.name, COBERTURA_COVERAGE_FILE_NAME
+        temporary_work_directory.name, get_coverage_file_name()
     )
     copyfile(
-        os.path.join(executor.resource_directory, COBERTURA_COVERAGE_FILE_NAME),
+        os.path.join(executor.resource_directory, get_coverage_file_name()),
         cobertura_coverage_file,
     )
     summary_coverage_file = os.path.join(publish_directory, COVERAGE_SUMMARY_FILE_NAME)
 
-    with open(summary_coverage_file, "w") as outfile:
+    with open(summary_coverage_file, "w", encoding="utf-8") as outfile:
         outfile.write("this is not a json file")
 
     suppplied_arguments = [COBERTURA_COMMAND_LINE_FLAG, cobertura_coverage_file]
 
-    expected_output = """\
-Previous coverage summary file 'publish\\coverage.json' is not a valid JSON file (Expecting value: line 1 column 1 (char 0)).
-"""
+    file_name = os.path.join(PUBLISH_DIRECTORY, COVERAGE_SUMMARY_FILE_NAME)
+    expected_output = (
+        f"Previous coverage summary file '{file_name}' is not "
+        + "a valid JSON file (Expecting value: line 1 column 1 (char 0))."
+    )
     expected_error = ""
     expected_return_code = 1
 
@@ -467,7 +609,11 @@ def test_summarize_simple_cobertura_report_and_publish_and_summarize_with_error_
 
     suppplied_arguments = [COBERTURA_COMMAND_LINE_FLAG, cobertura_coverage_file]
 
-    expected_output = "Previous coverage summary file 'publish\\coverage.json' was not loaded (None).\n"
+    file_name = os.path.join(PUBLISH_DIRECTORY, COVERAGE_SUMMARY_FILE_NAME)
+
+    expected_output = (
+        f"Previous coverage summary file '{file_name}' was not loaded (None).\n"
+    )
     expected_error = ""
     expected_return_code = 1
 
@@ -500,10 +646,10 @@ def test_summarize_simple_cobertura_report_with_error_on_report_write():
     executor = MainlineExecutor()
     temporary_work_directory, report_directory, _ = setup_directories()
     cobertura_coverage_file = os.path.join(
-        temporary_work_directory.name, COBERTURA_COVERAGE_FILE_NAME
+        temporary_work_directory.name, get_coverage_file_name()
     )
     copyfile(
-        os.path.join(executor.resource_directory, COBERTURA_COVERAGE_FILE_NAME),
+        os.path.join(executor.resource_directory, get_coverage_file_name()),
         cobertura_coverage_file,
     )
     summary_coverage_file = os.path.join(report_directory, COVERAGE_SUMMARY_FILE_NAME)
@@ -511,9 +657,8 @@ def test_summarize_simple_cobertura_report_with_error_on_report_write():
     suppplied_arguments = [COBERTURA_COMMAND_LINE_FLAG, cobertura_coverage_file]
 
     expected_output = (
-        "Project test coverage summary file '"
-        + os.path.abspath(summary_coverage_file)
-        + "' was not written (None).\n"
+        f"Project test coverage summary file '{os.path.abspath(summary_coverage_file)}' "
+        + "was not written (None).\n"
     )
     expected_error = ""
     expected_return_code = 1

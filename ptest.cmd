@@ -2,16 +2,17 @@
 setlocal EnableDelayedExpansion
 pushd %~dp0
 
+rem Required to make sure coverage is written to the right areas.
 set COVERAGE_FILE=build/.coverage
+set "PROJECT_DIRECTORY=%cd%"
+set PYTHONPATH=%PROJECT_DIRECTORY%
 
 rem Set needed environment variables.
 set PTEST_TEMPFILE=temp_ptest.txt
 set PTEST_SCRIPT_DIRECTORY=%~dp0
-set PTEST_PYSCAN_SCRIPT_PATH=%PTEST_SCRIPT_DIRECTORY%..\pyscan\pyscan\main.py
+set PTEST_PROJECT_SUMMARIZER_SCRIPT_PATH=python %PTEST_SCRIPT_DIRECTORY%\project_summarizer\main.py
 set PTEST_TEST_RESULTS_PATH=report\tests.xml
 set PTEST_TEST_COVERAGE_PATH=report\coverage.xml
-set "PROJECT_DIRECTORY=%cd%"
-set PYTHONPATH=%PROJECT_DIRECTORY%
 
 rem Look for options on the command line.
 set PTEST_PUBLISH_SUMMARIES=
@@ -74,9 +75,9 @@ if defined PTEST_KEYWORD (
 	set PTEST_KEYWORD=-k %PTEST_KEYWORD%
 )
 
-set PTEST_PYSCAN_OPTIONS=
+set PTEST_PROJECT_SUMMARIZER_OPTIONS=
 if not defined PTEST_FULL_REPORT (
-	set PTEST_PYSCAN_OPTIONS=--only-changes
+	set PTEST_PROJECT_SUMMARIZER_OPTIONS=--only-changes
 )
 
 if defined PTEST_MULTI_CORE_ARGS (
@@ -88,13 +89,13 @@ if defined PTEST_MULTI_CORE_ARGS (
 )
 
 rem Enter main part of script.
+set PYTEST_ARGS=--timeout=10 -ra --strict-markers --junitxml=report/tests.xml --html=report/report.html
 if defined PTEST_KEYWORD (
 	echo {Executing partial test suite...}
-	set PYTEST_ARGS=
 ) else (
 	if defined PTEST_COVERAGE_MODE (
 		echo {Executing full test suite with coverage...}
-		set PYTEST_ARGS=--cov-fail-under=90 --cov --cov-branch --cov-report xml:report/coverage.xml --cov-report html:report/coverage 
+		set PYTEST_ARGS=%PYTEST_ARGS% --cov --cov-branch --cov-report xml:report/coverage.xml --cov-report html:report/coverage
 	) else (
 		echo {Executing full test suite...}
 	)
@@ -125,12 +126,12 @@ if defined PTEST_KEYWORD (
 set PTEST_REPORT_OPTIONS=--junit %PTEST_TEST_RESULTS_PATH%
 if defined PTEST_COVERAGE_MODE (
 	if not defined TEST_EXECUTION_FAILED (
-		set PTEST_REPORT_OPTIONS=%PTEST_REPORT_OPTIONS% --cobertura=%PTEST_TEST_COVERAGE_PATH%
+		set PTEST_REPORT_OPTIONS=%PTEST_REPORT_OPTIONS% --cobertura %PTEST_TEST_COVERAGE_PATH%
 	)
 )
 
 echo {Summarizing changes in execution of full test suite.}
-pipenv run python %PTEST_PYSCAN_SCRIPT_PATH% %PTEST_PYSCAN_OPTIONS% %PTEST_REPORT_OPTIONS%
+pipenv run %PTEST_PROJECT_SUMMARIZER_SCRIPT_PATH% %PTEST_PROJECT_SUMMARIZER_OPTIONS% %PTEST_REPORT_OPTIONS%
 if ERRORLEVEL 1 (
 	echo.
 	echo {Summarizing changes in execution of full test suite failed.}
@@ -146,7 +147,7 @@ goto success_end
 
 :publish_start
 echo {Publishing summaries from last test runs.}
-pipenv run python %PTEST_PYSCAN_SCRIPT_PATH% --publish
+pipenv run %PTEST_PROJECT_SUMMARIZER_SCRIPT_PATH% --publish
 if ERRORLEVEL 1 (
 	echo.
 	echo {Publishing summaries from last test runs failed.}

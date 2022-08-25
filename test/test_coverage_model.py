@@ -3,7 +3,10 @@ Module to test the classes for the coverage models.  This coverage is required
 as the CoverageMeasurement class and the CoverageTotals class both implement
 the _eq_ function.
 """
-from pyscan.model import CoverageMeasurement, CoverageTotals
+from project_summarizer.plugins.coverage_model import (
+    CoverageMeasurement,
+    CoverageTotals,
+)
 
 
 def test_coverage_totals_equal():
@@ -21,7 +24,7 @@ def test_coverage_totals_equal():
     second_total.line_level = CoverageMeasurement(total_covered=15, total_measured=20)
 
     # Act
-    actual_result = bool(first_total == second_total)
+    actual_result = first_total == second_total
 
     # Assert
     assert actual_result
@@ -49,7 +52,7 @@ def test_coverage_totals_not_equal():
     )
 
     # Act
-    actual_result = bool(first_total == second_total)
+    actual_result = first_total == second_total
 
     # Assert
     assert not actual_result
@@ -66,7 +69,7 @@ def test_coverage_totals_not_equal_different_object():
     first_total.line_level = CoverageMeasurement(total_covered=15, total_measured=20)
 
     # Act
-    actual_result = bool(first_total == "second_total")
+    actual_result = first_total == "second_total"
 
     # Assert
     assert not actual_result
@@ -83,7 +86,7 @@ def test_coverage_measurements_equal():
     second_measurement = CoverageMeasurement(total_covered=5, total_measured=10)
 
     # Act
-    actual_result = bool(first_measurement == second_measurement)
+    actual_result = first_measurement == second_measurement
 
     # Assert
     assert actual_result
@@ -107,7 +110,7 @@ def test_coverage_measurements_not_equal():
     )
 
     # Act
-    actual_result = bool(first_measurement == second_measurement)
+    actual_result = first_measurement == second_measurement
 
     # Assert
     assert not actual_result
@@ -122,7 +125,7 @@ def test_coverage_measurement_not_equal_different_object():
     first_measurement = CoverageMeasurement(total_covered=5, total_measured=10)
 
     # Act
-    actual_result = bool(first_measurement == "second_measurement")
+    actual_result = first_measurement == "second_measurement"
 
     # Assert
     assert not actual_result

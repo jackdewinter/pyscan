@@ -1,19 +1,14 @@
 {
     "disables-by-file": {
-        "pyscan/__init__.py": {},
-        "pyscan/__main__.py": {},
-        "pyscan/main.py": {
-            "too-many-arguments": 2,
-            "unused-private-member": 1
+        "project_summarizer/__init__.py": {},
+        "project_summarizer/__main__.py": {},
+        "project_summarizer/main.py": {
+            "too-few-public-methods": 1
         },
-        "pyscan/model.py": {
-            "too-many-arguments": 2,
-            "too-many-instance-attributes": 1
-        }
+        "project_summarizer/summarize_context.py": {},
+        "project_summarizer/version.py": {}
     },
     "disables-by-name": {
-        "too-many-arguments": 4,
-        "unused-private-member": 1,
-        "too-many-instance-attributes": 1
+        "too-few-public-methods": 1
     }
 }

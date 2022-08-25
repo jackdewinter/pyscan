@@ -9,6 +9,10 @@ import sys
 import traceback
 from abc import ABC, abstractmethod
 
+from project_summarizer.plugin_manager.project_summarizer_plugin import (
+    ProjectSummarizerPlugin,
+)
+
 LOGGER = logging.getLogger(__name__)
 
 
@@ -52,14 +56,13 @@ class InProcessResult:
                 diff_values = "\n".join(list(diff))
                 print(diff_values, file=sys.stderr)
                 if not was_found:
-                    assert (
-                        False
-                    ), f"Block\n---\n{next_text_block}\n---\nwas not found in\n---\n{actual_stream.getvalue()}"
+                    raise AssertionError(
+                        f"Block\n---\n{next_text_block}\n---\nwas not found in\n---\n{actual_stream.getvalue()}"
+                    )
         elif actual_stream.getvalue().strip() != expected_text.strip():
             diff = difflib.ndiff(
                 expected_text.splitlines(), actual_stream.getvalue().splitlines()
             )
-
             diff_values = "\n".join(list(diff)) + "\n---\n"
 
             LOGGER.warning(
@@ -71,7 +74,7 @@ class InProcessResult:
             print(f"WARN>expect>>{cls.__make_value_visible(expected_text)}")
             if log_extra:
                 print(f"log_extra:{log_extra}")
-            assert False, f"{stream_name} not as expected:\n{diff_values}"
+            raise AssertionError(f"{stream_name} not as expected:\n{diff_values}")
 
     # pylint: enable=too-many-arguments
 
@@ -194,8 +197,13 @@ class InProcessResult:
         """
 
         split_expected_contents = expected_contents.split("\n")
-        with open(file_path, "r", encoding="utf-8") as infile:
+        with open(
+            file_path, "r", encoding=ProjectSummarizerPlugin.DEFAULT_FILE_ENCODING
+        ) as infile:
             split_actual_contents = infile.readlines()
+        for line_index, line_content in enumerate(split_actual_contents):
+            if line_content[-1] == "\n":
+                split_actual_contents[line_index] = line_content[:-1]
 
         are_different = len(split_expected_contents) != len(split_actual_contents)
         if not are_different:
@@ -211,9 +219,9 @@ class InProcessResult:
         if are_different:
             diff = difflib.ndiff(split_actual_contents, split_expected_contents)
             diff_values = "\n".join(list(diff))
-            assert (
-                False
-            ), f"Actual and expected contents of '{file_path}' are not equal:\n---\n{diff_values}\n---\n"
+            raise AssertionError(
+                f"Actual and expected contents of '{file_path}' are not equal:\n---\n{diff_values}\n---\n"
+            )
 
 
 # pylint: disable=too-few-public-methods
@@ -240,7 +248,7 @@ class SystemState:
         """
 
         os.chdir(self.saved_cwd)
-        os.environ = self.saved_env
+        os.environ = self.saved_env  # noqa B003
         sys.argv = self.saved_argv
         sys.stdout = self.saved_stdout
         sys.stderr = self.saved_stderr

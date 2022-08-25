@@ -23,7 +23,7 @@ class PatchBuiltinOpen:
         self.mock_patcher = unittest.mock.patch("builtins.open")
         self.patched_open = self.mock_patcher.start()
         self.patched_open.side_effect = self.my_open
-        self.open_file_args = ["map=" + str(self.exception_map)]
+        self.open_file_args = [f"map={str(self.exception_map)}"]
 
     def stop(self):
         """
@@ -70,7 +70,11 @@ class PatchBuiltinOpen:
         self.mock_patcher.stop()
         try:
             self.open_file_args.append((args, "passthrough"))
-            return open(filename, filemode, **kwargs)
+            return open(
+                filename,
+                filemode,
+                **kwargs,
+            )
         finally:
             self.patched_open = self.mock_patcher.start()
             self.patched_open.side_effect = self.my_open
