@@ -1,5 +1,5 @@
 report/
 build/
 .coverage
-dist/
-project_summarizer.egg-info/
+project_summarizer.egg-info/*
+dist/*

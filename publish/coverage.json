@@ -2,8 +2,8 @@
     "projectName": "project_summarizer",
     "reportSource": "Coverage.py",
     "branchLevel": {
-        "totalMeasured": 226,
-        "totalCovered": 226
+        "totalMeasured": 244,
+        "totalCovered": 244
     },
     "lineLevel": {
         "totalMeasured": 833,
