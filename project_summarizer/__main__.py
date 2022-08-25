@@ -1,16 +1,16 @@
 """
-Module to provide for "-m pyscan" access to the module,
+Module to provide for "-m project_summarizer" access to the module,
 as if it was run from the console.
 """
-import pyscan
+from project_summarizer.main import ProjectSummarizer
 
 
-def main():
+def main() -> None:
     """
     Main entry point.  Exposed in this manner so that the setup
     entry_points configuration has something to execute.
     """
-    pyscan.PyScan().main()
+    ProjectSummarizer().main()
 
 
 if __name__ == "__main__":

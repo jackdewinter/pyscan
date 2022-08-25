@@ -1,0 +1,2 @@
+defusedxml==0.7.1
+columnar==1.4.1
