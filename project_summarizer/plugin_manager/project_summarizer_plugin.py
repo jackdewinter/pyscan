@@ -7,7 +7,7 @@ import json
 import os
 import sys
 from abc import ABC, abstractmethod
-from typing import Any, Tuple
+from typing import Any, List, Optional, Tuple
 
 import defusedxml.ElementTree as ET  # type: ignore
 from defusedxml.ElementTree import ParseError
@@ -66,7 +66,7 @@ class ProjectSummarizerPlugin(ABC):
     @abstractmethod
     def generate_report(
         self, only_changes: bool, column_width: int, report_file: str
-    ) -> None:
+    ) -> Optional[Tuple[List[str], List[str], List[List[str]]]]:
         """
         Generate the report and display it.
 
@@ -132,7 +132,9 @@ class ProjectSummarizerPlugin(ABC):
                 "w",
                 encoding=ProjectSummarizerPlugin.DEFAULT_FILE_ENCODING,
             ) as outfile:
-                json.dump(object_to_write.to_dict(), outfile, indent=4)
+                if not isinstance(object_to_write, dict):
+                    object_to_write = object_to_write.to_dict()
+                json.dump(object_to_write, outfile, indent=4)
                 outfile.write("\n\n")
         except IOError as ex:
             print(

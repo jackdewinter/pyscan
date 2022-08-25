@@ -53,6 +53,8 @@ PROJECT_CLASSIFIERS = [
 
 PACKAGE_MODULES = [
     "project_summarizer",
+    "project_summarizer.plugin_manager",
+    "project_summarizer.plugins",
 ]
 
 setup(

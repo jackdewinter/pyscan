@@ -9,8 +9,6 @@ import os
 import sys
 from typing import Any, List, Optional, Tuple
 
-from columnar import columnar
-
 from project_summarizer.plugin_manager.plugin_details import PluginDetails
 from project_summarizer.plugin_manager.project_summarizer_plugin import (
     ProjectSummarizerPlugin,
@@ -86,7 +84,7 @@ class JunitPlugin(ProjectSummarizerPlugin):
 
     def generate_report(
         self, only_changes: bool, column_width: int, report_file: str
-    ) -> None:
+    ) -> Optional[Tuple[List[str], List[str], List[List[str]]]]:
         """
         Generate the report and display it.
         """
@@ -100,22 +98,23 @@ class JunitPlugin(ProjectSummarizerPlugin):
         assert self.__output_path is not None
         self.save_summary_file(self.__output_path, new_stats, "test report")
 
-        if column_width:
-            assert self.__context is not None
-            published_test_summary_path = self.__context.compute_published_path_to_file(
-                self.__output_path
-            )
-            loaded_stats, loaded_totals = self.load_test_results_summary_file(
-                published_test_summary_path
-            )
-            self.__report_test_files(
-                new_stats,
-                new_totals,
-                loaded_stats,
-                loaded_totals,
-                only_changes,
-                column_width,
-            )
+        if not column_width:
+            return None
+
+        assert self.__context is not None
+        published_test_summary_path = self.__context.compute_published_path_to_file(
+            self.__output_path
+        )
+        loaded_stats, loaded_totals = self.load_test_results_summary_file(
+            published_test_summary_path
+        )
+        return self.__report_test_files(
+            new_stats,
+            new_totals,
+            loaded_stats,
+            loaded_totals,
+            only_changes,
+        )
 
     def __compose_summary_from_junit_document(
         self, junit_document: Any
@@ -207,7 +206,7 @@ class JunitPlugin(ProjectSummarizerPlugin):
             grand_totals = self.__build_totals(test_totals)
         return test_totals, grand_totals
 
-    # pylint: disable=too-many-arguments, too-many-locals
+    # pylint: disable=too-many-arguments
     def __report_test_files(
         self,
         new_stats: TestTotals,
@@ -215,8 +214,7 @@ class JunitPlugin(ProjectSummarizerPlugin):
         loaded_stats: Optional[TestTotals],
         loaded_totals: Optional[TestMeasurement],
         only_report_changes: bool,
-        column_width: int,
-    ) -> None:
+    ) -> Optional[Tuple[List[str], List[str], List[List[str]]]]:
         """
         Generate a report comparing the current stats with the loaded/previous stats.
         """
@@ -257,11 +255,9 @@ class JunitPlugin(ProjectSummarizerPlugin):
                     row_to_add, test_report_rows, only_report_changes
                 )
 
-        self.print_test_summary(
-            test_report_rows, new_totals, loaded_totals, column_width
-        )
+        return self.print_test_summary(test_report_rows, new_totals, loaded_totals)
 
-    # pylint: enable=too-many-arguments, too-many-locals
+    # pylint: enable=too-many-arguments
 
     @classmethod
     def __generate_match_column(
@@ -391,8 +387,7 @@ class JunitPlugin(ProjectSummarizerPlugin):
         test_report_rows: List[List[str]],
         new_totals: TestMeasurement,
         loaded_totals: TestMeasurement,
-        column_width: int,
-    ) -> None:
+    ) -> Optional[Tuple[List[str], List[str], List[List[str]]]]:
         """
         Print the actual test summaries.
         """
@@ -400,28 +395,19 @@ class JunitPlugin(ProjectSummarizerPlugin):
         print("\nTest Results Summary\n--------------------\n")
         if not test_report_rows:
             print("Test results have not changed since last published test results.")
-        else:
-            test_report_rows.append(["---", "-1 0", "-1 0", "-1 0"])
-            test_report_rows.append(
-                self.__generate_full_match("TOTALS", new_totals, loaded_totals)
-            )
+            return None
+        test_report_rows.append(["---", "-1 0", "-1 0", "-1 0"])
+        test_report_rows.append(
+            self.__generate_full_match("TOTALS", new_totals, loaded_totals)
+        )
 
-            self.__format_test_totals_column(test_report_rows, 1)
-            self.__format_test_totals_column(test_report_rows, 2)
-            self.__format_test_totals_column(test_report_rows, 3)
+        self.__format_test_totals_column(test_report_rows, 1)
+        self.__format_test_totals_column(test_report_rows, 2)
+        self.__format_test_totals_column(test_report_rows, 3)
 
-            hdrs = ["Class Name", "Total Tests", "Failed Tests", "Skipped Tests"]
-
-            table = columnar(
-                test_report_rows,
-                headers=hdrs,
-                no_borders=True,
-                justify=["l", "r", "r", "r"],
-                terminal_width=column_width if column_width != -1 else None,
-            )
-            split_rows = table.split("\n")
-            new_rows = [next_row.rstrip() for next_row in split_rows]
-            print("\n".join(new_rows))
+        justify_columns = ["l", "r", "r", "r"]
+        column_headers = ["Class Name", "Total Tests", "Failed Tests", "Skipped Tests"]
+        return (column_headers, justify_columns, test_report_rows)
 
     @classmethod
     def __add_row_to_report(
