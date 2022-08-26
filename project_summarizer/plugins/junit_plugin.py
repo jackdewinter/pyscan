@@ -61,9 +61,8 @@ class JunitPlugin(ProjectSummarizerPlugin):
         """
         return self.__output_path
 
-    @classmethod
     def add_command_line_arguments(
-        cls, parser: argparse.ArgumentParser
+        self, parser: argparse.ArgumentParser
     ) -> Tuple[str, str]:
         """
         Add a command line argument to denote the file to scan.
