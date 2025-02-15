@@ -618,6 +618,7 @@ def test_summarize_simple_cobertura_report_and_publish_and_summarize_with_error_
     expected_error = ""
     expected_return_code = 1
 
+    print(f"-->publish_directory={publish_directory}")
     summary_coverage_file = os.path.join(publish_directory, COVERAGE_SUMMARY_FILE_NAME)
     print(f"-->summary_coverage_file={summary_coverage_file}")
 
