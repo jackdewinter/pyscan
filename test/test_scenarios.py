@@ -129,7 +129,7 @@ def setup_directories(
         temporary_work_directory.name, alternate_publish_directory
     )
     print(f"publish_directory={publish_directory}")
-    publish_directory=os.path.abspath(publish_directory)
+    publish_directory = os.path.abspath(publish_directory)
     print(f"publish_directory={publish_directory}")
     if create_publish_directory:
         os.makedirs(publish_directory)
