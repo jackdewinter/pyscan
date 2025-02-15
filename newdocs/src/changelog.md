@@ -16,7 +16,7 @@
 ### Fixed
 
 - [Issue 8](https://github.com/jackdewinter/pyscan/issues/8)
-    - As part of cleanup, added bash scripts
+    - As part of cleanup, added bash scripts.
 
 ## Version 0.5.1 - Date: 2025-02-15
 
