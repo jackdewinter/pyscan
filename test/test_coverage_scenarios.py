@@ -632,7 +632,7 @@ def test_summarize_simple_cobertura_report_and_publish_and_summarize_with_error_
         if platform.system() == "Darwin" and not summary_coverage_file.startswith(
             "/private/"
         ):
-            xx = os.path.sep + os.path.join("private", summary_coverage_file)
+            xx = f"/private{summary_coverage_file}"
             print(f"-->register_exception({xx})")
             pbo.register_exception(xx, "r")
         pbo.start()
