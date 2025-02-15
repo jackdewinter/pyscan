@@ -101,6 +101,7 @@ parse_command_line() {
 	MULTIPLE_WORKER_ARGS=
 	KEYWORD_ARG=
 	FAILURE_ARGS="--maxfail=5"
+	GENERATE_HTML_MODE=1
 	PARAMS=()
 	while (("$#")); do
 		case "$1" in
@@ -131,6 +132,10 @@ parse_command_line() {
 			;;
 		-p | --publish)
 			PUBLISH_MODE=1
+			shift
+			;;
+		-nh)
+			GENERATE_HTML_MODE=0
 			shift
 			;;
 		-q | --quiet)
@@ -212,10 +217,16 @@ execute_tests() {
 	if [[ -n ${KEYWORD_ARG[*]} ]]; then
 		echo "{Executing partial test suite...}"
 	else
-		pytest_args=(--strict-markers -ra --junitxml="${TEST_RESULTS_XML_PATH}" --html=report/report.html)
+		pytest_args=(--strict-markers -ra --junitxml="${TEST_RESULTS_XML_PATH}")
+		if [[ ${GENERATE_HTML_MODE} -ne 0 ]] ; then
+			pytest_args+=(--html=report/report.html)
+		fi
 		if [[ ${COVERAGE_MODE} -ne 0 ]]; then
 			echo "{Executing full test suite with coverage...}"
-			pytest_args+=(--cov --cov-branch --cov-report xml:"${TEST_COVERAGE_XML_PATH}" --cov-report html:report/coverage)
+			pytest_args+=(--cov --cov-branch --cov-report xml:"${TEST_COVERAGE_XML_PATH}")
+			if [[ ${GENERATE_HTML_MODE} -ne 0 ]] ; then
+				pytest_args+=(--cov-report html:report/coverage)
+			fi
 		else
 			echo "{Executing full test suite...}"
 		fi
