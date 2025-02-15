@@ -631,6 +631,7 @@ def test_summarize_simple_cobertura_report_and_publish_and_summarize_with_error_
             arguments=suppplied_arguments, cwd=temporary_work_directory.name
         )
     finally:
+        print(f"-->open_file_args={pbo.open_file_args}")
         pbo.stop()
 
     # Assert

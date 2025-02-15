@@ -207,9 +207,10 @@ class CoberturaPlugin(ProjectSummarizerPlugin):
             test_results_to_load
         ):
             try:
-                print(f"-->test_results_to_load={test_results_to_load}")
+                x = os.path.abspath(test_results_to_load)
+                print(f"-->test_results_to_load={x}")
                 with open(
-                    os.path.abspath(test_results_to_load),
+                    x,
                     "r",
                     encoding=ProjectSummarizerPlugin.DEFAULT_FILE_ENCODING,
                 ) as infile:
