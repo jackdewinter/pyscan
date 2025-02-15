@@ -123,7 +123,8 @@ def setup_directories(
         or ProjectSummarizerPlugin.DEFAULT_SUMMARY_PUBLISH_PATH
     )
 
-    print(f"publish_directory={publish_directory}")
+    print(f"temporary_work_directory.name={temporary_work_directory.name}")
+    print(f"alternate_publish_directory={alternate_publish_directory}")
     publish_directory = os.path.join(
         temporary_work_directory.name, alternate_publish_directory
     )
