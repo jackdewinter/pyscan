@@ -2,8 +2,8 @@
 Tests for the basic scenarios for the scanner.
 """
 
-import platform
 import os
+import platform
 import runpy
 import sys
 import tempfile

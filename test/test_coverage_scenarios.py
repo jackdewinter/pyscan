@@ -576,9 +576,8 @@ def test_summarize_invalid_published_summary_file():
 
     suppplied_arguments = [COBERTURA_COMMAND_LINE_FLAG, cobertura_coverage_file]
 
-    file_name = os.path.join(PUBLISH_DIRECTORY, COVERAGE_SUMMARY_FILE_NAME)
     expected_output = (
-        f"Previous coverage summary file '{file_name}' is not "
+        f"Previous coverage summary file '{summary_coverage_file}' is not "
         + "a valid JSON file (Expecting value: line 1 column 1 (char 0))."
     )
     expected_error = ""
