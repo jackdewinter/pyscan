@@ -2,6 +2,7 @@
 Module to provide reporting for coverage files in the Cobertura format.
 """
 
+import platform
 import argparse
 import json
 import os
@@ -207,9 +208,11 @@ class CoberturaPlugin(ProjectSummarizerPlugin):
             test_results_to_load
         ):
             try:
-                print(f"-->test_results_to_load={test_results_to_load}")
+                if platform.system() == "Darwin":
+                    print(f"-->test_results_to_load={test_results_to_load}")
                 x = os.path.abspath(test_results_to_load)
-                print(f"-->test_results_to_load={x}")
+                if platform.system() == "Darwin":
+                    print(f"-->test_results_to_load={x}")
                 with open(
                     x,
                     "r",

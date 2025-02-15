@@ -611,10 +611,11 @@ def test_summarize_simple_cobertura_report_and_publish_and_summarize_with_error_
 
     suppplied_arguments = [COBERTURA_COMMAND_LINE_FLAG, cobertura_coverage_file]
 
-    print(f"os={platform.system()}")
-    print(f"-->publish_directory={publish_directory}")
+    if platform.system() == "Darwin":
+        print(f"-->publish_directory={publish_directory}")
     summary_coverage_file = os.path.join(publish_directory, COVERAGE_SUMMARY_FILE_NAME)
-    print(f"-->summary_coverage_file={summary_coverage_file}")
+    if platform.system() == "Darwin":
+        print(f"-->summary_coverage_file={summary_coverage_file}")
 
     expected_output = f"Previous coverage summary file '{summary_coverage_file}' was not loaded (None).\n"
     expected_error = ""
@@ -630,7 +631,8 @@ def test_summarize_simple_cobertura_report_and_publish_and_summarize_with_error_
             arguments=suppplied_arguments, cwd=temporary_work_directory.name
         )
     finally:
-        print(f"-->open_file_args={pbo.open_file_args}")
+        if platform.system() == "Darwin":
+            print(f"-->open_file_args={pbo.open_file_args}")
         pbo.stop()
 
     # Assert
