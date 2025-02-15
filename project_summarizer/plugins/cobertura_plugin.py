@@ -207,6 +207,7 @@ class CoberturaPlugin(ProjectSummarizerPlugin):
             test_results_to_load
         ):
             try:
+                print(f"-->test_results_to_load={test_results_to_load}")
                 x = os.path.abspath(test_results_to_load)
                 print(f"-->test_results_to_load={x}")
                 with open(
