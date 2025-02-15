@@ -626,7 +626,15 @@ def test_summarize_simple_cobertura_report_and_publish_and_summarize_with_error_
     # Act
     try:
         pbo = PatchBuiltinOpen()
+        if platform.system() == "Darwin":
+            print(f"-->register_exception({summary_coverage_file})")
         pbo.register_exception(summary_coverage_file, "r")
+        if platform.system() == "Darwin" and not summary_coverage_file.startswith(
+            "/private/"
+        ):
+            xx = os.path.sep + os.path.join("private", summary_coverage_file)
+            print(f"-->register_exception({xx})")
+            pbo.register_exception(xx, "r")
         pbo.start()
 
         execute_results = executor.invoke_main(
