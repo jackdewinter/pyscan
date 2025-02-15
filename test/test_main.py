@@ -25,7 +25,7 @@ usage: main.py [-h] [--version] [--stack-trace] [--add-plugin ADD_PLUGIN]
 
 Summarize Python files.
 
-optional arguments:
+options:
   -h, --help            Show this help message and exit.
   --version             Show program's version number and exit.
   --stack-trace         if an error occurs, print out the stack trace for
@@ -83,7 +83,7 @@ usage: __main.py__ [-h] [--version] [--stack-trace] [--add-plugin ADD_PLUGIN]
 
 Summarize Python files.
 
-optional arguments:
+options:
   -h, --help            Show this help message and exit.
   --version             Show program's version number and exit.
   --stack-trace         if an error occurs, print out the stack trace for
@@ -139,7 +139,7 @@ usage: main.py [-h] [--version] [--stack-trace] [--add-plugin ADD_PLUGIN]
 
 Summarize Python files.
 
-optional arguments:
+options:
   -h, --help            Show this help message and exit.
   --version             Show program's version number and exit.
   --stack-trace         if an error occurs, print out the stack trace for
@@ -194,7 +194,7 @@ def test_scanner_with_dash_h():
 
 Summarize Python files.
 
-optional arguments:
+options:
   -h, --help            Show this help message and exit.
   --version             Show program's version number and exit.
   --stack-trace         if an error occurs, print out the stack trace for
@@ -250,7 +250,7 @@ usage: main.py [-h] [--version] [--stack-trace] [--add-plugin ADD_PLUGIN]
 
 Summarize Python files.
 
-optional arguments:
+options:
   -h, --help            Show this help message and exit.
   --version             Show program's version number and exit.
   --stack-trace         if an error occurs, print out the stack trace for
@@ -335,7 +335,7 @@ usage: main.py [-h] [--version] [--stack-trace] [--add-plugin ADD_PLUGIN]
 
 Summarize Python files.
 
-optional arguments:
+options:
   -h, --help            Show this help message and exit.
   --version             Show program's version number and exit.
   --stack-trace         if an error occurs, print out the stack trace for
