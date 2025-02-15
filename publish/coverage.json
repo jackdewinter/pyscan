@@ -2,12 +2,12 @@
     "projectName": "project_summarizer",
     "reportSource": "Unknown",
     "branchLevel": {
-        "totalMeasured": 226,
-        "totalCovered": 226
+        "totalMeasured": 298,
+        "totalCovered": 296
     },
     "lineLevel": {
-        "totalMeasured": 831,
-        "totalCovered": 831
+        "totalMeasured": 838,
+        "totalCovered": 836
     }
 }
 
