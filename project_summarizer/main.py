@@ -1,6 +1,7 @@
 """
 Module to provide for a simple summarization of relevant output files from a build.
 """
+
 import argparse
 import os
 import runpy
@@ -68,7 +69,7 @@ class ProjectSummarizer:
         parser.add_argument(
             "--version",
             action="version",
-            version=f"%(prog)s {self.__version_number}",
+            version=f"{self.__version_number}",
             help="Show program's version number and exit.",
         )
         parser.add_argument(

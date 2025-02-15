@@ -1,7 +1,9 @@
 """
 Tests for the basic scenarios for the scanner.
 """
+
 import os
+import runpy
 import sys
 import tempfile
 from test.pytest_execute import InProcessExecution
@@ -75,8 +77,12 @@ def test_get_summarizer_version():
     executor = MainlineExecutor()
     suppplied_arguments = ["--version"]
 
-    expected_output = """\
-main.py 0.5.0
+    version_path = os.path.join(".", "project_summarizer", "version.py")
+    version_meta = runpy.run_path(version_path)
+    semantic_version = version_meta["__version__"]
+
+    expected_output = f"""
+{semantic_version}
 """
     expected_error = ""
     expected_return_code = 0

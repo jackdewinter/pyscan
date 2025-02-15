@@ -32,7 +32,7 @@ PROJECT_URLS = {
 
 PACKAGE_NAME = "project_summarizer"
 SEMANTIC_VERSION = __get_semantic_version()
-MINIMUM_PYTHON_VERSION = "3.8.0"
+MINIMUM_PYTHON_VERSION = "3.9.0"
 
 ONE_LINE_DESCRIPTION = (
     "A simple tool for summarizing information about the current project."
@@ -40,7 +40,7 @@ ONE_LINE_DESCRIPTION = (
 LONG_DESCRIPTION = __load_readme_file()
 LONG_DESCRIPTION_CONTENT_TYPE = "text/markdown"
 
-KEYWORDS = [""]
+KEYWORDS = ["project", "tool", "coverage", "pytest"]
 PROJECT_CLASSIFIERS = [
     "Development Status :: 4 - Beta",
     "Environment :: Console",

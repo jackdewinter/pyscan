@@ -1,6 +1,7 @@
 """
 Module to test the various profiles seen with various coverage tools.
 """
+
 from project_summarizer.plugins.coverage_model import (
     CoverageMeasurement,
     CoverageTotals,

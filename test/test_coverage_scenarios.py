@@ -1,6 +1,7 @@
 """
 Tests to cover scenarios around the coverage measuring and reporting.
 """
+
 import os
 from shutil import copyfile
 from test.patch_builtin_open import PatchBuiltinOpen
@@ -36,7 +37,7 @@ def compose_coverage_summary_file():
 """
 
 
-def test_summarize_simple_cobertura_report(
+def summarize_simple_cobertura_report(
     create_publish_directory=False, temporary_work_directory=None
 ):
     """
@@ -100,6 +101,13 @@ Test Coverage Summary
     )
 
 
+def test_summarize_simple_cobertura_report():
+    """
+    Test the summarizing of a simple cobertura report with no previous summary.
+    """
+    summarize_simple_cobertura_report()
+
+
 def test_summarize_simple_cobertura_report_with_reduced_columns(
     create_publish_directory=False, temporary_work_directory=None
 ):
@@ -109,7 +117,7 @@ def test_summarize_simple_cobertura_report_with_reduced_columns(
 
     # Arrange
     executor = MainlineExecutor()
-    temporary_work_directory, report_directory, publish_directory = setup_directories(
+    temporary_work_directory, report_directory, _ = setup_directories(
         create_publish_directory=create_publish_directory,
         temporary_work_directory=temporary_work_directory,
     )
@@ -168,12 +176,6 @@ Test Coverage Summary
     execute_results.assert_resultant_file(
         summary_coverage_file, expected_test_coverage_file
     )
-    return (
-        executor,
-        temporary_work_directory,
-        publish_directory,
-        cobertura_coverage_file,
-    )
 
 
 def test_summarize_simple_cobertura_report_with_quiet(
@@ -185,7 +187,7 @@ def test_summarize_simple_cobertura_report_with_quiet(
 
     # Arrange
     executor = MainlineExecutor()
-    temporary_work_directory, report_directory, publish_directory = setup_directories(
+    temporary_work_directory, report_directory, _ = setup_directories(
         create_publish_directory=create_publish_directory,
         temporary_work_directory=temporary_work_directory,
     )
@@ -220,12 +222,6 @@ def test_summarize_simple_cobertura_report_with_quiet(
     )
     execute_results.assert_resultant_file(
         summary_coverage_file, expected_test_coverage_file
-    )
-    return (
-        executor,
-        temporary_work_directory,
-        publish_directory,
-        cobertura_coverage_file,
     )
 
 
@@ -294,12 +290,10 @@ def test_summarize_cobertura_report_with_source_as_directory():
     )
 
 
-def test_summarize_simple_cobertura_report_and_publish(
+def summarize_simple_cobertura_report_and_publish(
     temporary_work_directory=None, check_file_contents=True
 ):
     """
-    Test the summarizing of a simple cobertura report, then publishing that report.
-
     NOTE: This function is in this module because of the other tests in this module
     that rely on it.  Moving it to the test_publish_scenarios module would create
     a circular reference.
@@ -311,7 +305,7 @@ def test_summarize_simple_cobertura_report_and_publish(
         temporary_work_directory,
         publish_directory,
         cobertura_coverage_file,
-    ) = test_summarize_simple_cobertura_report(
+    ) = summarize_simple_cobertura_report(
         temporary_work_directory=temporary_work_directory
     )
     summary_coverage_file = os.path.join(publish_directory, COVERAGE_SUMMARY_FILE_NAME)
@@ -348,6 +342,13 @@ def test_summarize_simple_cobertura_report_and_publish(
     )
 
 
+def test_summarize_simple_cobertura_report_and_publish():
+    """
+    Test the summarizing of a simple cobertura report, then publishing that report.
+    """
+    summarize_simple_cobertura_report_and_publish()
+
+
 def test_summarize_simple_cobertura_report_and_publish_and_summarize_again(
     temporary_work_directory=None, check_file_contents=True
 ):
@@ -361,7 +362,7 @@ def test_summarize_simple_cobertura_report_and_publish_and_summarize_again(
         temporary_work_directory,
         _,
         cobertura_coverage_file,
-    ) = test_summarize_simple_cobertura_report_and_publish(
+    ) = summarize_simple_cobertura_report_and_publish(
         temporary_work_directory=temporary_work_directory,
         check_file_contents=check_file_contents,
     )
@@ -411,7 +412,7 @@ def test_summarize_simple_cobertura_report_and_publish_and_summarize_again_only_
         temporary_work_directory,
         _,
         cobertura_coverage_file,
-    ) = test_summarize_simple_cobertura_report_and_publish(
+    ) = summarize_simple_cobertura_report_and_publish(
         temporary_work_directory=temporary_work_directory,
         check_file_contents=check_file_contents,
     )
@@ -605,7 +606,7 @@ def test_summarize_simple_cobertura_report_and_publish_and_summarize_with_error_
         temporary_work_directory,
         publish_directory,
         cobertura_coverage_file,
-    ) = test_summarize_simple_cobertura_report_and_publish()
+    ) = summarize_simple_cobertura_report_and_publish()
 
     suppplied_arguments = [COBERTURA_COMMAND_LINE_FLAG, cobertura_coverage_file]
 

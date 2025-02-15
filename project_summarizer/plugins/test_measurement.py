@@ -2,7 +2,6 @@
 Module to provide an encapsulation of the test measurements.
 """
 
-
 from typing import Any, Dict
 
 
@@ -10,6 +9,8 @@ class TestMeasurement:
     """
     Class to provide an encapsulation of the test measurements.
     """
+
+    __test__ = False
 
     # pylint: disable=too-many-arguments
     def __init__(
