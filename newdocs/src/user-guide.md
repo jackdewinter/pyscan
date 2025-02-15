@@ -1,6 +1,6 @@
 # Note
 
-Our team is equally versed at using the Window CMD scripts as we are using Bash
+Our team is equally versed at using the Windows CMD scripts as we are using Bash
 scripts. For convenience, the following examples will refer to the `ptest.sh` Bash
 script for executing a series of tests and observing the changes in the summary
 information.  Those references to `ptest.sh` can easily be replaced with the
