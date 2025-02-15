@@ -3,6 +3,7 @@ Tests to cover scenarios around the coverage measuring and reporting.
 """
 
 import os
+import platform
 from shutil import copyfile
 from test.patch_builtin_open import PatchBuiltinOpen
 from test.test_scenarios import (
@@ -610,13 +611,12 @@ def test_summarize_simple_cobertura_report_and_publish_and_summarize_with_error_
 
     suppplied_arguments = [COBERTURA_COMMAND_LINE_FLAG, cobertura_coverage_file]
 
+    print(f"os={platform.system()}")
     print(f"-->publish_directory={publish_directory}")
     summary_coverage_file = os.path.join(publish_directory, COVERAGE_SUMMARY_FILE_NAME)
     print(f"-->summary_coverage_file={summary_coverage_file}")
 
-    expected_output = (
-        f"Previous coverage summary file '{summary_coverage_file}' was not loaded (None).\n"
-    )
+    expected_output = f"Previous coverage summary file '{summary_coverage_file}' was not loaded (None).\n"
     expected_error = ""
     expected_return_code = 1
 
