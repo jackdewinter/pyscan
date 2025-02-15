@@ -24,7 +24,7 @@ columnar = "==1.4.1"
 defusedxml = "==0.7.1"
 
 [requires]
-python_version = "3.8"
+python_version = "3.13"
 
 [pipenv]
 allow_prereleases = true

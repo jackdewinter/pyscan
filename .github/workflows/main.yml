@@ -46,6 +46,7 @@ jobs:
 
     name: Scenario Tests
     strategy:
+      fail-fast: false
       matrix:
         python: ["3.13"]
         platform: [windows-latest, ubuntu-latest, macos-latest]
