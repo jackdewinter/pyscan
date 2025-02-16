@@ -3,7 +3,6 @@ Tests for the basic scenarios for the scanner.
 """
 
 import os
-import platform
 import runpy
 import sys
 import tempfile
@@ -124,17 +123,10 @@ def setup_directories(
         or ProjectSummarizerPlugin.DEFAULT_SUMMARY_PUBLISH_PATH
     )
 
-    if platform.system() == "Darwin":
-        print(f"temporary_work_directory.name={temporary_work_directory.name}")
-        print(f"alternate_publish_directory={alternate_publish_directory}")
     publish_directory = os.path.join(
         temporary_work_directory.name, alternate_publish_directory
     )
-    if platform.system() == "Darwin":
-        print(f"publish_directory={publish_directory}")
     publish_directory = os.path.abspath(publish_directory)
-    if platform.system() == "Darwin":
-        print(f"publish_directory={publish_directory}")
     if create_publish_directory:
         os.makedirs(publish_directory)
 

@@ -616,14 +616,8 @@ def test_summarize_simple_cobertura_report_and_publish_and_summarize_with_error_
 
     suppplied_arguments = [COBERTURA_COMMAND_LINE_FLAG, cobertura_coverage_file]
 
-    if platform.system() == "Darwin":
-        print(f"-->publish_directory={publish_directory}")
     summary_coverage_file = os.path.join(publish_directory, COVERAGE_SUMMARY_FILE_NAME)
-    if platform.system() == "Darwin":
-        print(f"-->summary_coverage_file={summary_coverage_file}")
     summary_coverage_file = os.path.abspath(summary_coverage_file)
-    if platform.system() == "Darwin":
-        print(f"-->summary_coverage_file={summary_coverage_file}")
     if platform.system() == "Darwin" and not summary_coverage_file.startswith(
         "/private/"
     ):
@@ -636,23 +630,13 @@ def test_summarize_simple_cobertura_report_and_publish_and_summarize_with_error_
     # Act
     try:
         pbo = PatchBuiltinOpen()
-        if platform.system() == "Darwin":
-            print(f"-->register_exception({summary_coverage_file})")
         pbo.register_exception(summary_coverage_file, "r")
-        if platform.system() == "Darwin" and not summary_coverage_file.startswith(
-            "/private/"
-        ):
-            xx = f"/private{summary_coverage_file}"
-            print(f"-->register_exception({xx})")
-            pbo.register_exception(xx, "r")
         pbo.start()
 
         execute_results = executor.invoke_main(
             arguments=suppplied_arguments, cwd=temporary_work_directory.name
         )
     finally:
-        if platform.system() == "Darwin":
-            print(f"-->open_file_args={pbo.open_file_args}")
         pbo.stop()
 
     # Assert
