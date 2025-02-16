@@ -207,26 +207,24 @@ class CoberturaPlugin(ProjectSummarizerPlugin):
         if os.path.exists(test_results_to_load) and os.path.isfile(
             test_results_to_load
         ):
-            x = test_results_to_load
+            test_results_to_load_path = test_results_to_load
             try:
-                if platform.system() == "Darwin":
-                    print(f"-->test_results_to_load={test_results_to_load}")
-                x = os.path.abspath(test_results_to_load)
-                if platform.system() == "Darwin":
-                    print(f"-->test_results_to_load={x}")
+                test_results_to_load_path = os.path.abspath(test_results_to_load)
                 with open(
-                    x,
+                    test_results_to_load_path,
                     "r",
                     encoding=ProjectSummarizerPlugin.DEFAULT_FILE_ENCODING,
                 ) as infile:
                     results_dictionary = json.load(infile)
             except json.decoder.JSONDecodeError as ex:
                 print(
-                    f"Previous coverage summary file '{x}' is not a valid JSON file ({ex})."
+                    f"Previous coverage summary file '{test_results_to_load_path}' is not a valid JSON file ({ex})."
                 )
                 sys.exit(1)
             except IOError as ex:
-                print(f"Previous coverage summary file '{x}' was not loaded ({ex}).")
+                print(
+                    f"Previous coverage summary file '{test_results_to_load_path}' was not loaded ({ex})."
+                )
                 sys.exit(1)
             test_totals = CoverageTotals.from_dict(results_dictionary)
         return test_totals
