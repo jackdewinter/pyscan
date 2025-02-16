@@ -5,7 +5,6 @@ Module to provide reporting for coverage files in the Cobertura format.
 import argparse
 import json
 import os
-import platform
 import sys
 from typing import Any, List, Optional, Tuple
 
