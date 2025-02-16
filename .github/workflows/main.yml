@@ -106,10 +106,10 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup Python ${{ matrix.python }}
+      - name: Setup Python ${{ env.default-python-version }}
         uses: actions/setup-python@v5.3.0
         with:
-          python-version: ${{ matrix.python }}
+          python-version: ${{ env.default-python-version }}
 
       - name: Install PipEnv
         run: |
