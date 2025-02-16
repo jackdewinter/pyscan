@@ -138,7 +138,7 @@ remove_previous_packaging_directories() {
 # Create the packaging required to be able to publish the application.
 create_package() {
 
-	if ! [[ -d "${SCRIPT_DIR}/report/" ]] ; then
+	if ! [[ -d "${SCRIPT_DIR}/report/" ]]; then
 		mkdir -p "${SCRIPT_DIR}/report/"
 	fi
 

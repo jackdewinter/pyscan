@@ -9,18 +9,18 @@ repos:
     hooks:
       - id: isort
         name: "Format: ISort"
-  # - repo: https://github.com/scop/pre-commit-shfmt
-  #   rev: v3.10.0-2
-  #   hooks:
-  #     - id: shfmt
-  #       name: "Format: ShFmt"
+  - repo: https://github.com/scop/pre-commit-shfmt
+    rev: v3.10.0-1
+    hooks:
+    - id: shfmt
+      name: "Format: ShFmt"
   - repo: local
     hooks:
-      - id: verify-install-requirements
-        name: "Scan:   Verify Install Requirements Match"
-        language: system
-        entry: pipenv run python utils/verify_install_requirements.py
-        pass_filenames: false
+    - id: verify-install-requirements
+      name: "Scan:   Verify Install Requirements Match"
+      language: system
+      entry: pipenv run python utils/verify_install_requirements.py
+      pass_filenames: false
   - repo: https://github.com/pycqa/flake8
     rev: '7.1.1'
     hooks:
@@ -82,7 +82,7 @@ repos:
       ]
       pass_filenames: false
   - repo: https://github.com/jackdewinter/pymarkdown
-    rev: v0.9.7
+    rev: v0.9.27
     hooks:
       - id: pymarkdown
         name: "Scan:   Old Docs"
@@ -95,7 +95,7 @@ repos:
           - README.md
           - ./docs
   - repo: https://github.com/jackdewinter/pymarkdown
-    rev: v0.9.18
+    rev: v0.9.27
     hooks:
       - id: pymarkdown
         name: "Scan:   PyMarkdown (New Documentation)"
@@ -105,10 +105,10 @@ repos:
           - newdocs/clean.json
           - scan
           - ./newdocs/src
-  # - repo: https://github.com/koalaman/shellcheck-precommit
-  #   rev: v0.10.0
-  #   hooks:
-  #   - id: shellcheck
-  #     name: "Scan:   Shellcheck"
-  #     args: ["-x", "-o","require-variable-braces"]
+  - repo: https://github.com/koalaman/shellcheck-precommit
+    rev: v0.10.0
+    hooks:
+    - id: shellcheck
+      name: "Scan:   Shellcheck"
+      args: ["-x", "-o","require-variable-braces"]
 
