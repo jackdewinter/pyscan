@@ -670,7 +670,13 @@ def test_summarize_simple_cobertura_report_with_error_on_report_write():
         os.path.join(executor.resource_directory, get_coverage_file_name()),
         cobertura_coverage_file,
     )
-    summary_coverage_file = os.path.join(report_directory, COVERAGE_SUMMARY_FILE_NAME)
+    summary_coverage_file = os.path.abspath(
+        os.path.join(report_directory, COVERAGE_SUMMARY_FILE_NAME)
+    )
+    if platform.system() == "Darwin" and not summary_coverage_file.startswith(
+        "/private/"
+    ):
+        summary_coverage_file = f"/private{summary_coverage_file}"
 
     suppplied_arguments = [COBERTURA_COMMAND_LINE_FLAG, cobertura_coverage_file]
 

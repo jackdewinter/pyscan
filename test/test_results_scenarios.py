@@ -873,7 +873,13 @@ def test_summarize_simple_junit_report_and_publish_and_summarize_with_error_on_p
     expected_error = ""
     expected_return_code = 1
 
-    summary_result_file = os.path.join(publish_directory, RESULTS_SUMMARY_FILE_NAME)
+    summary_result_file = os.path.abspath(
+        os.path.join(publish_directory, RESULTS_SUMMARY_FILE_NAME)
+    )
+    if platform.system() == "Darwin" and not summary_result_file.startswith(
+        "/private/"
+    ):
+        summary_result_file = f"/private{summary_result_file}"
 
     # Act
     try:
