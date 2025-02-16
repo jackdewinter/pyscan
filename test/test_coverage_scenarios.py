@@ -618,6 +618,10 @@ def test_summarize_simple_cobertura_report_and_publish_and_summarize_with_error_
     summary_coverage_file = os.path.abspath(summary_coverage_file)
     if platform.system() == "Darwin":
         print(f"-->summary_coverage_file={summary_coverage_file}")
+    if platform.system() == "Darwin" and not summary_coverage_file.startswith(
+        "/private/"
+    ):
+        summary_coverage_file = f"/private{summary_coverage_file}"
 
     expected_output = f"Previous coverage summary file '{summary_coverage_file}' was not loaded (None).\n"
     expected_error = ""
