@@ -14,7 +14,7 @@ SCRIPT_TITLE="Running project tests"
 TEST_RESULTS_XML_PATH=report/tests.xml
 TEST_COVERAGE_XML_PATH=report/coverage.xml
 
-PYSCAN_SCRIPT_PATH="python ${SCRIPT_DIR}/main.py"
+PYSCAN_SCRIPT_PATH=(python "${SCRIPT_DIR}/main.py")
 
 # Perform any cleanup required by the script.
 # shellcheck disable=SC2317  # Unreachable code
@@ -170,7 +170,7 @@ handle_publish_mode() {
 
 	if [[ ${PUBLISH_MODE} -ne 0 ]]; then
 		echo "{Publishing summaries from last test run.}"
-		if ! pipenv run ${PYSCAN_SCRIPT_PATH} --publish; then
+		if ! pipenv run "${PYSCAN_SCRIPT_PATH[@]}" --publish; then
 			complete_process 1 "{Publishing of test run summaries failed.}"
 		fi
 		complete_process 0 "{Publishing of test run summaries succeeded.}"
@@ -218,13 +218,13 @@ execute_tests() {
 		echo "{Executing partial test suite...}"
 	else
 		pytest_args=(--strict-markers -ra --junitxml="${TEST_RESULTS_XML_PATH}")
-		if [[ ${GENERATE_HTML_MODE} -ne 0 ]] ; then
+		if [[ ${GENERATE_HTML_MODE} -ne 0 ]]; then
 			pytest_args+=(--html=report/report.html)
 		fi
 		if [[ ${COVERAGE_MODE} -ne 0 ]]; then
 			echo "{Executing full test suite with coverage...}"
 			pytest_args+=(--cov --cov-branch --cov-report xml:"${TEST_COVERAGE_XML_PATH}")
-			if [[ ${GENERATE_HTML_MODE} -ne 0 ]] ; then
+			if [[ ${GENERATE_HTML_MODE} -ne 0 ]]; then
 				pytest_args+=(--cov-report html:report/coverage)
 			fi
 		else
@@ -265,7 +265,7 @@ summarize_test_executions() {
 	fi
 
 	echo "{Summarizing changes in execution of full test suite.}"
-	if ! pipenv run ${PYSCAN_SCRIPT_PATH} ${PYSCAN_OPTIONS} "${PYSCAN_REPORT_OPTIONS[@]}"; then
+	if ! pipenv run "${PYSCAN_SCRIPT_PATH[@]}" ${PYSCAN_OPTIONS} "${PYSCAN_REPORT_OPTIONS[@]}"; then
 		echo ""
 		complete_process 1 "{Summarizing changes in execution of full test suite failed.}"
 	fi
