@@ -27,7 +27,7 @@ AUTHOR = "Jack De Winter"
 AUTHOR_EMAIL = "jack.de.winter@outlook.com"
 PROJECT_URL = "https://github.com/jackdewinter/pyscan"
 PROJECT_URLS = {
-    "Change Log": "https://github.com/jackdewinter/pyscan/blob/main/changelog.md",
+    "Change Log": "https://project-summarizer.readthedocs.io/en/latest/changelog/",
 }
 
 PACKAGE_NAME = "project_summarizer"

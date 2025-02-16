@@ -10,7 +10,7 @@
 <!--- pyml disable-next-line no-duplicate-heading-->
 ### Changed
 
-- None
+- Cleaned up dependencies and badges.
 
 <!--- pyml disable-next-line no-duplicate-heading-->
 ### Fixed
