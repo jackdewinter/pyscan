@@ -7,7 +7,7 @@ from typing import List
 WHEEL_REGEX = r"^(.*)-(.*)-py3-none-any\.whl$"
 TARBALL_REGEX = r"^(.*)-(.*)\.tar\.gz$"
 
-PACKAGE_NAME = "pymarkdownlnt"
+PACKAGE_NAME = "project_summarizer"
 
 
 def __get_versions_from_pip() -> List[str]:
