@@ -23,10 +23,6 @@ twine = "<5.1"
 columnar = "==1.4.1"
 defusedxml = "==0.7.1"
 
-[packages]
-columnar = "==1.4.1"
-defusedxml = "==0.7.1"
-
 [requires]
 python_version = "3.13"
 
