@@ -2,7 +2,6 @@
 Module to contain the model objects used to contain various summary information.
 """
 
-
 from typing import Any, Dict, Optional
 
 

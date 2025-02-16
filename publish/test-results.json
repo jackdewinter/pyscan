@@ -44,7 +44,7 @@
         },
         {
             "name": "test.test_publish_scenarios",
-            "totalTests": 10,
+            "totalTests": 8,
             "failedTests": 0,
             "errorTests": 0,
             "skippedTests": 0,

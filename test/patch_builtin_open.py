@@ -1,6 +1,7 @@
 """
 Module to patch the "builtin.open" function.
 """
+
 import unittest.mock
 
 
@@ -45,7 +46,7 @@ class PatchBuiltinOpen:
         """
         self.exception_map[exact_file_name] = (file_mode, exception_message)
 
-    # pylint: disable=consider-using-with, unspecified-encoding
+    # pylint: disable=unspecified-encoding
     def my_open(self, *args, **kwargs):
         """
         Provide alternate handling of the "builtins.open" function.
@@ -79,4 +80,4 @@ class PatchBuiltinOpen:
             self.patched_open = self.mock_patcher.start()
             self.patched_open.side_effect = self.my_open
 
-    # pylint: enable=consider-using-with, unspecified-encoding
+    # pylint: enable=unspecified-encoding

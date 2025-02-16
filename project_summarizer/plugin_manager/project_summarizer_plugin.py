@@ -27,9 +27,6 @@ class ProjectSummarizerPlugin(ABC):
 
     VERSION_BASIC = 1
 
-    def __init__(self) -> None:
-        pass
-
     @abstractmethod
     def get_details(self) -> PluginDetails:
         """

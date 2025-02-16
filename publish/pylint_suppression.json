@@ -5,10 +5,35 @@
         "project_summarizer/main.py": {
             "too-few-public-methods": 1
         },
+        "project_summarizer/plugin_manager/__init__.py": {},
+        "project_summarizer/plugin_manager/bad_plugin_error.py": {
+            "too-many-arguments": 1
+        },
+        "project_summarizer/plugin_manager/plugin_details.py": {},
+        "project_summarizer/plugin_manager/plugin_manager.py": {},
+        "project_summarizer/plugin_manager/project_summarizer_plugin.py": {},
+        "project_summarizer/plugins/__init__.py": {},
+        "project_summarizer/plugins/cobertura_plugin.py": {
+            "unused-private-member": 1
+        },
+        "project_summarizer/plugins/coverage_model.py": {
+            "too-many-instance-attributes": 1,
+            "too-many-arguments": 1
+        },
+        "project_summarizer/plugins/junit_plugin.py": {
+            "too-many-arguments": 2
+        },
+        "project_summarizer/plugins/test_measurement.py": {
+            "too-many-arguments": 1
+        },
+        "project_summarizer/plugins/test_totals.py": {},
         "project_summarizer/summarize_context.py": {},
         "project_summarizer/version.py": {}
     },
     "disables-by-name": {
-        "too-few-public-methods": 1
+        "too-few-public-methods": 1,
+        "too-many-arguments": 5,
+        "unused-private-member": 1,
+        "too-many-instance-attributes": 1
     }
 }

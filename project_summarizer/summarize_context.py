@@ -1,6 +1,7 @@
 """
 Module to hold the context to be passed to the summarizers.
 """
+
 import os
 from dataclasses import dataclass
 

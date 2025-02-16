@@ -7,71 +7,129 @@ on:
   pull_request:
     branches:
       - master
-  schedule:
-    - cron: '0 0 * * *'  # daily at midnight
+
+env:
+  project-name: project_summarizer
+  default-python-version: 3.13
+  default-pipenv-version: 2023.12.1
 
 jobs:
-  scenario-tests:
-    strategy:
-      matrix:
-        python: [3.8]
-        platform: [windows-latest, ubuntu-latest]
-    runs-on: ${{ matrix.platform }}
+  lint:
+    name: Project Quality Analysis
+    runs-on: ubuntu-latest
+
     steps:
+
       - name: Checkout Repository
-        uses: actions/checkout@master
-      - name: Setup Python 3.8
-        uses: actions/setup-python@v4.2.0
+        uses: actions/checkout@v4
+
+      - name: Setup Python ${{ env.default-python-version }}
+        uses: actions/setup-python@v5.3.0
         with:
-          python-version: 3.8
+          python-version: ${{ env.default-python-version }}
+
       - name: Install PipEnv
         run: |
-          pip install pipenv==2022.1.8
+          pip install pipenv==${{ env.default-pipenv-version }}
+
       - name: Sync With Repository
         run: |
-          pipenv lock
-          pipenv sync
+          pipenv lock --clear --python ${{ env.default-python-version }}
+          pipenv sync -d
           pipenv graph
+
+      - name: Execute Pre-Commit
+        run: |
+          pipenv run pre-commit run --all
+
+  scenario-tests:
+
+    name: Scenario Tests
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.13"]
+        platform: [windows-latest, ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.platform }}
+    needs: [ lint ]
+
+    steps:
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python ${{ matrix.python }}
+        uses: actions/setup-python@v5.3.0
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Install PipEnv
+        run: |
+          pip install pipenv==${{ env.default-pipenv-version }}
+
+      - name: Sync With Repository
+        run: |
+          pipenv lock --clear --python ${{ env.default-python-version }}
+          pipenv sync -d
+          pipenv graph
+          pipenv uninstall pytest-html
+
       - name: Execute Tests
-        run: pipenv run pytest --timeout=10 --strict-markers --cov --cov-branch --cov-report xml:report/coverage.xml --cov-report html:report/coverage
+        run: ./ptest.sh --coverage --full-report -nh
+
       - name: Archive coverage artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.platform }} Coverage
           path: |
             ./report/coverage.xml
-            ./report/coverage
+
       - name: Report Coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         if: github.event_name != 'schedule'
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}        
         with:
           file: ./report/coverage.xml
           name: ${{ matrix.python }} - ${{ matrix.platform }}
           fail_ci_if_error: true
-  lint:
-    strategy:
-      matrix:
-        python: [3.8]
-        platform: [windows-latest]
-    runs-on: ${{ matrix.platform }}
+
+  packaging:
+
+    name: Package Application
+    runs-on: ubuntu-latest
+    needs: [ scenario-tests ]
+    # if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
     steps:
+
       - name: Checkout Repository
-        uses: actions/checkout@master
-      - name: Setup Python 3.8
-        uses: actions/setup-python@v4.2.0
+        uses: actions/checkout@v4
+
+      - name: Setup Python ${{ env.default-python-version }}
+        uses: actions/setup-python@v5.3.0
         with:
-          python-version: 3.8
+          python-version: ${{ env.default-python-version }}
+
       - name: Install PipEnv
         run: |
-          pip install pipenv==2022.1.8
+          pip install pipenv==${{ env.default-pipenv-version }}
+
       - name: Sync With Repository
         run: |
-          pipenv lock
-          pipenv sync
+          pipenv lock --clear --python ${{ env.default-python-version }}
+          pipenv sync -d
           pipenv graph
-      - name: Execute Flake8
-        run: pipenv run flake8 --exclude dist,build
-      - name: Execute PyLint on Source
-        run: pipenv run pylint --rcfile=setup.cfg ./project_summarizer
-      - name: Execute PyLint on Tests
-        run: pipenv run pylint --rcfile=setup.cfg ./test
+          pipenv uninstall pytest-html
+
+      - name: Build package
+        run: |
+          ./package-release.sh
+
+      - name: Upload Package
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-package-dist
+          path: ${{github.workspace}}/dist/
+
+        

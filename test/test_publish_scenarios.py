@@ -1,17 +1,18 @@
 """
 Tests to cover scenarios around the publishing of summaries.
 """
+
 import os
 from shutil import copyfile
 from test.patch_builtin_open import PatchBuiltinOpen
 from test.test_coverage_scenarios import (
     compose_coverage_summary_file,
     get_coverage_file_name,
-    test_summarize_simple_cobertura_report,
+    summarize_simple_cobertura_report,
 )
 from test.test_results_scenarios import (
     compose_test_results,
-    test_summarize_simple_junit_report,
+    summarize_simple_junit_report,
 )
 from test.test_scenarios import (
     COVERAGE_SUMMARY_FILE_NAME,
@@ -40,7 +41,7 @@ def test_summarize_simple_junit_report_and_publish_with_existing_publish():
         temporary_work_directory,
         publish_directory,
         _,
-    ) = test_summarize_simple_junit_report(create_publish_directory=True)
+    ) = summarize_simple_junit_report(create_publish_directory=True)
     summary_result_file = os.path.join(publish_directory, RESULTS_SUMMARY_FILE_NAME)
 
     suppplied_arguments = [PUBLISH_COMMAND_LINE_FLAG]
@@ -79,7 +80,7 @@ def test_summarize_simple_junit_report_and_publish_with_alternate_publish():
         temporary_work_directory,
         publish_directory,
         _,
-    ) = test_summarize_simple_junit_report(
+    ) = summarize_simple_junit_report(
         create_publish_directory=True,
         alternate_publish_directory=alternate_publish_directory,
     )
@@ -121,7 +122,7 @@ def test_summarize_simple_cobertura_report_and_publish_with_existing_publish():
         temporary_work_directory,
         publish_directory,
         _,
-    ) = test_summarize_simple_cobertura_report(create_publish_directory=True)
+    ) = summarize_simple_cobertura_report(create_publish_directory=True)
     summary_coverage_file = os.path.join(publish_directory, COVERAGE_SUMMARY_FILE_NAME)
 
     suppplied_arguments = [PUBLISH_COMMAND_LINE_FLAG]
@@ -266,7 +267,7 @@ def test_summarize_simple_junit_report_and_publish_with_error_on_source_read():
         temporary_work_directory,
         _,
         _,
-    ) = test_summarize_simple_junit_report(create_publish_directory=True)
+    ) = summarize_simple_junit_report(create_publish_directory=True)
 
     suppplied_arguments = [PUBLISH_COMMAND_LINE_FLAG]
 
@@ -304,7 +305,7 @@ def test_summarize_simple_junit_report_and_publish_with_error_on_destination_wri
         temporary_work_directory,
         _,
         _,
-    ) = test_summarize_simple_junit_report(create_publish_directory=True)
+    ) = summarize_simple_junit_report(create_publish_directory=True)
 
     suppplied_arguments = [PUBLISH_COMMAND_LINE_FLAG]
 

@@ -1,7 +1,9 @@
 """
 Tests for the basic scenarios for the scanner.
 """
+
 import os
+import runpy
 import sys
 import tempfile
 from test.pytest_execute import InProcessExecution
@@ -75,8 +77,12 @@ def test_get_summarizer_version():
     executor = MainlineExecutor()
     suppplied_arguments = ["--version"]
 
-    expected_output = """\
-main.py 0.5.0
+    version_path = os.path.join(".", "project_summarizer", "version.py")
+    version_meta = runpy.run_path(version_path)
+    semantic_version = version_meta["__version__"]
+
+    expected_output = f"""
+{semantic_version}
 """
     expected_error = ""
     expected_return_code = 0
@@ -116,9 +122,11 @@ def setup_directories(
         alternate_publish_directory
         or ProjectSummarizerPlugin.DEFAULT_SUMMARY_PUBLISH_PATH
     )
+
     publish_directory = os.path.join(
         temporary_work_directory.name, alternate_publish_directory
     )
+    publish_directory = os.path.abspath(publish_directory)
     if create_publish_directory:
         os.makedirs(publish_directory)
 

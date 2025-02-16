@@ -1,6 +1,7 @@
 """
 Module to provide functionality to test scripts from within pytest.
 """
+
 import difflib
 import io
 import logging
@@ -78,12 +79,9 @@ class InProcessResult:
 
     # pylint: enable=too-many-arguments
 
-    # pylint: disable=unused-private-member
     @classmethod
     def __make_value_visible(cls, string_to_modify):
         return string_to_modify.replace("\n", "\\n").replace("\t", "\\t")
-
-    # pylint: enable=unused-private-member
 
     @property
     def return_code(self):
@@ -303,7 +301,7 @@ class InProcessExecution(ABC):
             del trace_back
         return 1
 
-    # pylint: disable=broad-except
+    # pylint: disable=broad-exception-caught
     def invoke_main(self, arguments=None, cwd=None):
         """
         Invoke the mainline so that we can capture results.
@@ -334,4 +332,4 @@ class InProcessExecution(ABC):
 
         return InProcessResult(returncode, std_output, std_error)
 
-    # pylint: enable=broad-except
+    # pylint: enable=broad-exception-caught

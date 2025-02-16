@@ -1,7 +1,9 @@
 """
 Tests to cover scenarios around the measuring and reporting of test runs.
 """
+
 import os
+import platform
 from shutil import copyfile
 from test.patch_builtin_open import PatchBuiltinOpen
 from test.test_scenarios import (
@@ -18,6 +20,8 @@ from test.test_scenarios import (
 from project_summarizer.plugin_manager.project_summarizer_plugin import (
     ProjectSummarizerPlugin,
 )
+
+# pylint: disable=too-many-lines
 
 
 def compose_test_results(total_tests):
@@ -45,7 +49,7 @@ def compose_test_results(total_tests):
     )
 
 
-def test_summarize_simple_junit_report(
+def summarize_simple_junit_report(
     create_publish_directory=False,
     temporary_work_directory=None,
     alternate_publish_directory=None,
@@ -103,6 +107,13 @@ Test Results Summary
     return executor, temporary_work_directory, publish_directory, junit_test_file
 
 
+def test_summarize_simple_junit_report():
+    """
+    Test the summarizing of a simple junit report with no previous summary.
+    """
+    summarize_simple_junit_report()
+
+
 def test_summarize_simple_junit_report_with_reduced_columns(
     create_publish_directory=False, temporary_work_directory=None
 ):
@@ -112,7 +123,7 @@ def test_summarize_simple_junit_report_with_reduced_columns(
 
     # Arrange
     executor = MainlineExecutor()
-    temporary_work_directory, report_directory, publish_directory = setup_directories(
+    temporary_work_directory, report_directory, _ = setup_directories(
         create_publish_directory=create_publish_directory,
         temporary_work_directory=temporary_work_directory,
     )
@@ -158,7 +169,6 @@ Test Results Summary
     execute_results.assert_resultant_file(
         summary_result_file, expected_test_results_file
     )
-    return executor, temporary_work_directory, publish_directory, junit_test_file
 
 
 def test_summarize_simple_junit_report_with_quiet(
@@ -170,7 +180,7 @@ def test_summarize_simple_junit_report_with_quiet(
 
     # Arrange
     executor = MainlineExecutor()
-    temporary_work_directory, report_directory, publish_directory = setup_directories(
+    temporary_work_directory, report_directory, _ = setup_directories(
         create_publish_directory=create_publish_directory,
         temporary_work_directory=temporary_work_directory,
     )
@@ -202,7 +212,6 @@ def test_summarize_simple_junit_report_with_quiet(
     execute_results.assert_resultant_file(
         summary_result_file, expected_test_results_file
     )
-    return executor, temporary_work_directory, publish_directory, junit_test_file
 
 
 def test_summarize_junit_report_with_bad_source():
@@ -266,7 +275,7 @@ def test_summarize_junit_report_with_source_as_directory():
     )
 
 
-def test_summarize_simple_junit_report_and_publish(
+def __test_summarize_simple_junit_report_and_publish(
     temporary_work_directory=None, check_file_contents=True
 ):
     """
@@ -283,9 +292,7 @@ def test_summarize_simple_junit_report_and_publish(
         temporary_work_directory,
         publish_directory,
         junit_test_file,
-    ) = test_summarize_simple_junit_report(
-        temporary_work_directory=temporary_work_directory
-    )
+    ) = summarize_simple_junit_report(temporary_work_directory=temporary_work_directory)
     summary_result_file = os.path.join(publish_directory, RESULTS_SUMMARY_FILE_NAME)
 
     suppplied_arguments = [PUBLISH_COMMAND_LINE_FLAG]
@@ -315,6 +322,13 @@ def test_summarize_simple_junit_report_and_publish(
     return executor, temporary_work_directory, publish_directory, junit_test_file
 
 
+def test_summarize_simple_junit_report_and_publish():
+    """
+    Test the summarizing of a simple junit report, then publishing that report.
+    """
+    __test_summarize_simple_junit_report_and_publish()
+
+
 def test_summarize_simple_junit_report_and_publish_and_summarize_again(
     temporary_work_directory=None, check_file_contents=True
 ):
@@ -328,7 +342,7 @@ def test_summarize_simple_junit_report_and_publish_and_summarize_again(
         temporary_work_directory,
         _,
         junit_test_file,
-    ) = test_summarize_simple_junit_report_and_publish(
+    ) = __test_summarize_simple_junit_report_and_publish(
         temporary_work_directory=temporary_work_directory,
         check_file_contents=check_file_contents,
     )
@@ -373,7 +387,7 @@ def test_summarize_simple_junit_report_and_publish_and_summarize_again_only_chan
         temporary_work_directory,
         _,
         junit_test_file,
-    ) = test_summarize_simple_junit_report_and_publish()
+    ) = __test_summarize_simple_junit_report_and_publish()
 
     suppplied_arguments = [
         ONLY_CHANGES_COMMAND_LINE_FLAG,
@@ -414,7 +428,7 @@ def test_summarize_simple_junit_report_and_publish_and_then_test_fails():
         temporary_work_directory,
         _,
         junit_test_file,
-    ) = test_summarize_simple_junit_report_and_publish()
+    ) = __test_summarize_simple_junit_report_and_publish()
     copyfile(
         os.path.join(executor.resource_directory, "tests-with-one-failure.xml"),
         junit_test_file,
@@ -460,7 +474,7 @@ def test_summarize_simple_junit_report_and_publish_and_then_new_test_only_change
         temporary_work_directory,
         _,
         junit_test_file,
-    ) = test_summarize_simple_junit_report_and_publish()
+    ) = __test_summarize_simple_junit_report_and_publish()
     copyfile(
         os.path.join(executor.resource_directory, "tests-with-new-test.xml"),
         junit_test_file,
@@ -510,7 +524,7 @@ def test_summarize_simple_junit_report_and_publish_and_then_new_test_class_only_
         temporary_work_directory,
         _,
         junit_test_file,
-    ) = test_summarize_simple_junit_report_and_publish()
+    ) = __test_summarize_simple_junit_report_and_publish()
     copyfile(
         os.path.join(executor.resource_directory, "tests-with-new-class-test.xml"),
         junit_test_file,
@@ -560,7 +574,7 @@ def test_summarize_simple_junit_report_and_publish_and_then_test_skipped():
         temporary_work_directory,
         _,
         junit_test_file,
-    ) = test_summarize_simple_junit_report_and_publish()
+    ) = __test_summarize_simple_junit_report_and_publish()
     copyfile(
         os.path.join(executor.resource_directory, "tests-with-one-skipped.xml"),
         junit_test_file,
@@ -606,7 +620,7 @@ def test_summarize_simple_junit_report_and_publish_and_then_test_rename():
         temporary_work_directory,
         _,
         junit_test_file,
-    ) = test_summarize_simple_junit_report_and_publish()
+    ) = __test_summarize_simple_junit_report_and_publish()
     copyfile(
         os.path.join(executor.resource_directory, "tests-with-rename.xml"),
         junit_test_file,
@@ -653,7 +667,7 @@ def test_summarize_single_and_double_digit_changes_from_published():
         temporary_work_directory,
         _,
         junit_test_file,
-    ) = test_summarize_simple_junit_report_and_publish()
+    ) = __test_summarize_simple_junit_report_and_publish()
     copyfile(
         os.path.join(executor.resource_directory, "tests-with-lots-of-changes.xml"),
         junit_test_file,
@@ -847,7 +861,7 @@ def test_summarize_simple_junit_report_and_publish_and_summarize_with_error_on_p
         temporary_work_directory,
         publish_directory,
         junit_test_file,
-    ) = test_summarize_simple_junit_report_and_publish()
+    ) = __test_summarize_simple_junit_report_and_publish()
 
     suppplied_arguments = [JUNIT_COMMAND_LINE_FLAG, junit_test_file]
 
@@ -859,7 +873,13 @@ def test_summarize_simple_junit_report_and_publish_and_summarize_with_error_on_p
     expected_error = ""
     expected_return_code = 1
 
-    summary_result_file = os.path.join(publish_directory, RESULTS_SUMMARY_FILE_NAME)
+    summary_result_file = os.path.abspath(
+        os.path.join(publish_directory, RESULTS_SUMMARY_FILE_NAME)
+    )
+    if platform.system() == "Darwin" and not summary_result_file.startswith(
+        "/private/"
+    ):
+        summary_result_file = f"/private{summary_result_file}"
 
     # Act
     try:
@@ -894,7 +914,13 @@ def test_summarize_simple_junit_report_with_error_on_report_write():
         os.path.join(executor.resource_directory, JUNIT_RESULTS_FILE_NAME),
         junit_test_file,
     )
-    summary_result_file = os.path.join(report_directory, RESULTS_SUMMARY_FILE_NAME)
+    summary_result_file = os.path.abspath(
+        os.path.join(report_directory, RESULTS_SUMMARY_FILE_NAME)
+    )
+    if platform.system() == "Darwin" and not summary_result_file.startswith(
+        "/private/"
+    ):
+        summary_result_file = f"/private{summary_result_file}"
 
     suppplied_arguments = [JUNIT_COMMAND_LINE_FLAG, junit_test_file]
 

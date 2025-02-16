@@ -1,7 +1,9 @@
 """
 Tests to cover scenarios around the coverage measuring and reporting.
 """
+
 import os
+import platform
 from shutil import copyfile
 from test.patch_builtin_open import PatchBuiltinOpen
 from test.test_scenarios import (
@@ -36,7 +38,7 @@ def compose_coverage_summary_file():
 """
 
 
-def test_summarize_simple_cobertura_report(
+def summarize_simple_cobertura_report(
     create_publish_directory=False, temporary_work_directory=None
 ):
     """
@@ -100,6 +102,13 @@ Test Coverage Summary
     )
 
 
+def test_summarize_simple_cobertura_report():
+    """
+    Test the summarizing of a simple cobertura report with no previous summary.
+    """
+    summarize_simple_cobertura_report()
+
+
 def test_summarize_simple_cobertura_report_with_reduced_columns(
     create_publish_directory=False, temporary_work_directory=None
 ):
@@ -109,7 +118,7 @@ def test_summarize_simple_cobertura_report_with_reduced_columns(
 
     # Arrange
     executor = MainlineExecutor()
-    temporary_work_directory, report_directory, publish_directory = setup_directories(
+    temporary_work_directory, report_directory, _ = setup_directories(
         create_publish_directory=create_publish_directory,
         temporary_work_directory=temporary_work_directory,
     )
@@ -168,12 +177,6 @@ Test Coverage Summary
     execute_results.assert_resultant_file(
         summary_coverage_file, expected_test_coverage_file
     )
-    return (
-        executor,
-        temporary_work_directory,
-        publish_directory,
-        cobertura_coverage_file,
-    )
 
 
 def test_summarize_simple_cobertura_report_with_quiet(
@@ -185,7 +188,7 @@ def test_summarize_simple_cobertura_report_with_quiet(
 
     # Arrange
     executor = MainlineExecutor()
-    temporary_work_directory, report_directory, publish_directory = setup_directories(
+    temporary_work_directory, report_directory, _ = setup_directories(
         create_publish_directory=create_publish_directory,
         temporary_work_directory=temporary_work_directory,
     )
@@ -220,12 +223,6 @@ def test_summarize_simple_cobertura_report_with_quiet(
     )
     execute_results.assert_resultant_file(
         summary_coverage_file, expected_test_coverage_file
-    )
-    return (
-        executor,
-        temporary_work_directory,
-        publish_directory,
-        cobertura_coverage_file,
     )
 
 
@@ -294,12 +291,10 @@ def test_summarize_cobertura_report_with_source_as_directory():
     )
 
 
-def test_summarize_simple_cobertura_report_and_publish(
+def summarize_simple_cobertura_report_and_publish(
     temporary_work_directory=None, check_file_contents=True
 ):
     """
-    Test the summarizing of a simple cobertura report, then publishing that report.
-
     NOTE: This function is in this module because of the other tests in this module
     that rely on it.  Moving it to the test_publish_scenarios module would create
     a circular reference.
@@ -311,7 +306,7 @@ def test_summarize_simple_cobertura_report_and_publish(
         temporary_work_directory,
         publish_directory,
         cobertura_coverage_file,
-    ) = test_summarize_simple_cobertura_report(
+    ) = summarize_simple_cobertura_report(
         temporary_work_directory=temporary_work_directory
     )
     summary_coverage_file = os.path.join(publish_directory, COVERAGE_SUMMARY_FILE_NAME)
@@ -348,6 +343,13 @@ def test_summarize_simple_cobertura_report_and_publish(
     )
 
 
+def test_summarize_simple_cobertura_report_and_publish():
+    """
+    Test the summarizing of a simple cobertura report, then publishing that report.
+    """
+    summarize_simple_cobertura_report_and_publish()
+
+
 def test_summarize_simple_cobertura_report_and_publish_and_summarize_again(
     temporary_work_directory=None, check_file_contents=True
 ):
@@ -361,7 +363,7 @@ def test_summarize_simple_cobertura_report_and_publish_and_summarize_again(
         temporary_work_directory,
         _,
         cobertura_coverage_file,
-    ) = test_summarize_simple_cobertura_report_and_publish(
+    ) = summarize_simple_cobertura_report_and_publish(
         temporary_work_directory=temporary_work_directory,
         check_file_contents=check_file_contents,
     )
@@ -411,7 +413,7 @@ def test_summarize_simple_cobertura_report_and_publish_and_summarize_again_only_
         temporary_work_directory,
         _,
         cobertura_coverage_file,
-    ) = test_summarize_simple_cobertura_report_and_publish(
+    ) = summarize_simple_cobertura_report_and_publish(
         temporary_work_directory=temporary_work_directory,
         check_file_contents=check_file_contents,
     )
@@ -567,16 +569,21 @@ def test_summarize_invalid_published_summary_file():
         os.path.join(executor.resource_directory, get_coverage_file_name()),
         cobertura_coverage_file,
     )
-    summary_coverage_file = os.path.join(publish_directory, COVERAGE_SUMMARY_FILE_NAME)
+    summary_coverage_file = os.path.abspath(
+        os.path.join(publish_directory, COVERAGE_SUMMARY_FILE_NAME)
+    )
+    if platform.system() == "Darwin" and not summary_coverage_file.startswith(
+        "/private/"
+    ):
+        summary_coverage_file = f"/private{summary_coverage_file}"
 
     with open(summary_coverage_file, "w", encoding="utf-8") as outfile:
         outfile.write("this is not a json file")
 
     suppplied_arguments = [COBERTURA_COMMAND_LINE_FLAG, cobertura_coverage_file]
 
-    file_name = os.path.join(PUBLISH_DIRECTORY, COVERAGE_SUMMARY_FILE_NAME)
     expected_output = (
-        f"Previous coverage summary file '{file_name}' is not "
+        f"Previous coverage summary file '{summary_coverage_file}' is not "
         + "a valid JSON file (Expecting value: line 1 column 1 (char 0))."
     )
     expected_error = ""
@@ -605,19 +612,20 @@ def test_summarize_simple_cobertura_report_and_publish_and_summarize_with_error_
         temporary_work_directory,
         publish_directory,
         cobertura_coverage_file,
-    ) = test_summarize_simple_cobertura_report_and_publish()
+    ) = summarize_simple_cobertura_report_and_publish()
 
     suppplied_arguments = [COBERTURA_COMMAND_LINE_FLAG, cobertura_coverage_file]
 
-    file_name = os.path.join(PUBLISH_DIRECTORY, COVERAGE_SUMMARY_FILE_NAME)
+    summary_coverage_file = os.path.join(publish_directory, COVERAGE_SUMMARY_FILE_NAME)
+    summary_coverage_file = os.path.abspath(summary_coverage_file)
+    if platform.system() == "Darwin" and not summary_coverage_file.startswith(
+        "/private/"
+    ):
+        summary_coverage_file = f"/private{summary_coverage_file}"
 
-    expected_output = (
-        f"Previous coverage summary file '{file_name}' was not loaded (None).\n"
-    )
+    expected_output = f"Previous coverage summary file '{summary_coverage_file}' was not loaded (None).\n"
     expected_error = ""
     expected_return_code = 1
-
-    summary_coverage_file = os.path.join(publish_directory, COVERAGE_SUMMARY_FILE_NAME)
 
     # Act
     try:
@@ -652,7 +660,13 @@ def test_summarize_simple_cobertura_report_with_error_on_report_write():
         os.path.join(executor.resource_directory, get_coverage_file_name()),
         cobertura_coverage_file,
     )
-    summary_coverage_file = os.path.join(report_directory, COVERAGE_SUMMARY_FILE_NAME)
+    summary_coverage_file = os.path.abspath(
+        os.path.join(report_directory, COVERAGE_SUMMARY_FILE_NAME)
+    )
+    if platform.system() == "Darwin" and not summary_coverage_file.startswith(
+        "/private/"
+    ):
+        summary_coverage_file = f"/private{summary_coverage_file}"
 
     suppplied_arguments = [COBERTURA_COMMAND_LINE_FLAG, cobertura_coverage_file]
 

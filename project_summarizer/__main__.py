@@ -2,6 +2,7 @@
 Module to provide for "-m project_summarizer" access to the module,
 as if it was run from the console.
 """
+
 from project_summarizer.main import ProjectSummarizer
 
 

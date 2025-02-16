@@ -1,6 +1,7 @@
 """
 Module to provide an encapsulation of the test totals.
 """
+
 from typing import Any, Dict, Optional
 
 from project_summarizer.plugins.test_measurement import TestMeasurement
@@ -10,6 +11,8 @@ class TestTotals:
     """
     Class to provide an encapsulation of the test totals.
     """
+
+    __test__ = False
 
     def __init__(
         self, project_name: Optional[str] = None, report_source: Optional[str] = None
@@ -33,7 +36,7 @@ class TestTotals:
             for _, next_measurement in self.measurements.items()
         ]
 
-        measurements_array.sort(key=lambda item: item["name"])  # type: ignore
+        measurements_array.sort(key=lambda item: item["name"])
 
         serialized_dictionary["measurements"] = measurements_array
         return serialized_dictionary
