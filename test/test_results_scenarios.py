@@ -3,6 +3,7 @@ Tests to cover scenarios around the measuring and reporting of test runs.
 """
 
 import os
+import platform
 from shutil import copyfile
 from test.patch_builtin_open import PatchBuiltinOpen
 from test.test_scenarios import (
@@ -19,6 +20,8 @@ from test.test_scenarios import (
 from project_summarizer.plugin_manager.project_summarizer_plugin import (
     ProjectSummarizerPlugin,
 )
+
+# pylint: disable=too-many-lines
 
 
 def compose_test_results(total_tests):
@@ -905,7 +908,13 @@ def test_summarize_simple_junit_report_with_error_on_report_write():
         os.path.join(executor.resource_directory, JUNIT_RESULTS_FILE_NAME),
         junit_test_file,
     )
-    summary_result_file = os.path.join(report_directory, RESULTS_SUMMARY_FILE_NAME)
+    summary_result_file = os.path.abspath(
+        os.path.join(report_directory, RESULTS_SUMMARY_FILE_NAME)
+    )
+    if platform.system() == "Darwin" and not summary_result_file.startswith(
+        "/private/"
+    ):
+        summary_result_file = f"/private{summary_result_file}"
 
     suppplied_arguments = [JUNIT_COMMAND_LINE_FLAG, junit_test_file]
 
