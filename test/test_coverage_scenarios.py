@@ -569,7 +569,13 @@ def test_summarize_invalid_published_summary_file():
         os.path.join(executor.resource_directory, get_coverage_file_name()),
         cobertura_coverage_file,
     )
-    summary_coverage_file = os.path.join(publish_directory, COVERAGE_SUMMARY_FILE_NAME)
+    summary_coverage_file = os.path.abspath(
+        os.path.join(publish_directory, COVERAGE_SUMMARY_FILE_NAME)
+    )
+    if platform.system() == "Darwin" and not summary_coverage_file.startswith(
+        "/private/"
+    ):
+        summary_coverage_file = f"/private{summary_coverage_file}"
 
     with open(summary_coverage_file, "w", encoding="utf-8") as outfile:
         outfile.write("this is not a json file")
