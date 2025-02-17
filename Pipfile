@@ -4,7 +4,7 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
-coverage = "==7.6.1"
+coverage = "==7.6.12"
 pre-commit = "==2.20.0"
 pylint = "==3.2.7"
 pylint-utils = "==0.5.1"
