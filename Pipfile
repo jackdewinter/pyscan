@@ -6,7 +6,7 @@ verify_ssl = true
 [dev-packages]
 coverage = "==7.6.1"
 pre-commit = "==2.20.0"
-pylint = "==3.2.7"
+pylint = "==3.3.7"
 pylint-utils = "==0.5.1"
 pyroma = "==4.2"
 pytest = "==8.3.4"
