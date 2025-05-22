@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+# Env. Var. -- PROJECT_SUMMARIZER__PERFRUN
+# If set to something other than "" or "0", will cause this script to execute
+# the application with performance measuring arguments.
+
 # Set the script mode to "strict".
 # http://redsymbol.net/articles/unofficial-bash-strict-mode/ without the fail fast.
 set -uo pipefail
@@ -108,7 +112,7 @@ start_process
 
 # If we are doing a performance run, make sure to use optimized python.
 PYTHON_PERFORMANCE_ARGUMENTS=
-if [[ ${PYMARKDOWNLINT__PERFRUN:-0} -ne 0 ]]; then
+if [[ ${PROJECT_SUMMARIZER__PERFRUN:-0} -ne 0 ]]; then
 	PYTHON_PERFORMANCE_ARGUMENTS=-OO
 fi
 

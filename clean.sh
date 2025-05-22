@@ -334,12 +334,12 @@ execute_sourcery() {
 
 	if [[ ${PUBLISH_MODE} -ne 0 ]]; then
 		verbose_echo "{  Executing Sourcery against full project contents.}"
-		if ! pipenv run sourcery review --check pymarkdown; then
+		if ! pipenv run sourcery review --check "${PYTHON_MODULE_NAME}"; then
 			complete_process 1 "{Executing Sourcery on Python code failed.}"
 		fi
 	else
 		verbose_echo "{  Executing Sourcery against changed project contents.}"
-		if ! pipenv run sourcery review --check pymarkdown --diff "git diff"; then
+		if ! pipenv run sourcery review --check "${PYTHON_MODULE_NAME}" --diff "git diff"; then
 			complete_process 1 "{Executing Sourcery on Python code failed.}"
 		fi
 	fi

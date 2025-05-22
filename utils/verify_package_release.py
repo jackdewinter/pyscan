@@ -7,7 +7,7 @@ from typing import List
 WHEEL_REGEX = r"^(.*)-(.*)-py3-none-any\.whl$"
 TARBALL_REGEX = r"^(.*)-(.*)\.tar\.gz$"
 
-PACKAGE_NAME = "project_summarizer"
+PACKAGE_NAME = sys.argv[1]
 
 
 def __get_versions_from_pip() -> List[str]:
@@ -24,7 +24,7 @@ def __get_versions_from_pip() -> List[str]:
 
 
 # Verify that the specified directory exists.
-dist_directory = sys.argv[1]
+dist_directory = sys.argv[2]
 if not os.path.isdir(dist_directory):
     print(f"Path '{dist_directory}' is not an existing directory.")
     sys.exit(1)

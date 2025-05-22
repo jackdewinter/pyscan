@@ -112,6 +112,23 @@ parse_command_line() {
 	fi
 }
 
+load_properties_from_file() {
+
+	verbose_echo "{Loading 'project.properties file'...}"
+	while IFS='=' read -r key_value; do
+		if [[ ${key_value} == \#* ]]; then
+			continue
+		fi
+		key=$(echo "${key_value}" | cut -d '=' -f1)
+		value=$(echo "${key_value}" | cut -d '=' -f2-)
+		export "${key}=${value}"
+	done <"${SCRIPT_DIR}/project.properties"
+
+	if [[ -z ${PYTHON_MODULE_NAME} ]]; then
+		complete_process 1 "Property 'PYTHON_MODULE_NAME' must be defined in the project.properties file."
+	fi
+}
+
 # Check the packaging before we use it.
 check_with_pyroma() {
 
@@ -132,7 +149,7 @@ remove_previous_packaging_directories() {
 	fi
 	rm -rf "${SCRIPT_DIR}"/dist
 	rm -rf "${SCRIPT_DIR}"/build
-	rm -rf "${SCRIPT_DIR}"/PyMarkdown.egg-info
+	rm -rf "${SCRIPT_DIR}"/"${PYTHON_MODULE_NAME}.egg-info"
 }
 
 # Create the packaging required to be able to publish the application.
@@ -175,6 +192,8 @@ check_package_with_twine() {
 parse_command_line "$@"
 
 start_process
+
+load_properties_from_file
 
 # Main body of the script.
 
