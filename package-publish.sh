@@ -7,7 +7,27 @@ set -uo pipefail
 # Set up any project based local script variables.
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 
-if ! python utils/verify_package_release.py "${SCRIPT_DIR}/dist"; then
+load_properties_from_file() {
+
+	verbose_echo "{Loading 'project.properties file'...}"
+	while IFS='=' read -r key_value; do
+		if [[ ${key_value} == \#* ]]; then
+			continue
+		fi
+		key=$(echo "${key_value}" | cut -d '=' -f1)
+		value=$(echo "${key_value}" | cut -d '=' -f2-)
+		export "${key}=${value}"
+	done <"${SCRIPT_DIR}/project.properties"
+
+	if [[ -z ${PYTHON_MODULE_NAME} ]]; then
+		echo "Property 'PYTHON_MODULE_NAME' must be defined in the project.properties file."
+		exit 1
+	fi
+}
+
+load_properties_from_file
+
+if ! python utils/verify_package_release.py "${PYTHON_MODULE_NAME}" "${SCRIPT_DIR}/dist"; then
 	echo "Validation of 'dist' package directory failed.  Run 'package-release.sh' before trying again."
 	exit 1
 fi
