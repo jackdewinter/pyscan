@@ -361,11 +361,11 @@
         },
         "docutils": {
             "hashes": [
-                "sha256:3a6b18732edf182daa3cd12775bbb338cf5691468f91eeeb109deff6ebfa986f",
-                "sha256:dafca5b9e384f0e419294eb4d2ff9fa826435bf15f15b7bd45723e8ad76811b2"
+                "sha256:5c43c5302ca46c65edfb18a726de6f6c73b6a40b7836663ba77d40d61409d39f",
+                "sha256:a179809afe81ee8af64f4e4f46216780b72736397620d1842ec3b682d14f68bd"
             ],
             "markers": "python_version >= '3.9'",
-            "version": "==0.21.2"
+            "version": "==0.22rc1"
         },
         "execnet": {
             "hashes": [
