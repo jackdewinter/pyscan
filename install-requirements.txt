@@ -1,2 +1,3 @@
+typing-extensions>=4.5.0
 defusedxml==0.7.1
 columnar==1.4.1

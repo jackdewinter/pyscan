@@ -6,6 +6,7 @@ import os
 import platform
 from shutil import copyfile
 from test.patch_builtin_open import PatchBuiltinOpen
+from test.pytest_execute import InProcessResult
 from test.test_scenarios import (
     JUNIT_COMMAND_LINE_FLAG,
     JUNIT_RESULTS_FILE_NAME,
@@ -101,7 +102,7 @@ Test Results Summary
     execute_results.assert_results(
         expected_output, expected_error, expected_return_code
     )
-    execute_results.assert_resultant_file(
+    InProcessResult.assert_resultant_file(
         summary_result_file, expected_test_results_file
     )
     return executor, temporary_work_directory, publish_directory, junit_test_file
@@ -166,7 +167,7 @@ Test Results Summary
     execute_results.assert_results(
         expected_output, expected_error, expected_return_code
     )
-    execute_results.assert_resultant_file(
+    InProcessResult.assert_resultant_file(
         summary_result_file, expected_test_results_file
     )
 
@@ -209,7 +210,7 @@ def test_summarize_simple_junit_report_with_quiet(
     execute_results.assert_results(
         expected_output, expected_error, expected_return_code
     )
-    execute_results.assert_resultant_file(
+    InProcessResult.assert_resultant_file(
         summary_result_file, expected_test_results_file
     )
 
@@ -315,7 +316,7 @@ def __test_summarize_simple_junit_report_and_publish(
         expected_output, expected_error, expected_return_code
     )
     if check_file_contents:
-        execute_results.assert_resultant_file(
+        InProcessResult.assert_resultant_file(
             summary_result_file, expected_test_results_file
         )
 

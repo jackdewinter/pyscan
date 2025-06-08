@@ -9,12 +9,11 @@ import os
 import sys
 import traceback
 from abc import ABC, abstractmethod
-
-from project_summarizer.plugin_manager.project_summarizer_plugin import (
-    ProjectSummarizerPlugin,
-)
+from typing import Any, List, Optional, Union
 
 LOGGER = logging.getLogger(__name__)
+
+DEFAULT_FILE_ENCODING = "utf-8"
 
 
 class InProcessResult:
@@ -22,118 +21,128 @@ class InProcessResult:
     Class to provide for an encapsulation of the results of an execution.
     """
 
-    def __init__(self, return_code, std_out, std_err):
+    def __init__(
+        self, return_code: int, std_out: io.StringIO, std_err: io.StringIO
+    ) -> None:
         self.__return_code = return_code
         self.__std_out = std_out
         self.__std_err = std_err
 
-    # pylint: disable=too-many-arguments
-    @classmethod
+    @staticmethod
+    def make_value_visible(value_to_modify: Any) -> str:
+        """
+        For the given value, turn it into a string if necessary, and then replace
+        any known "invisible" characters with more visible strings.
+        """
+        return (
+            str(value_to_modify)
+            .replace("\b", "\\b")
+            .replace("\a", "\\a")
+            .replace("\t", "\\t")
+            .replace("\n", "\\n")
+        )
+
+    @staticmethod
     def compare_versus_expected(
-        cls,
-        stream_name,
-        actual_stream,
-        expected_text,
-        additional_text=None,
-        log_extra=None,
-    ):
+        stream_name: str,
+        actual_stream: Union[io.StringIO, str],
+        expected_stream: Union[io.StringIO, str],
+        additional_text: Optional[List[str]] = None,
+        log_extra: Optional[str] = None,
+    ) -> None:
         """
         Do a thorough comparison of the actual stream against the expected text.
         """
 
+        actual_stream_text = (
+            actual_stream
+            if isinstance(actual_stream, str)
+            else actual_stream.getvalue()
+        )
+        expected_stream_text = (
+            expected_stream
+            if isinstance(expected_stream, str)
+            else expected_stream.getvalue()
+        )
         if additional_text:
-            assert actual_stream.getvalue().strip().startswith(expected_text.strip()), (
-                f"Block\n---\n{expected_text}\n---\nwas not found at the start of"
-                + "\n---\n{actual_stream.getvalue()}\nExtra:{log_extra}"
+            assert actual_stream_text.strip().startswith(
+                expected_stream_text.strip()
+            ), (
+                f"Block\n---\n{expected_stream_text}\n---\nwas not found at the start of"
+                + f"\n---\n{actual_stream_text}\nExtra:{log_extra}"
             )
 
             for next_text_block in additional_text:
-                was_found = next_text_block.strip() in actual_stream.getvalue().strip()
+                was_found = next_text_block.strip() in actual_stream_text.strip()
                 diff = difflib.ndiff(
                     next_text_block.strip().splitlines(),
-                    actual_stream.getvalue().strip().splitlines(),
+                    actual_stream_text.strip().splitlines(),
                 )
 
                 diff_values = "\n".join(list(diff))
                 print(diff_values, file=sys.stderr)
                 if not was_found:
                     raise AssertionError(
-                        f"Block\n---\n{next_text_block}\n---\nwas not found in\n---\n{actual_stream.getvalue()}"
+                        f"Block\n---\n{next_text_block}\n---\nwas not found in\n---\n{actual_stream_text}"
                     )
-        elif actual_stream.getvalue().strip() != expected_text.strip():
+        elif actual_stream_text.strip() != expected_stream_text.strip():
             diff = difflib.ndiff(
-                expected_text.splitlines(), actual_stream.getvalue().splitlines()
+                expected_stream_text.splitlines(), actual_stream_text.splitlines()
             )
-            diff_values = "\n".join(list(diff)) + "\n---\n"
+
+            diff_values = "\n".join(list(diff))
+            diff_values = f"{diff_values}\n---\n"
 
             LOGGER.warning(
                 "actual>>%s",
-                cls.__make_value_visible(actual_stream.getvalue()),
+                InProcessResult.make_value_visible(actual_stream_text),
             )
-            print(f"WARN>actual>>{cls.__make_value_visible(actual_stream.getvalue())}")
-            LOGGER.warning("expect>>%s", cls.__make_value_visible(expected_text))
-            print(f"WARN>expect>>{cls.__make_value_visible(expected_text)}")
+            print(
+                f"WARN>actual>>{InProcessResult.make_value_visible(actual_stream_text)}"
+            )
+            LOGGER.warning(
+                "expect>>%s", InProcessResult.make_value_visible(expected_stream_text)
+            )
+            print(
+                f"WARN>expect>>{InProcessResult.make_value_visible(expected_stream_text)}"
+            )
             if log_extra:
                 print(f"log_extra:{log_extra}")
             raise AssertionError(f"{stream_name} not as expected:\n{diff_values}")
 
-    # pylint: enable=too-many-arguments
-
-    @classmethod
-    def __make_value_visible(cls, string_to_modify):
-        return string_to_modify.replace("\n", "\\n").replace("\t", "\\t")
-
     @property
-    def return_code(self):
+    def return_code(self) -> int:
         """
         Return code provided after execution.
         """
         return self.__return_code
 
     @property
-    def std_out(self):
+    def std_out(self) -> io.StringIO:
         """
         Standard output collected during execution.
         """
         return self.__std_out
 
-    # pylint: disable=too-many-arguments
     def assert_results(
         self,
-        stdout=None,
-        stderr=None,
-        error_code=0,
-        additional_error=None,
-        alternate_stdout=None,
-    ):
+        stdout: Optional[Union[io.StringIO, str]] = None,
+        stderr: Optional[Union[io.StringIO, str]] = None,
+        error_code: int = 0,
+        additional_error: Optional[List[str]] = None,
+    ) -> None:
         """
         Assert the results are as expected in the "assert" phase.
         """
 
         try:
             if stdout:
-                if alternate_stdout:
-                    try:
-                        self.compare_versus_expected(
-                            "Stdout",
-                            self.__std_out,
-                            stdout,
-                            log_extra=self.__std_err.getvalue(),
-                        )
-                    except AssertionError:
-                        self.compare_versus_expected(
-                            "Stdout",
-                            self.__std_out,
-                            alternate_stdout,
-                            log_extra=self.__std_err.getvalue(),
-                        )
-                else:
-                    self.compare_versus_expected(
-                        "Stdout",
-                        self.__std_out,
-                        stdout,
-                        log_extra=self.__std_err.getvalue(),
-                    )
+                InProcessResult.compare_versus_expected(
+                    "Stdout",
+                    self.__std_out,
+                    stdout,
+                    log_extra=self.__std_err.getvalue(),
+                )
             else:
                 assert_text = (
                     f"Expected stdout to be empty, not: {self.__std_out.getvalue()}"
@@ -143,7 +152,7 @@ class InProcessResult:
                 assert not self.__std_out.getvalue(), assert_text
 
             if stderr:
-                self.compare_versus_expected(
+                InProcessResult.compare_versus_expected(
                     "Stderr", self.__std_err, stderr, additional_error
                 )
             else:
@@ -159,45 +168,14 @@ class InProcessResult:
             self.__std_out.close()
             self.__std_err.close()
 
-    # pylint: enable=too-many-arguments
-
-    def assert_stream_contents(
-        self, stream_name, actual_stream, expected_stream, additional_error=None
-    ):
-        """
-        Assert that the contents of the given stream are as expected.
-        """
-
-        result = None
-        try:
-            if expected_stream:
-                self.compare_versus_expected(
-                    stream_name, actual_stream, expected_stream, additional_error
-                )
-            else:
-                assert not actual_stream.getvalue(), (
-                    "Expected "
-                    + stream_name
-                    + " to be empty. Not:\n---\n"
-                    + actual_stream.getvalue()
-                    + "\n---\n"
-                )
-        except AssertionError as ex:
-            result = ex
-        finally:
-            actual_stream.close()
-        return result
-
-    @classmethod
-    def assert_resultant_file(cls, file_path, expected_contents):
+    @staticmethod
+    def assert_resultant_file(file_path: str, expected_contents: str) -> None:
         """
         Assert the contents of a given file against it's expected contents.
         """
 
         split_expected_contents = expected_contents.split("\n")
-        with open(
-            file_path, "r", encoding=ProjectSummarizerPlugin.DEFAULT_FILE_ENCODING
-        ) as infile:
+        with open(file_path, "r", encoding=DEFAULT_FILE_ENCODING) as infile:
             split_actual_contents = infile.readlines()
         for line_index, line_content in enumerate(split_actual_contents):
             if line_content[-1] == "\n":
@@ -229,18 +207,19 @@ class SystemState:
     it later.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """
         Initializes a new instance of the SystemState class.
         """
 
+        self.saved_stdin = sys.stdin
         self.saved_stdout = sys.stdout
         self.saved_stderr = sys.stderr
         self.saved_cwd = os.getcwd()
         self.saved_env = os.environ
         self.saved_argv = sys.argv
 
-    def restore(self):
+    def restore(self) -> None:
         """
         Restore the system state variables to what they were before.
         """
@@ -248,6 +227,7 @@ class SystemState:
         os.chdir(self.saved_cwd)
         os.environ = self.saved_env  # noqa B003
         sys.argv = self.saved_argv
+        sys.stdin = self.saved_stdin
         sys.stdout = self.saved_stdout
         sys.stderr = self.saved_stderr
 
@@ -261,21 +241,23 @@ class InProcessExecution(ABC):
     """
 
     @abstractmethod
-    def execute_main(self):
+    def execute_main(self, direct_arguments: Optional[List[str]] = None) -> None:
         """
         Provides the code to execute the mainline.  Should be simple like:
         MyObjectClass().main()
         """
 
     @abstractmethod
-    def get_main_name(self):
+    def get_main_name(self) -> str:
         """
         Provides the main name to associate with the mainline.  Gets set as
         the first argument to the program.
         """
 
     @classmethod
-    def handle_system_exit(cls, exit_exception, std_error):
+    def handle_system_exit(
+        cls, exit_exception: SystemExit, std_error: io.StringIO
+    ) -> int:
         """
         Handle the processing of an "early" exit as a result of our execution.
         """
@@ -288,48 +270,65 @@ class InProcessExecution(ABC):
         return returncode
 
     @classmethod
-    def handle_normal_exception(cls):
+    def handle_normal_exception(cls) -> int:
         """
         Handle the processing of a normal exception as a result of our execution.
         """
+        trace_back = None
         try:
             exception_type, exception_value, trace_back = sys.exc_info()
+            assert exception_type is not None
+            assert exception_value is not None
+            assert trace_back is not None
             traceback.print_exception(
                 exception_type, exception_value, trace_back.tb_next
             )
         finally:
-            del trace_back
+            if trace_back:
+                del trace_back
         return 1
 
-    # pylint: disable=broad-exception-caught
-    def invoke_main(self, arguments=None, cwd=None):
+    def invoke_main(
+        self,
+        arguments: List[str],
+        cwd: Optional[str] = None,
+        standard_input_to_use: Optional[str] = None,
+        use_direct_arguments: bool = False,
+    ) -> InProcessResult:
         """
         Invoke the mainline so that we can capture results.
         """
 
         saved_state = SystemState()
 
+        if standard_input_to_use is not None:
+            sys.stdin = io.StringIO(standard_input_to_use)
         std_output = io.StringIO()
         std_error = io.StringIO()
+
         sys.stdout = std_output
         sys.stderr = std_error
 
-        sys.argv = arguments.copy() if arguments else []
-        sys.argv.insert(0, self.get_main_name())
+        direct_arguments = None
+        if use_direct_arguments:
+            direct_arguments = arguments
+        else:
+            sys.argv = arguments.copy() if arguments else []
+            sys.argv.insert(0, self.get_main_name())
 
         if cwd:
             os.chdir(cwd)
 
+        # pylint: disable=broad-exception-caught
         try:
             returncode = 0
-            self.execute_main()
+            self.execute_main(direct_arguments)
         except SystemExit as this_exception:
             returncode = self.handle_system_exit(this_exception, std_error)
         except Exception:
             returncode = self.handle_normal_exception()
         finally:
             saved_state.restore()
+        # pylint: enable=broad-exception-caught
 
         return InProcessResult(returncode, std_output, std_error)
-
-    # pylint: enable=broad-exception-caught

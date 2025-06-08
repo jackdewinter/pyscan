@@ -1,0 +1,28 @@
+default_context:
+    project_name: "project_summarizer"
+    project_version: "0.5.1"
+
+    project_src_additional_path: ", stubs"
+    project_src_dependencies: "columnar"
+
+    pypi_package_name: "project_summarizer"
+
+    github_organization: "jackdewinter"
+    github_project_name: "pyscan"
+    github_primary_branch_name: "master"
+
+    one_line_setup_description : "A simple tool for summarizing information about the current project."
+    
+    setup_intended_audience : "\"Intended Audience :: Developers\","
+    setup_additional_classifier : "\"Topic :: Software Development :: Libraries :: Application Frameworks\","
+    setup_keywords : "\"project\", \"tool\", \"coverage\", \"pytest\""
+    setup_package_modules : "\"project_summarizer\",\"project_summarizer.plugin_manager\",\"project_summarizer.plugins\""
+    setup_entry_points : "\"project_summarizer=project_summarizer.__main__:main\","
+    
+    rtd_site_name : "Project Summarizer"
+    rtd_deploy_name : "project_summarizer4"
+
+    # "main_class_name" : "DefaultClassName"
+    # one_line_help_description : "A simple tool for summarizing information about the current project."
+    # "setup_development_status" : "4 - Beta",
+    # "setup_package_data" : "\"\": [\"*.typed\"]",

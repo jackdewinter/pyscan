@@ -5,6 +5,7 @@ Tests to cover scenarios around the publishing of summaries.
 import os
 from shutil import copyfile
 from test.patch_builtin_open import PatchBuiltinOpen
+from test.pytest_execute import InProcessResult
 from test.test_coverage_scenarios import (
     compose_coverage_summary_file,
     get_coverage_file_name,
@@ -63,7 +64,7 @@ def test_summarize_simple_junit_report_and_publish_with_existing_publish():
     execute_results.assert_results(
         expected_output, expected_error, expected_return_code
     )
-    execute_results.assert_resultant_file(
+    InProcessResult.assert_resultant_file(
         summary_result_file, expected_test_results_file
     )
 
@@ -106,7 +107,7 @@ def test_summarize_simple_junit_report_and_publish_with_alternate_publish():
     execute_results.assert_results(
         expected_output, expected_error, expected_return_code
     )
-    execute_results.assert_resultant_file(
+    InProcessResult.assert_resultant_file(
         summary_result_file, expected_test_results_file
     )
 
@@ -144,7 +145,7 @@ def test_summarize_simple_cobertura_report_and_publish_with_existing_publish():
     execute_results.assert_results(
         expected_output, expected_error, expected_return_code
     )
-    execute_results.assert_resultant_file(
+    InProcessResult.assert_resultant_file(
         summary_coverage_file, expected_test_coverage_file
     )
 

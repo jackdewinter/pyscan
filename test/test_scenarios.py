@@ -7,6 +7,7 @@ import runpy
 import sys
 import tempfile
 from test.pytest_execute import InProcessExecution
+from typing import List, Optional
 
 from project_summarizer.__main__ import main
 from project_summarizer.main import ProjectSummarizer
@@ -47,7 +48,7 @@ class MainlineExecutor(InProcessExecution):
     Class to provide for a local instance of a InProcessExecution class.
     """
 
-    def __init__(self, use_module=False, use_main=False):
+    def __init__(self, use_module: bool = False, use_main: bool = False) -> None:
         super().__init__()
 
         self.__use_main = use_main
@@ -58,13 +59,13 @@ class MainlineExecutor(InProcessExecution):
         assert os.path.isdir(resource_directory)
         self.resource_directory = resource_directory
 
-    def execute_main(self):
+    def execute_main(self, direct_arguments: Optional[List[str]] = None):
         if self.__use_main:
             main()
         else:
             ProjectSummarizer().main()
 
-    def get_main_name(self):
+    def get_main_name(self) -> str:
         return self.__entry_point
 
 

@@ -7,7 +7,8 @@ authors:
 
 If you find anything wrong when using the project or if you have a feature
 suggestion for the project, please consider using our
-[Issues List](https://github.com/jackdewinter/pyscan/issues) to let us know
+[Issues List](https://github.com/jackdewinter/project_summarizer/issues)
+to let us know
 about your scenario. Before submitting a new issue, please follow these steps:
 
 1. **Clearly identify the problem that you plan to report**.  
@@ -43,7 +44,8 @@ about your scenario. Before submitting a new issue, please follow these steps:
    specific in your definition of the issue if you submit a new issue.
 1. **Check that the issue is not already present in our backlog.**  
    Goto our
-   [Issues List](https://github.com/jackdewinter/pyscan/issues), remove
+   [Issues List](https://github.com/jackdewinter/project_summarizer/issues),
+   remove
    the `is:open` text from the filter selection, and press enter. Then try
    various search terms to look for any issues that are related to your issue.
    If you find an issue that is like your issue, try to provide more
@@ -54,7 +56,8 @@ about your scenario. Before submitting a new issue, please follow these steps:
    when submitting your issue.
 1. **Submit your issue.**  
    Finally, file the issue in our
-   [Issues List](https://github.com/jackdewinter/pyscan/issues). Note that
+   [Issues List](https://github.com/jackdewinter/project_summarizer/issues).
+   Note that
    we pre-populate our issues with lists to help you follow these steps before
    submitting the issue. Note that saying you did follow the process when you
    did not is usually frowned upon.

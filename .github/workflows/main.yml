@@ -14,19 +14,102 @@ env:
   default-pipenv-version: 2023.12.1
 
 jobs:
-  lint:
-    name: Project Quality Analysis
+
+  matrix-prep:
+
+    name: Prepare Test Matrix
     runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+
+    - name: Check out code
+      uses: actions/checkout@v4
+
+    - name: Calculate test matrix
+      id: set-matrix
+      run: |
+        branchName=$(echo '${{ github.ref }}' | sed 's,refs/heads/,,g')
+        echo "Branch Name: $branchName"
+        matrix=$(jq --arg branchName "$branchName" 'map(. | select((.runOn==$branchName) or (.runOn=="always")) )' .github/workflows/matrix_includes.json)
+        echo "Matrix: $matrix"
+        echo "matrix={\"include\":$(echo $matrix)}" >> $GITHUB_OUTPUT
+
+  scenario-tests:
+
+    name: Scenario Tests
+    needs: matrix-prep
+    strategy:
+      matrix: ${{fromJson(needs.matrix-prep.outputs.matrix)}}
+    runs-on: ${{ matrix.platform }}
+    timeout-minutes: ${{ matrix.timeout }}
+    defaults:
+      run:
+        shell: bash
 
     steps:
 
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@master
 
-      - name: Setup Python ${{ env.default-python-version }}
+      - name: Setup Python ${{ matrix.python }}
         uses: actions/setup-python@v5.6.0
         with:
-          python-version: ${{ env.default-python-version }}
+          python-version: ${{ matrix.python }}
+
+      - name: Install PipEnv
+        run: |
+          pip install pipenv==${{ env.default-pipenv-version }}
+
+      - name: Sync With Repository
+        run: |
+          pipenv lock --clear --python ${{ matrix.python }}
+          pipenv sync -d
+          pipenv graph
+
+      - name: Execute Tests
+        run: pipenv run pytest --cov-fail-under=80 --cov --cov-branch --cov-report xml:report/coverage.xml --cov-report html:report/coverage
+
+      - name: Archive coverage artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.platform }} Coverage
+          path: |
+            ./report/coverage.xml
+            ./report/coverage
+
+      - name: Report Coverage
+        uses: codecov/codecov-action@v5
+        if: github.event_name != 'schedule'
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        with:
+          file: ./report/coverage.xml
+          name: ${{ matrix.python }} - ${{ matrix.platform }}
+          fail_ci_if_error: true
+
+  lint:
+
+    name: Project Quality Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+
+      - name: Checkout Repository
+        uses: actions/checkout@master
+
+      - name: Setup Python 3.8
+        uses: actions/setup-python@v5.6.0
+        with:
+          python-version: 3.8
 
       - name: Install PipEnv
         run: |
@@ -42,69 +125,20 @@ jobs:
         run: |
           pipenv run pre-commit run --all
 
-  scenario-tests:
-
-    name: Scenario Tests
-    strategy:
-      fail-fast: false
-      matrix:
-        python: ["3.13"]
-        platform: [windows-latest, ubuntu-latest, macos-latest]
-    runs-on: ${{ matrix.platform }}
-    needs: [ lint ]
-
-    steps:
-
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Setup Python ${{ matrix.python }}
-        uses: actions/setup-python@v5.6.0
-        with:
-          python-version: ${{ matrix.python }}
-
-      - name: Install PipEnv
-        run: |
-          pip install pipenv==${{ env.default-pipenv-version }}
-
-      - name: Sync With Repository
-        run: |
-          pipenv lock --clear --python ${{ env.default-python-version }}
-          pipenv sync -d
-          pipenv graph
-          pipenv uninstall pytest-html
-
-      - name: Execute Tests
-        run: ./ptest.sh --coverage --full-report -nh
-
-      - name: Archive coverage artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.platform }} Coverage
-          path: |
-            ./report/coverage.xml
-
-      - name: Report Coverage
-        uses: codecov/codecov-action@v5
-        if: github.event_name != 'schedule'
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}        
-        with:
-          file: ./report/coverage.xml
-          name: ${{ matrix.python }} - ${{ matrix.platform }}
-          fail_ci_if_error: true
-
   packaging:
 
-    name: Package Application
+    name: Package Library
+    needs: [ lint, scenario-tests ]
     runs-on: ubuntu-latest
-    needs: [ scenario-tests ]
-    # if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    timeout-minutes: 5
+    defaults:
+      run:
+        shell: bash
 
     steps:
 
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@master
 
       - name: Setup Python ${{ env.default-python-version }}
         uses: actions/setup-python@v5.6.0
@@ -113,23 +147,28 @@ jobs:
 
       - name: Install PipEnv
         run: |
-          pip install pipenv==${{ env.default-pipenv-version }}
+          pipenv lock --clear --python ${{ env.default-python-version }}
 
       - name: Sync With Repository
         run: |
-          pipenv lock --clear --python ${{ env.default-python-version }}
+          pipenv lock
           pipenv sync -d
           pipenv graph
-          pipenv uninstall pytest-html
 
-      - name: Build package
+      - name: Pyroma
         run: |
-          ./package-release.sh
+          pipenv run pyroma -q -n 10 .
+
+      - name: Setup
+        run: |
+          pipenv run python setup.py sdist bdist_wheel
+
+      - name: Twine
+        run: |
+          pipenv run twine check dist/*    
 
       - name: Upload Package
         uses: actions/upload-artifact@v4
         with:
-          name: python-package-dist
+          name: packaged-library
           path: ${{github.workspace}}/dist/
-
-        

@@ -6,6 +6,7 @@ import os
 import platform
 from shutil import copyfile
 from test.patch_builtin_open import PatchBuiltinOpen
+from test.pytest_execute import InProcessResult
 from test.test_scenarios import (
     COBERTURA_COMMAND_LINE_FLAG,
     COVERAGE_SUMMARY_FILE_NAME,
@@ -91,7 +92,7 @@ Test Coverage Summary
     execute_results.assert_results(
         expected_output, expected_error, expected_return_code
     )
-    execute_results.assert_resultant_file(
+    InProcessResult.assert_resultant_file(
         summary_coverage_file, expected_test_coverage_file
     )
     return (
@@ -174,7 +175,7 @@ Test Coverage Summary
     execute_results.assert_results(
         expected_output, expected_error, expected_return_code
     )
-    execute_results.assert_resultant_file(
+    InProcessResult.assert_resultant_file(
         summary_coverage_file, expected_test_coverage_file
     )
 
@@ -221,7 +222,7 @@ def test_summarize_simple_cobertura_report_with_quiet(
     execute_results.assert_results(
         expected_output, expected_error, expected_return_code
     )
-    execute_results.assert_resultant_file(
+    InProcessResult.assert_resultant_file(
         summary_coverage_file, expected_test_coverage_file
     )
 
@@ -331,7 +332,7 @@ def summarize_simple_cobertura_report_and_publish(
         expected_output, expected_error, expected_return_code
     )
     if check_file_contents:
-        execute_results.assert_resultant_file(
+        InProcessResult.assert_resultant_file(
             summary_coverage_file, expected_test_coverage_file
         )
 

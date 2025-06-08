@@ -26,14 +26,14 @@ repos:
     hooks:
     - id: flake8
       name: "Scan:   Flake8"
-      args: ["-j","4", "--exclude", "dist,build" ]
+      args: ["-j","4", "--exclude", "dist,build,.venv" ]
       additional_dependencies: ["flake8-bugbear==24.8.19", "flake8-bandit==4.1.1"]
   - repo: https://github.com/PyCQA/bandit
     rev: 1.8.0
     hooks:
     - id: bandit
       name: "Scan:   Bandit"
-      args: [--configfile,.bandit.yaml,-q,-r,"./pyshell"]
+      args: [--configfile,.bandit.yaml,-q,-r,"project_summarizer"]
       pass_filenames: false
   - repo: local
     hooks:
@@ -71,12 +71,39 @@ repos:
           "test"
         ]
       pass_filenames: false
+  - repo: local
+    hooks:
+    - id: pylint
+      name: "Scan:   PyLint (utils)"
+      entry: pylint
+      language: system
+      types: [python]
+      require_serial: true
+      args:
+        [
+          "-j=1",
+          "--recursive=y",
+          "-rn", # Only display messages
+          "-sn", # Don't display the score
+          "utils"
+        ]
+      pass_filenames: false
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.13.0
     hooks:
     - id: mypy
       name: "Scan:   MyPy"
-      args: [--strict, project_summarizer, stubs]
+      args: [--warn-return-any, --strict, project_summarizer , stubs ]
+      additional_dependencies: [
+        columnar
+      ]
+      pass_filenames: false
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.13.0
+    hooks:
+    - id: mypy
+      name: "Scan:   MyPy (test)"
+      args: [--warn-return-any, --strict, test , stubs ]
       additional_dependencies: [
         columnar
       ]
@@ -85,7 +112,7 @@ repos:
     rev: v0.9.27
     hooks:
       - id: pymarkdown
-        name: "Scan:   Old Docs"
+        name: "Scan:   PyMarkdown (Old Documentation)"
         pass_filenames: false
         args:
           - --config
@@ -111,4 +138,3 @@ repos:
     - id: shellcheck
       name: "Scan:   Shellcheck"
       args: ["-x", "-o","require-variable-braces"]
-

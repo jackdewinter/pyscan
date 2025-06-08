@@ -8,11 +8,30 @@ set "PROJECT_DIRECTORY=%cd%"
 set PYTHONPATH=%PROJECT_DIRECTORY%
 
 rem Set needed environment variables.
+set PROPERTIES_FILE=project.properties
 set PTEST_TEMPFILE=temp_ptest.txt
 set PTEST_SCRIPT_DIRECTORY=%~dp0
-set PTEST_PROJECT_SUMMARIZER_SCRIPT_PATH=python %PTEST_SCRIPT_DIRECTORY%\project_summarizer\main.py
 set PTEST_TEST_RESULTS_PATH=report\tests.xml
 set PTEST_TEST_COVERAGE_PATH=report\coverage.xml
+
+rem Read properties from the properties file and set in the current environment.
+FOR /f %%N IN (%PROPERTIES_FILE%) DO (
+	set TEST_LINE=%%N
+	IF NOT "!TEST_LINE:~0,1!"=="#" (
+		SET %%N
+	)
+)
+if not defined PYTHON_MODULE_NAME (
+	echo "Property 'PYTHON_MODULE_NAME' must be set in the %PROPERTIES_FILE% file."
+	goto error_end
+)
+
+if "%PYTHON_MODULE_NAME%" == "project_summarizer" (
+	set PTEST_PYSCAN_SCRIPT_PATH=python %PTEST_SCRIPT_DIRECTORY%\project_summarizer\main.py
+) else (
+	set PTEST_PYSCAN_SCRIPT_PATH=project_summarizer
+)
+echo %PTEST_PYSCAN_SCRIPT_PATH%
 
 rem Look for options on the command line.
 set PTEST_PUBLISH_SUMMARIES=
@@ -75,9 +94,9 @@ if defined PTEST_KEYWORD (
 	set PTEST_KEYWORD=-k %PTEST_KEYWORD%
 )
 
-set PTEST_PROJECT_SUMMARIZER_OPTIONS=
+set PTEST_PYSCAN_OPTIONS=
 if not defined PTEST_FULL_REPORT (
-	set PTEST_PROJECT_SUMMARIZER_OPTIONS=--only-changes
+	set PTEST_PYSCAN_OPTIONS=--only-changes
 )
 
 if defined PTEST_MULTI_CORE_ARGS (
@@ -89,13 +108,17 @@ if defined PTEST_MULTI_CORE_ARGS (
 )
 
 rem Enter main part of script.
-set PYTEST_ARGS=--timeout=10 -ra --strict-markers --junitxml=report/tests.xml --html=report/report.html
+
+rem The build directory can sometimes be a problem, so just nuke it.
+rmdir /s /q build > nul 2>&1
+
 if defined PTEST_KEYWORD (
 	echo {Executing partial test suite...}
+	set PYTEST_ARGS=
 ) else (
 	if defined PTEST_COVERAGE_MODE (
 		echo {Executing full test suite with coverage...}
-		set PYTEST_ARGS=%PYTEST_ARGS% --cov --cov-branch --cov-report xml:report/coverage.xml --cov-report html:report/coverage
+		set PYTEST_ARGS=--cov --cov-branch --cov-report xml:report/coverage.xml --cov-report html:report/coverage 
 	) else (
 		echo {Executing full test suite...}
 	)
@@ -131,7 +154,7 @@ if defined PTEST_COVERAGE_MODE (
 )
 
 echo {Summarizing changes in execution of full test suite.}
-pipenv run %PTEST_PROJECT_SUMMARIZER_SCRIPT_PATH% %PTEST_PROJECT_SUMMARIZER_OPTIONS% %PTEST_REPORT_OPTIONS%
+pipenv run %PTEST_PYSCAN_SCRIPT_PATH% %PTEST_PYSCAN_OPTIONS% %PTEST_REPORT_OPTIONS%
 if ERRORLEVEL 1 (
 	echo.
 	echo {Summarizing changes in execution of full test suite failed.}
@@ -147,7 +170,7 @@ goto success_end
 
 :publish_start
 echo {Publishing summaries from last test runs.}
-pipenv run %PTEST_PROJECT_SUMMARIZER_SCRIPT_PATH% --publish
+pipenv run %PTEST_PYSCAN_SCRIPT_PATH% --publish
 if ERRORLEVEL 1 (
 	echo.
 	echo {Publishing summaries from last test runs failed.}

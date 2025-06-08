@@ -65,6 +65,14 @@
             "errorTests": 0,
             "skippedTests": 0,
             "elapsedTimeInMilliseconds": 0
+        },
+        {
+            "name": "test.test_version",
+            "totalTests": 1,
+            "failedTests": 0,
+            "errorTests": 0,
+            "skippedTests": 0,
+            "elapsedTimeInMilliseconds": 0
         }
     ]
 }
