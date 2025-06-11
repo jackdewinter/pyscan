@@ -10,7 +10,7 @@ from project_summarizer.plugins.coverage_model import (
 )
 
 
-def test_coverage_totals_equal():
+def test_coverage_totals_equal() -> None:
     """
     Test to make sure the coverage totals is equal to another total of the same amount.
     """
@@ -31,7 +31,7 @@ def test_coverage_totals_equal():
     assert actual_result
 
 
-def test_coverage_totals_not_equal():
+def test_coverage_totals_not_equal() -> None:
     """
     Test to make sure the coverage totals is not equal to another total of almost the same amount.
     """
@@ -59,7 +59,7 @@ def test_coverage_totals_not_equal():
     assert not actual_result
 
 
-def test_coverage_totals_not_equal_different_object():
+def test_coverage_totals_not_equal_different_object() -> None:
     """
     Test to make sure the coverage totals is not equal to another object that is not a total object.
     """
@@ -76,7 +76,7 @@ def test_coverage_totals_not_equal_different_object():
     assert not actual_result
 
 
-def test_coverage_measurements_equal():
+def test_coverage_measurements_equal() -> None:
     """
     Test to make sure the coverage measurements is equal to another measurement of the same amount.
     """
@@ -93,7 +93,7 @@ def test_coverage_measurements_equal():
     assert actual_result
 
 
-def test_coverage_measurements_not_equal():
+def test_coverage_measurements_not_equal() -> None:
     """
     Test to make sure the coverage measurements is not equal to another measurement of almost the same amount.
     """
@@ -117,7 +117,7 @@ def test_coverage_measurements_not_equal():
     assert not actual_result
 
 
-def test_coverage_measurement_not_equal_different_object():
+def test_coverage_measurement_not_equal_different_object() -> None:
     """
     Test to make sure the coverage measurements is not equal to another object that is not a total object.
     """

@@ -13,8 +13,10 @@ from project_summarizer.plugin_manager.plugin_details import PluginDetails
 from project_summarizer.plugin_manager.project_summarizer_plugin import (
     ProjectSummarizerPlugin,
 )
-from project_summarizer.plugins.test_measurement import TestMeasurement
-from project_summarizer.plugins.test_totals import TestTotals
+from project_summarizer.plugins.resultant_test_measurement import (
+    ResultantTestMeasurement,
+)
+from project_summarizer.plugins.resultant_test_totals import ResultantTestTotals
 from project_summarizer.summarize_context import SummarizeContext
 
 
@@ -117,13 +119,13 @@ class JunitPlugin(ProjectSummarizerPlugin):
 
     def __compose_summary_from_junit_document(
         self, junit_document: Any
-    ) -> Tuple[TestTotals, TestMeasurement]:
+    ) -> Tuple[ResultantTestTotals, ResultantTestMeasurement]:
         """
-        Read the values from the junit document and construct a TestTotals instance
+        Read the values from the junit document and construct a ResultantTestTotals instance
         summary from the data.
         """
 
-        test_totals = TestTotals(project_name="?", report_source="pytest")
+        test_totals = ResultantTestTotals(project_name="?", report_source="pytest")
         for next_test_suite in junit_document.findall("testsuite"):
             for next_test_case in next_test_suite.findall("./testcase"):
                 class_name = next_test_case.attrib["classname"]
@@ -133,7 +135,7 @@ class JunitPlugin(ProjectSummarizerPlugin):
                 if class_name in test_totals.measurements:
                     measurement_to_add_to = test_totals.measurements[class_name]
                 else:
-                    measurement_to_add_to = TestMeasurement(class_name)
+                    measurement_to_add_to = ResultantTestMeasurement(class_name)
                     test_totals.measurements[class_name] = measurement_to_add_to
                 for next_child_node in next_test_case:
                     if next_child_node.tag == "failure":
@@ -156,12 +158,14 @@ class JunitPlugin(ProjectSummarizerPlugin):
         return test_totals, grand_totals
 
     @classmethod
-    def __build_totals(cls, test_totals: TestTotals) -> TestMeasurement:
+    def __build_totals(
+        cls, test_totals: ResultantTestTotals
+    ) -> ResultantTestMeasurement:
         """
         Calculate the grand totals based on the test totals object presented.
         """
 
-        grand_totals = TestMeasurement("totals")
+        grand_totals = ResultantTestMeasurement("totals")
         for next_key in sorted(test_totals.measurements):
             next_value = test_totals.measurements[next_key]
             grand_totals.total_tests = grand_totals.total_tests + next_value.total_tests
@@ -175,7 +179,7 @@ class JunitPlugin(ProjectSummarizerPlugin):
 
     def load_test_results_summary_file(
         self, test_results_to_load: str
-    ) -> Tuple[Optional[TestTotals], Optional[TestMeasurement]]:
+    ) -> Tuple[Optional[ResultantTestTotals], Optional[ResultantTestMeasurement]]:
         """
         Attempt to load a previously published test summary.
         """
@@ -201,17 +205,17 @@ class JunitPlugin(ProjectSummarizerPlugin):
                     f"Previous results summary file '{test_results_to_load}' was not loaded ({ex})."
                 )
                 sys.exit(1)
-            test_totals = TestTotals.from_dict(results_dictionary)
+            test_totals = ResultantTestTotals.from_dict(results_dictionary)
             grand_totals = self.__build_totals(test_totals)
         return test_totals, grand_totals
 
     # pylint: disable=too-many-arguments
     def __report_test_files(
         self,
-        new_stats: TestTotals,
-        new_totals: TestMeasurement,
-        loaded_stats: Optional[TestTotals],
-        loaded_totals: Optional[TestMeasurement],
+        new_stats: ResultantTestTotals,
+        new_totals: ResultantTestMeasurement,
+        loaded_stats: Optional[ResultantTestTotals],
+        loaded_totals: Optional[ResultantTestMeasurement],
         only_report_changes: bool,
     ) -> Optional[Tuple[List[str], List[str], List[List[str]]]]:
         """
@@ -219,9 +223,9 @@ class JunitPlugin(ProjectSummarizerPlugin):
         """
 
         if not loaded_stats:
-            loaded_stats = TestTotals()
+            loaded_stats = ResultantTestTotals()
         if not loaded_totals:
-            loaded_totals = TestMeasurement("default")
+            loaded_totals = ResultantTestMeasurement("default")
 
         new_stats_keys = sorted(list(new_stats.measurements.keys()))
         loaded_stats_keys = sorted(list(loaded_stats.measurements.keys()))
@@ -297,8 +301,8 @@ class JunitPlugin(ProjectSummarizerPlugin):
     def __generate_full_match(
         self,
         class_name: str,
-        newer_measure: TestMeasurement,
-        older_measure: TestMeasurement,
+        newer_measure: ResultantTestMeasurement,
+        older_measure: ResultantTestMeasurement,
     ) -> List[str]:
         """
         Helper method to generate a match with both a newer measurement and an older measurement.
@@ -315,7 +319,7 @@ class JunitPlugin(ProjectSummarizerPlugin):
         )
 
     def __generate_older_match(
-        self, class_name: str, older_measure: TestMeasurement
+        self, class_name: str, older_measure: ResultantTestMeasurement
     ) -> List[str]:
         """
         Helper method to generate a match with only an older measurement.
@@ -332,7 +336,7 @@ class JunitPlugin(ProjectSummarizerPlugin):
         )
 
     def __generate_newer_match(
-        self, class_name: str, newer_measure: TestMeasurement
+        self, class_name: str, newer_measure: ResultantTestMeasurement
     ) -> List[str]:
         """
         Helper method to generate a match with only a newer measurement.
@@ -384,8 +388,8 @@ class JunitPlugin(ProjectSummarizerPlugin):
     def print_test_summary(
         self,
         test_report_rows: List[List[str]],
-        new_totals: TestMeasurement,
-        loaded_totals: TestMeasurement,
+        new_totals: ResultantTestMeasurement,
+        loaded_totals: ResultantTestMeasurement,
     ) -> Optional[Tuple[List[str], List[str], List[List[str]]]]:
         """
         Print the actual test summaries.

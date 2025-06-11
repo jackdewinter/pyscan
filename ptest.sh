@@ -14,7 +14,30 @@ SCRIPT_TITLE="Running project tests"
 TEST_RESULTS_XML_PATH=report/tests.xml
 TEST_COVERAGE_XML_PATH=report/coverage.xml
 
-PYSCAN_SCRIPT_PATH=(python "${SCRIPT_DIR}/main.py")
+verbose_echo() {
+	echo_text=${1:-}
+
+	if [ "${VERBOSE_MODE}" -ne 0 ]; then
+		echo "${echo_text}"
+	fi
+}
+
+load_properties_from_file() {
+
+	verbose_echo "{Loading 'project.properties file'...}"
+	while IFS='=' read -r key_value; do
+		if [[ ${key_value} == \#* ]]; then
+			continue
+		fi
+		key=$(echo "${key_value}" | cut -d '=' -f1)
+		value=$(echo "${key_value}" | cut -d '=' -f2-)
+		export "${key}=${value}"
+	done <"${SCRIPT_DIR}/project.properties"
+
+	if [[ -z ${PYTHON_MODULE_NAME} ]]; then
+		complete_process 1 "Property 'PYTHON_MODULE_NAME' must be defined in the project.properties file."
+	fi
+}
 
 # Perform any cleanup required by the script.
 # shellcheck disable=SC2317  # Unreachable code
@@ -168,6 +191,12 @@ parse_command_line() {
 # Handle the publishing mode, as it publishes previous tests results, not run new tests.
 handle_publish_mode() {
 
+	if [[ ${PYTHON_MODULE_NAME} == "project_summarizer" ]]; then
+		PYSCAN_SCRIPT_PATH=(python "${SCRIPT_DIR}/main.py")
+	else
+		PYSCAN_SCRIPT_PATH=(project_summarizer)
+	fi
+
 	if [[ ${PUBLISH_MODE} -ne 0 ]]; then
 		echo "{Publishing summaries from last test run.}"
 		if ! pipenv run "${PYSCAN_SCRIPT_PATH[@]}" --publish; then
@@ -254,6 +283,12 @@ execute_tests() {
 # Summarize the test executions, and if coverage is enabled, any change in coverage.
 summarize_test_executions() {
 
+	if [[ ${PYTHON_MODULE_NAME} == "project_summarizer" ]]; then
+		PYSCAN_SCRIPT_PATH=(python "${SCRIPT_DIR}/main.py")
+	else
+		PYSCAN_SCRIPT_PATH=(project_summarizer)
+	fi
+
 	# Determine if we report on the tests, or tests + coverage.
 	PYSCAN_REPORT_OPTIONS=(--junit "${TEST_RESULTS_XML_PATH}")
 	if [[ ${COVERAGE_MODE} -ne 0 ]]; then
@@ -273,6 +308,8 @@ summarize_test_executions() {
 
 # Parse any command line values.
 parse_command_line "$@"
+
+load_properties_from_file
 
 # Clean entrance into the script.
 start_process

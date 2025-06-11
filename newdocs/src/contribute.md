@@ -11,7 +11,8 @@ Thanks for your interest in contributing to this application!
 ## How To Go About Helping Us
 
 Let us say that you have a great idea on what you want to see happen with this
-project.  You submit it to our [issues list](https://github.com/jackdewinter/pyscan/issues),
+project.  You submit it to our
+[issues list](https://github.com/jackdewinter/project_summarizer/issues),
 and we tell you it is going to be a long time before we get to it.  Or we say
 that it does not fit the direction we have for the project.
 

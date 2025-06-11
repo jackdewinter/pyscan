@@ -1,3 +1,7 @@
+"""
+TBD
+"""
+
 import os
 import re
 import subprocess
@@ -16,6 +20,7 @@ def __get_versions_from_pip() -> List[str]:
             [sys.executable, "-m", "pip", "install", f"{PACKAGE_NAME}==99.99.99"],
             capture_output=True,
             text=True,
+            check=True,
         )
     )
     pip_response = pip_response[pip_response.find("(from versions:") + 15 :]

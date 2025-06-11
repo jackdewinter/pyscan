@@ -11,7 +11,7 @@ from project_summarizer.plugin_manager.project_summarizer_plugin import (
 )
 
 
-def test_add_plugin_bad_file_name():
+def test_add_plugin_bad_file_name() -> None:
     """
     Test the addition of a plugin with a non-existant file name.
     """
@@ -38,7 +38,7 @@ Plugin file '{file}' does not exist.""".replace(
     )
 
 
-def test_add_plugin_bad_python_file():
+def test_add_plugin_bad_python_file() -> None:
     """
     Test the addition of a plugin with a file name that exists but is not a python file.
     """
@@ -69,7 +69,7 @@ Plugin file named '{file}' cannot be loaded.""".replace(
     )
 
 
-def test_add_plugin_bad_class_name():
+def test_add_plugin_bad_class_name() -> None:
     """
     Test the addition of a plugin with a file that does not contain a proper class.
     """
@@ -100,7 +100,7 @@ Plugin file named '{file}' does not contain a class named 'Misnamed'.""".replace
     )
 
 
-def test_add_plugin_bad_constructor():
+def test_add_plugin_bad_constructor() -> None:
     """
     Test the addition of a plugin with a file that does not have a constructor that accepts 0 arguments.
     """
@@ -131,7 +131,7 @@ Plugin file named '{file}' threw an exception in the constructor for the class '
     )
 
 
-def test_add_plugin_bad_set_context():
+def test_add_plugin_bad_set_context() -> None:
     """
     Test the addition of a plugin with a file that has a bad set_context function.
     """
@@ -165,7 +165,7 @@ def test_add_plugin_bad_set_context():
         )
 
 
-def test_add_plugin_bad_get_output_path():
+def test_add_plugin_bad_get_output_path() -> None:
     """
     Test the addition of a plugin with a file that has a bad get_output_path function.
     """
@@ -202,7 +202,7 @@ def test_add_plugin_bad_get_output_path():
         )
 
 
-def test_add_plugin_bad_add_arguments():
+def test_add_plugin_bad_add_arguments() -> None:
     """
     Test the addition of a plugin with a file that has a bad add_command_line_arguments function.
     """
@@ -232,7 +232,7 @@ def test_add_plugin_bad_add_arguments():
     )
 
 
-def test_add_plugin_bad_generate_report():
+def test_add_plugin_bad_generate_report() -> None:
     """
     Test the addition of a plugin with a file that has a bad generate_report function.
     """
@@ -270,7 +270,7 @@ def test_add_plugin_bad_generate_report():
         )
 
 
-def test_add_plugin_bad_generate_report_exception():
+def test_add_plugin_bad_generate_report_exception() -> None:
     """
     Test the addition of a plugin with a file that has a bad generate_report function
     that throws the bad plguin error.
@@ -318,7 +318,7 @@ project_summarizer.plugin_manager.bad_plugin_error.BadPluginError: bad_generate_
         )
 
 
-def test_add_plugin_bad_get_details():
+def test_add_plugin_bad_get_details() -> None:
     """
     Test the addition of a plugin with a file that has a bad get_details function.
     """
@@ -348,7 +348,7 @@ Plugin class 'BadGetDetails' had a critical failure loading the plugin details."
     )
 
 
-def test_add_plugin_bad_get_details_interface():
+def test_add_plugin_bad_get_details_interface() -> None:
     """
     Test the addition of a plugin with a file that has a bad get_details function that returns a bad interface.
     """
@@ -381,7 +381,7 @@ Plugin '{file}' with an interface version ('0') that is not '1'.""".replace(
     )
 
 
-def test_add_plugin_bad_get_details_interface_type():
+def test_add_plugin_bad_get_details_interface_type() -> None:
     """
     Test the addition of a plugin with a file that has a bad get_details function that returns a bad interface type.
     """
@@ -411,7 +411,7 @@ Plugin class 'BadGetDetailsInterfaceVersionType' returned an improperly typed va
     )
 
 
-def test_add_plugin_bad_get_details_id_type():
+def test_add_plugin_bad_get_details_id_type() -> None:
     """
     Test the addition of a plugin with a file that has a bad get_details function that returns a bad id type.
     """
@@ -441,7 +441,7 @@ Plugin class 'BadGetDetailsIdType' returned an improperly typed value for field 
     )
 
 
-def test_add_plugin_bad_get_details_id_empty():
+def test_add_plugin_bad_get_details_id_empty() -> None:
     """
     Test the addition of a plugin with a file that has a bad get_details function that returns a bad id that is empty.
     """
@@ -471,7 +471,7 @@ Plugin class 'BadGetDetailsIdEmpty' returned an empty value for field name 'plug
     )
 
 
-def test_add_plugin_good_class():
+def test_add_plugin_good_class() -> None:
     """
     Test the addition of a plugin with a file that is just fine but does nothing.
     """
@@ -521,7 +521,7 @@ def test_add_plugin_good_class():
         assert all_lines[0] == "The file to report on was: file"
 
 
-def test_add_plugin_good_class_with_dictionary():
+def test_add_plugin_good_class_with_dictionary() -> None:
     """
     Test the addition of a plugin with a file that is just fine but does nothing.
     """

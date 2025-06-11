@@ -5,7 +5,7 @@ Module to provide an encapsulation of the test measurements.
 from typing import Any, Dict
 
 
-class TestMeasurement:
+class ResultantTestMeasurement:
     """
     Class to provide an encapsulation of the test measurements.
     """
@@ -46,7 +46,7 @@ class TestMeasurement:
         }
 
     @staticmethod
-    def from_dict(input_dictionary: Dict[str, Any]) -> "TestMeasurement":
+    def from_dict(input_dictionary: Dict[str, Any]) -> "ResultantTestMeasurement":
         """
         Read the measurement in from the specified dictionary.
         """
@@ -57,7 +57,7 @@ class TestMeasurement:
         measure_errored = input_dictionary["errorTests"]
         measure_skipped = input_dictionary["skippedTests"]
         measure_elapsed = input_dictionary["elapsedTimeInMilliseconds"]
-        return TestMeasurement(
+        return ResultantTestMeasurement(
             name=measure_name,
             total_tests=measure_total,
             failed_tests=measure_failed,

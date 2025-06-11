@@ -3,7 +3,7 @@ site_name: Project Summarizer
 site_description: TBD
 site_author: Jack De Winter
 theme: readthedocs
-# repo_url: https://github.com/jackdewinter/pyscan
+# repo_url: https://github.com/jackdewinter/project_summarizer
 docs_dir: src
 site_dir: site
 plugins:
@@ -25,3 +25,14 @@ markdown_extensions:
 theme:
   name: readthedocs
   navigation_depth: 2
+  # features:
+  #   - navigation.tabs
+  #   - navigation.top
+  #   - navigation.sections
+  #   - navigation.expand
+  #   - navigation.instant
+  #   - navigation.index
+  #   - navigation.search
+  #   - navigation.search.highlight
+  #   - navigation.search.suggest
+  #   - navigation.search.suggest.autocomplete  

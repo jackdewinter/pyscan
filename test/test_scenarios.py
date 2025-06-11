@@ -7,6 +7,9 @@ import runpy
 import sys
 import tempfile
 from test.pytest_execute import InProcessExecution
+from typing import Generator, List, Optional, Tuple
+
+import pytest
 
 from project_summarizer.__main__ import main
 from project_summarizer.main import ProjectSummarizer
@@ -31,7 +34,7 @@ __COBERTURA_COVERAGE_FILE_NAME = "coverage.xml"
 __COBERTURA_NON_WINDOWS_COVERAGE_FILE_NAME = "coverage-non-windows.xml"
 
 
-def get_coverage_file_name():
+def get_coverage_file_name() -> str:
     """
     Get the coverage file for the specific operating system class.
 
@@ -47,7 +50,7 @@ class MainlineExecutor(InProcessExecution):
     Class to provide for a local instance of a InProcessExecution class.
     """
 
-    def __init__(self, use_module=False, use_main=False):
+    def __init__(self, use_module: bool = False, use_main: bool = False) -> None:
         super().__init__()
 
         self.__use_main = use_main
@@ -58,17 +61,17 @@ class MainlineExecutor(InProcessExecution):
         assert os.path.isdir(resource_directory)
         self.resource_directory = resource_directory
 
-    def execute_main(self):
+    def execute_main(self, direct_arguments: Optional[List[str]] = None) -> None:
         if self.__use_main:
             main()
         else:
             ProjectSummarizer().main()
 
-    def get_main_name(self):
+    def get_main_name(self) -> str:
         return self.__entry_point
 
 
-def test_get_summarizer_version():
+def test_get_summarizer_version() -> None:
     """
     Make sure that we can get information about the version of the summarizer.
     """
@@ -96,23 +99,74 @@ def test_get_summarizer_version():
     )
 
 
-# pylint: disable=consider-using-with
-def setup_directories(
-    create_report_directory=True,
-    create_publish_directory=False,
-    alternate_publish_directory=None,
-    temporary_work_directory=None,
-):
+@pytest.fixture(name="my_temporary_directory")
+def my_temporary_directory_impl() -> Generator[str, None, None]:
+    """
+    Fixture to create a temporary directory for testing purposes.
+    """
+    with tempfile.TemporaryDirectory() as temp_dir:
+        yield temp_dir
+
+
+# @pytest.fixture(scope="session")
+# def image_file(tmpdir_factory):
+#     img = compute_expensive_image()
+#     fn = tmpdir_factory.mktemp("data").join("img.png")
+#     img.save(str(fn))
+#     return fn
+
+
+# def setup_directories(
+#     create_report_directory: bool = True,
+#     create_publish_directory: bool = False,
+#     alternate_publish_directory: Optional[str] = None,
+#     temporary_work_directory: Optional[tempfile.TemporaryDirectory] = None,
+# ) -> Tuple[tempfile.TemporaryDirectory, str, str]:
+#     """
+#     Setup a temporary directory, a report directory under it (created if necessary),
+#     and the publish directory (not created by default if necessary).
+#     """
+
+#     if not temporary_work_directory:
+#         temporary_work_directory = tempfile.TemporaryDirectory()
+
+#     report_directory = os.path.join(
+#         temporary_work_directory.name,
+#         ProjectSummarizerPlugin.DEFAULT_REPORT_PUBLISH_PATH,
+#     )
+#     if create_report_directory:
+#         os.makedirs(report_directory)
+
+#     alternate_publish_directory = (
+#         alternate_publish_directory
+#         or ProjectSummarizerPlugin.DEFAULT_SUMMARY_PUBLISH_PATH
+#     )
+
+#     publish_directory = os.path.join(
+#         temporary_work_directory.name, alternate_publish_directory
+#     )
+#     publish_directory = os.path.abspath(publish_directory)
+#     if create_publish_directory:
+#         os.makedirs(publish_directory)
+
+#     return temporary_work_directory, report_directory, publish_directory
+
+
+def setup_directories2(
+    temporary_work_directory: str,
+    create_report_directory: bool = True,
+    create_publish_directory: bool = False,
+    alternate_publish_directory: Optional[str] = None,
+) -> Tuple[str, str]:
     """
     Setup a temporary directory, a report directory under it (created if necessary),
     and the publish directory (not created by default if necessary).
     """
 
-    if not temporary_work_directory:
-        temporary_work_directory = tempfile.TemporaryDirectory()
+    assert temporary_work_directory
 
     report_directory = os.path.join(
-        temporary_work_directory.name,
+        temporary_work_directory,
         ProjectSummarizerPlugin.DEFAULT_REPORT_PUBLISH_PATH,
     )
     if create_report_directory:
@@ -124,13 +178,10 @@ def setup_directories(
     )
 
     publish_directory = os.path.join(
-        temporary_work_directory.name, alternate_publish_directory
+        temporary_work_directory, alternate_publish_directory
     )
     publish_directory = os.path.abspath(publish_directory)
     if create_publish_directory:
         os.makedirs(publish_directory)
 
-    return temporary_work_directory, report_directory, publish_directory
-
-
-# pylint: enable=consider-using-with
+    return report_directory, publish_directory
