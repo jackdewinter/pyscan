@@ -3,6 +3,7 @@ Module to provide tests related to the basic parts of the scanner.
 """
 
 import os
+import sys
 from test.test_scenarios import (
     MainlineExecutor,
     my_temporary_directory_impl,
@@ -11,6 +12,11 @@ from test.test_scenarios import (
 from typing import List
 
 _ = my_temporary_directory_impl
+
+if sys.version_info < (3, 10):
+    ARGPARSE_X = "optional arguments:"
+else:
+    ARGPARSE_X = "options:"
 
 
 def test_scanner_with_no_parameters(my_temporary_directory: str) -> None:
@@ -24,7 +30,7 @@ def test_scanner_with_no_parameters(my_temporary_directory: str) -> None:
     supplied_arguments: List[str] = []
 
     expected_return_code = 2
-    expected_output = """Error: Either --publish or one of the reporting arguments mush be specified.
+    expected_output = f"""Error: Either --publish or one of the reporting arguments mush be specified.
 usage: main.py [-h] [--version] [--stack-trace] [--add-plugin ADD_PLUGIN]
                [--report-dir REPORT_DIR] [--publish-dir PUBLISH_DIR]
                [--cobertura path] [--junit path] [--only-changes] [--publish]
@@ -32,7 +38,7 @@ usage: main.py [-h] [--version] [--stack-trace] [--add-plugin ADD_PLUGIN]
 
 Summarize Python files.
 
-options:
+{ARGPARSE_X}
   -h, --help            Show this help message and exit.
   --version             Show program's version number and exit.
   --stack-trace         if an error occurs, print out the stack trace for
@@ -82,7 +88,7 @@ def test_scanner_with_no_parameters_through_module(my_temporary_directory: str) 
 
     expected_return_code = 2
     expected_error = ""
-    expected_output = """Error: Either --publish or one of the reporting arguments mush be specified.
+    expected_output = f"""Error: Either --publish or one of the reporting arguments mush be specified.
 usage: __main.py__ [-h] [--version] [--stack-trace] [--add-plugin ADD_PLUGIN]
                    [--report-dir REPORT_DIR] [--publish-dir PUBLISH_DIR]
                    [--cobertura path] [--junit path] [--only-changes]
@@ -90,7 +96,7 @@ usage: __main.py__ [-h] [--version] [--stack-trace] [--add-plugin ADD_PLUGIN]
 
 Summarize Python files.
 
-options:
+{ARGPARSE_X}
   -h, --help            Show this help message and exit.
   --version             Show program's version number and exit.
   --stack-trace         if an error occurs, print out the stack trace for
@@ -138,7 +144,7 @@ def test_scanner_with_no_parameters_through_main(my_temporary_directory: str) ->
     supplied_arguments: List[str] = []
 
     expected_return_code = 2
-    expected_output = """Error: Either --publish or one of the reporting arguments mush be specified.
+    expected_output = f"""Error: Either --publish or one of the reporting arguments mush be specified.
 usage: main.py [-h] [--version] [--stack-trace] [--add-plugin ADD_PLUGIN]
                [--report-dir REPORT_DIR] [--publish-dir PUBLISH_DIR]
                [--cobertura path] [--junit path] [--only-changes] [--publish]
@@ -146,7 +152,7 @@ usage: main.py [-h] [--version] [--stack-trace] [--add-plugin ADD_PLUGIN]
 
 Summarize Python files.
 
-options:
+{ARGPARSE_X}
   -h, --help            Show this help message and exit.
   --version             Show program's version number and exit.
   --stack-trace         if an error occurs, print out the stack trace for
@@ -194,14 +200,14 @@ def test_scanner_with_dash_h(my_temporary_directory: str) -> None:
     supplied_arguments = ["-h"]
 
     expected_return_code = 0
-    expected_output = """usage: main.py [-h] [--version] [--stack-trace] [--add-plugin ADD_PLUGIN]
+    expected_output = f"""usage: main.py [-h] [--version] [--stack-trace] [--add-plugin ADD_PLUGIN]
                [--report-dir REPORT_DIR] [--publish-dir PUBLISH_DIR]
                [--cobertura path] [--junit path] [--only-changes] [--publish]
                [--quiet] [--columns DISPLAY_COLUMNS]
 
 Summarize Python files.
 
-options:
+{ARGPARSE_X}
   -h, --help            Show this help message and exit.
   --version             Show program's version number and exit.
   --stack-trace         if an error occurs, print out the stack trace for
@@ -249,7 +255,7 @@ def test_scanner_with_dash_dash_quiet(my_temporary_directory: str) -> None:
     supplied_arguments = ["--quiet"]
 
     expected_return_code = 2
-    expected_output = """Error: Either --publish or one of the reporting arguments mush be specified.
+    expected_output = f"""Error: Either --publish or one of the reporting arguments mush be specified.
 usage: main.py [-h] [--version] [--stack-trace] [--add-plugin ADD_PLUGIN]
                [--report-dir REPORT_DIR] [--publish-dir PUBLISH_DIR]
                [--cobertura path] [--junit path] [--only-changes] [--publish]
@@ -257,7 +263,7 @@ usage: main.py [-h] [--version] [--stack-trace] [--add-plugin ADD_PLUGIN]
 
 Summarize Python files.
 
-options:
+{ARGPARSE_X}
   -h, --help            Show this help message and exit.
   --version             Show program's version number and exit.
   --stack-trace         if an error occurs, print out the stack trace for
@@ -336,7 +342,7 @@ def test_scanner_with_dash_dash_columns_good_number(
 
     supplied_arguments = ["--columns", "100"]
     expected_return_code = 2
-    expected_output = """Error: Either --publish or one of the reporting arguments mush be specified.
+    expected_output = f"""Error: Either --publish or one of the reporting arguments mush be specified.
 usage: main.py [-h] [--version] [--stack-trace] [--add-plugin ADD_PLUGIN]
                [--report-dir REPORT_DIR] [--publish-dir PUBLISH_DIR]
                [--cobertura path] [--junit path] [--only-changes] [--publish]
@@ -344,7 +350,7 @@ usage: main.py [-h] [--version] [--stack-trace] [--add-plugin ADD_PLUGIN]
 
 Summarize Python files.
 
-options:
+{ARGPARSE_X}
   -h, --help            Show this help message and exit.
   --version             Show program's version number and exit.
   --stack-trace         if an error occurs, print out the stack trace for
