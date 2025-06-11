@@ -262,10 +262,6 @@ check_for_unsychronized_virtual_environment() {
 
 synchronize_virtual_environment() {
 
-	# TODO consider
-	# python.exe -m pip install --upgrade pip
-	# pip install -U pipenv
-
 	verbose_echo "{Syncing python packages in virtual environment.}"
 	rm Pipfile.lock >/dev/null 2>&1
 	if ! pipenv lock --python "${RESET_PYTHON_VERSION}" >"${TEMP_FILE}" 2>&1; then
@@ -351,6 +347,12 @@ execute_sourcery() {
 
 find_unused_pylint_suppressions() {
 
+	if [[ ${PYTHON_MODULE_NAME} == "pylint_utils" ]]; then
+		PYLINT_UTILS_SCRIPT_PATH=(python "${SCRIPT_DIR}/main.py")
+	else
+		PYLINT_UTILS_SCRIPT_PATH=(pylint_utils)
+	fi
+
 	SCAN_FILES=()
 	git diff --name-only --staged >"${TEMP_FILE}"
 	while IFS= read -r line; do
@@ -364,7 +366,7 @@ find_unused_pylint_suppressions() {
 		verbose_echo "{Not executing pylint suppression checker on Python source code. No eligible Python files staged.}"
 	else
 		verbose_echo "{Executing pylint suppression checker on Python source code.}"
-		if ! pipenv run pylint_utils -s "${SCAN_FILES[@]}"; then
+		if ! pipenv run "${PYLINT_UTILS_SCRIPT_PATH[@]}" --ignore-path test/resources -s "${SCAN_FILES[@]}"; then
 			complete_process 1 "{Executing reporting of unused pylint suppressions in modified Python source code failed.}"
 		fi
 	fi
@@ -387,9 +389,15 @@ publish_analysis_results_if_requested() {
 
 analyze_pylint_suppressions() {
 
+	if [[ ${PYTHON_MODULE_NAME} == "pylint_utils" ]]; then
+		PYLINT_UTILS_SCRIPT_PATH=(python "${SCRIPT_DIR}/main.py")
+	else
+		PYLINT_UTILS_SCRIPT_PATH=(pylint_utils)
+	fi
+
 	echo ""
 	verbose_echo "{Executing pylint utils analyzer on Python source code to verify suppressions and document them.}"
-	if ! pipenv run pylint_utils --recurse -r "${SCRIPT_DIR}/publish/pylint_suppression.json" "${PYTHON_MODULE_NAME}"; then
+	if ! pipenv run "${PYLINT_UTILS_SCRIPT_PATH[@]}" --recurse -r "${SCRIPT_DIR}/publish/pylint_suppression.json" "${PYTHON_MODULE_NAME}"; then
 		complete_process 1 "{Executing reporting of pylint suppressions in Python source code failed.}"
 	fi
 }
@@ -414,6 +422,16 @@ parse_command_line "$@"
 start_process
 
 load_properties_from_file
+
+if ! python.exe -m pip install --upgrade pip >"${TEMP_FILE}" 2>&1; then
+	cat "${TEMP_FILE}"
+	complete_process 1 "{Cannot ensure pip has been upgraded.  Please check your Python installation and try again.}"
+fi
+
+if ! pip install -U pipenv==2025.0.3 >"${TEMP_FILE}" 2>&1; then
+	cat "${TEMP_FILE}"
+	complete_process 1 "{Cannot ensure pipenv has been upgraded.  Please check your Python installation and try again.}"
+fi
 
 RESET_PIPFILE=0
 if [[ ${FORCE_RESET_MODE} -ne 0 ]]; then
@@ -444,6 +462,11 @@ else
 	if [[ ${SOURCERY_ONLY_MODE} -ne 0 ]]; then
 		complete_process 0
 	fi
+fi
+
+if ! pipenv run pyroma -n 10 . >"${TEMP_FILE}" 2>&1; then
+	cat "${TEMP_FILE}"
+	complete_process 1 "{Executing pyroma on Python code failed.}"
 fi
 
 if [[ ${PERFORMANCE_ONLY_MODE} -eq 0 ]]; then

@@ -216,10 +216,10 @@ class ProjectSummarizer:
 
     def __initialize_plugins(self) -> List[str]:
         try:
-            remaining_arguments = self.__plugin_manager.initialize_plugins()
+            return self.__plugin_manager.initialize_plugins()
         except BadPluginError as this_exception:
             self.__report_error(this_exception, True)
-        return remaining_arguments
+            return []  # pragma: no cover
 
     def main(self) -> None:
         """

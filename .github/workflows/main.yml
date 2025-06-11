@@ -11,7 +11,8 @@ on:
 env:
   project-name: project_summarizer
   default-python-version: 3.13
-  default-pipenv-version: 2023.12.1
+  default-pipenv-version: 2025.0.3
+  default-platform: windows-latest
 
 jobs:
 
@@ -42,7 +43,7 @@ jobs:
   scenario-tests:
 
     name: Scenario Tests
-    needs: matrix-prep
+    needs: [ matrix-prep, lint ]
     strategy:
       matrix: ${{fromJson(needs.matrix-prep.outputs.matrix)}}
     runs-on: ${{ matrix.platform }}
@@ -63,10 +64,15 @@ jobs:
 
       - name: Install PipEnv
         run: |
+          export PYTHONIOENCODING=utf-8
           pip install pipenv==${{ env.default-pipenv-version }}
 
       - name: Sync With Repository
         run: |
+          export PYTHONIOENCODING=utf-8
+          grep -v '^sourcery' Pipfile > temp
+          mv temp Pipfile
+          cat Pipfile
           pipenv lock --clear --python ${{ matrix.python }}
           pipenv sync -d
           pipenv graph
@@ -76,6 +82,7 @@ jobs:
 
       - name: Archive coverage artifacts
         uses: actions/upload-artifact@v4
+        if: ${{ matrix.python == env.default-python-version && matrix.platform == env.default-platform }}
         with:
           name: ${{ matrix.platform }} Coverage
           path: |
@@ -84,7 +91,7 @@ jobs:
 
       - name: Report Coverage
         uses: codecov/codecov-action@v5
-        if: github.event_name != 'schedule'
+        if: ${{ matrix.python == env.default-python-version && matrix.platform == env.default-platform }}
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         with:
@@ -113,16 +120,22 @@ jobs:
 
       - name: Install PipEnv
         run: |
+          export PYTHONIOENCODING=utf-8
           pip install pipenv==${{ env.default-pipenv-version }}
 
       - name: Sync With Repository
         run: |
+          export PYTHONIOENCODING=utf-8
+          grep -v '^sourcery' Pipfile > temp
+          mv temp Pipfile
+          cat Pipfile
           pipenv lock --clear --python ${{ env.default-python-version }}
           pipenv sync -d
           pipenv graph
 
       - name: Execute Pre-Commit
         run: |
+          export PYTHONIOENCODING=utf-8
           pipenv run pre-commit run --all
 
   packaging:
@@ -147,24 +160,32 @@ jobs:
 
       - name: Install PipEnv
         run: |
+          export PYTHONIOENCODING=utf-8
           pip install pipenv==${{ env.default-pipenv-version }}
 
       - name: Sync With Repository
         run: |
+          export PYTHONIOENCODING=utf-8
+          grep -v '^sourcery' Pipfile > temp
+          mv temp Pipfile
+          cat Pipfile
           pipenv lock --clear --python ${{ env.default-python-version }}
           pipenv sync -d
           pipenv graph
 
       - name: Pyroma
         run: |
-          pipenv run pyroma -q -n 10 .
+          export PYTHONIOENCODING=utf-8
+          pipenv run pyroma -n 10 .
 
       - name: Setup
         run: |
+          export PYTHONIOENCODING=utf-8
           pipenv run python setup.py sdist bdist_wheel
 
       - name: Twine
         run: |
+          export PYTHONIOENCODING=utf-8
           pipenv run twine check dist/*    
 
       - name: Upload Package

@@ -15,11 +15,15 @@ from test.test_scenarios import (
     PUBLISH_DIRECTORY,
     MainlineExecutor,
     get_coverage_file_name,
-    setup_directories,
+    my_temporary_directory_impl,
+    setup_directories2,
 )
+from typing import Tuple
+
+_ = my_temporary_directory_impl
 
 
-def compose_coverage_summary_file():
+def compose_coverage_summary_file() -> str:
     """
     Create a test coverage file for a sample report.
     """
@@ -40,20 +44,21 @@ def compose_coverage_summary_file():
 
 
 def summarize_simple_cobertura_report(
-    create_publish_directory=False, temporary_work_directory=None
-):
+    temporary_work_directory: str,
+    create_publish_directory: bool = False,
+) -> Tuple[MainlineExecutor, str, str]:
     """
     Test the summarizing of a simple cobertura report with no previous summary.
     """
 
     # Arrange
     executor = MainlineExecutor()
-    temporary_work_directory, report_directory, publish_directory = setup_directories(
+    report_directory, publish_directory = setup_directories2(
         create_publish_directory=create_publish_directory,
         temporary_work_directory=temporary_work_directory,
     )
     cobertura_coverage_file = os.path.join(
-        temporary_work_directory.name, get_coverage_file_name()
+        temporary_work_directory, get_coverage_file_name()
     )
     copyfile(
         os.path.join(executor.resource_directory, get_coverage_file_name()),
@@ -85,7 +90,7 @@ Test Coverage Summary
 
     # Act
     execute_results = executor.invoke_main(
-        arguments=suppplied_arguments, cwd=temporary_work_directory.name
+        arguments=suppplied_arguments, cwd=temporary_work_directory
     )
 
     # Assert
@@ -97,34 +102,34 @@ Test Coverage Summary
     )
     return (
         executor,
-        temporary_work_directory,
         publish_directory,
         cobertura_coverage_file,
     )
 
 
-def test_summarize_simple_cobertura_report():
+def test_summarize_simple_cobertura_report(my_temporary_directory: str) -> None:
     """
     Test the summarizing of a simple cobertura report with no previous summary.
     """
-    summarize_simple_cobertura_report()
+    summarize_simple_cobertura_report(my_temporary_directory)
 
 
 def test_summarize_simple_cobertura_report_with_reduced_columns(
-    create_publish_directory=False, temporary_work_directory=None
-):
+    my_temporary_directory: str,
+    create_publish_directory: bool = False,
+) -> None:
     """
     Test the summarizing of a simple cobertura report with no previous summary.
     """
 
     # Arrange
     executor = MainlineExecutor()
-    temporary_work_directory, report_directory, _ = setup_directories(
+    report_directory, _ = setup_directories2(
         create_publish_directory=create_publish_directory,
-        temporary_work_directory=temporary_work_directory,
+        temporary_work_directory=my_temporary_directory,
     )
     cobertura_coverage_file = os.path.join(
-        temporary_work_directory.name, get_coverage_file_name()
+        my_temporary_directory, get_coverage_file_name()
     )
     copyfile(
         os.path.join(executor.resource_directory, get_coverage_file_name()),
@@ -168,7 +173,7 @@ Test Coverage Summary
 
     # Act
     execute_results = executor.invoke_main(
-        arguments=suppplied_arguments, cwd=temporary_work_directory.name
+        arguments=suppplied_arguments, cwd=my_temporary_directory
     )
 
     # Assert
@@ -181,20 +186,21 @@ Test Coverage Summary
 
 
 def test_summarize_simple_cobertura_report_with_quiet(
-    create_publish_directory=False, temporary_work_directory=None
-):
+    my_temporary_directory: str,
+    create_publish_directory: bool = False,
+) -> None:
     """
     Test the summarizing of a simple cobertura report with no previous summary.
     """
 
     # Arrange
     executor = MainlineExecutor()
-    temporary_work_directory, report_directory, _ = setup_directories(
+    report_directory, _ = setup_directories2(
         create_publish_directory=create_publish_directory,
-        temporary_work_directory=temporary_work_directory,
+        temporary_work_directory=my_temporary_directory,
     )
     cobertura_coverage_file = os.path.join(
-        temporary_work_directory.name, get_coverage_file_name()
+        my_temporary_directory, get_coverage_file_name()
     )
     copyfile(
         os.path.join(executor.resource_directory, get_coverage_file_name()),
@@ -215,7 +221,7 @@ def test_summarize_simple_cobertura_report_with_quiet(
 
     # Act
     execute_results = executor.invoke_main(
-        arguments=suppplied_arguments, cwd=temporary_work_directory.name
+        arguments=suppplied_arguments, cwd=my_temporary_directory
     )
 
     # Assert
@@ -227,16 +233,18 @@ def test_summarize_simple_cobertura_report_with_quiet(
     )
 
 
-def test_summarize_cobertura_report_with_bad_source():
+def test_summarize_cobertura_report_with_bad_source(
+    my_temporary_directory: str,
+) -> None:
     """
     Test to make sure that summarizing a test coverage file that does not exist.
     """
 
     # Arrange
     executor = MainlineExecutor()
-    temporary_work_directory, _, _ = setup_directories()
+    setup_directories2(my_temporary_directory)
     cobertura_coverage_file = os.path.join(
-        temporary_work_directory.name, get_coverage_file_name()
+        my_temporary_directory, get_coverage_file_name()
     )
 
     assert not os.path.exists(cobertura_coverage_file)
@@ -250,7 +258,7 @@ def test_summarize_cobertura_report_with_bad_source():
 
     # Act
     execute_results = executor.invoke_main(
-        arguments=suppplied_arguments, cwd=temporary_work_directory.name
+        arguments=suppplied_arguments, cwd=my_temporary_directory
     )
 
     # Assert
@@ -259,16 +267,18 @@ def test_summarize_cobertura_report_with_bad_source():
     )
 
 
-def test_summarize_cobertura_report_with_source_as_directory():
+def test_summarize_cobertura_report_with_source_as_directory(
+    my_temporary_directory: str,
+) -> None:
     """
     Test to make sure that summarizing a test coverage file that is not a file.
     """
 
     # Arrange
     executor = MainlineExecutor()
-    temporary_work_directory, _, _ = setup_directories()
+    setup_directories2(my_temporary_directory)
     cobertura_coverage_file = os.path.join(
-        temporary_work_directory.name, get_coverage_file_name()
+        my_temporary_directory, get_coverage_file_name()
     )
 
     os.makedirs(cobertura_coverage_file)
@@ -283,7 +293,7 @@ def test_summarize_cobertura_report_with_source_as_directory():
 
     # Act
     execute_results = executor.invoke_main(
-        arguments=suppplied_arguments, cwd=temporary_work_directory.name
+        arguments=suppplied_arguments, cwd=my_temporary_directory
     )
 
     # Assert
@@ -293,8 +303,9 @@ def test_summarize_cobertura_report_with_source_as_directory():
 
 
 def summarize_simple_cobertura_report_and_publish(
-    temporary_work_directory=None, check_file_contents=True
-):
+    my_temporary_directory: str,
+    check_file_contents: bool = True,
+) -> Tuple[MainlineExecutor, str, str]:
     """
     NOTE: This function is in this module because of the other tests in this module
     that rely on it.  Moving it to the test_publish_scenarios module would create
@@ -304,11 +315,10 @@ def summarize_simple_cobertura_report_and_publish(
     # Arrange
     (
         executor,
-        temporary_work_directory,
         publish_directory,
         cobertura_coverage_file,
     ) = summarize_simple_cobertura_report(
-        temporary_work_directory=temporary_work_directory
+        temporary_work_directory=my_temporary_directory
     )
     summary_coverage_file = os.path.join(publish_directory, COVERAGE_SUMMARY_FILE_NAME)
 
@@ -324,7 +334,7 @@ def summarize_simple_cobertura_report_and_publish(
 
     # Act
     execute_results = executor.invoke_main(
-        arguments=suppplied_arguments, cwd=temporary_work_directory.name
+        arguments=suppplied_arguments, cwd=my_temporary_directory
     )
 
     # Assert
@@ -338,22 +348,24 @@ def summarize_simple_cobertura_report_and_publish(
 
     return (
         executor,
-        temporary_work_directory,
         publish_directory,
         cobertura_coverage_file,
     )
 
 
-def test_summarize_simple_cobertura_report_and_publish():
+def test_summarize_simple_cobertura_report_and_publish(
+    my_temporary_directory: str,
+) -> None:
     """
     Test the summarizing of a simple cobertura report, then publishing that report.
     """
-    summarize_simple_cobertura_report_and_publish()
+    summarize_simple_cobertura_report_and_publish(my_temporary_directory)
 
 
 def test_summarize_simple_cobertura_report_and_publish_and_summarize_again(
-    temporary_work_directory=None, check_file_contents=True
-):
+    my_temporary_directory: str,
+    check_file_contents: bool = True,
+) -> None:
     """
     Test the summarizing of a cobertura report, publishing, and then comparing again.
     """
@@ -361,11 +373,10 @@ def test_summarize_simple_cobertura_report_and_publish_and_summarize_again(
     # Arrange
     (
         executor,
-        temporary_work_directory,
         _,
         cobertura_coverage_file,
     ) = summarize_simple_cobertura_report_and_publish(
-        temporary_work_directory=temporary_work_directory,
+        my_temporary_directory,
         check_file_contents=check_file_contents,
     )
 
@@ -392,7 +403,7 @@ Test Coverage Summary
 
     # Act
     execute_results = executor.invoke_main(
-        arguments=suppplied_arguments, cwd=temporary_work_directory.name
+        arguments=suppplied_arguments, cwd=my_temporary_directory
     )
 
     # Assert
@@ -402,8 +413,9 @@ Test Coverage Summary
 
 
 def test_summarize_simple_cobertura_report_and_publish_and_summarize_again_only_changes(
-    temporary_work_directory=None, check_file_contents=True
-):
+    my_temporary_directory: str,
+    check_file_contents: bool = True,
+) -> None:
     """
     Test the summarizing of a cobertura report, publishing, and then comparing again with the only changes flat set.
     """
@@ -411,11 +423,10 @@ def test_summarize_simple_cobertura_report_and_publish_and_summarize_again_only_
     # Arrange
     (
         executor,
-        temporary_work_directory,
         _,
         cobertura_coverage_file,
     ) = summarize_simple_cobertura_report_and_publish(
-        temporary_work_directory=temporary_work_directory,
+        my_temporary_directory,
         check_file_contents=check_file_contents,
     )
 
@@ -438,7 +449,7 @@ Test coverage has not changed since last published test coverage.
 
     # Act
     execute_results = executor.invoke_main(
-        arguments=suppplied_arguments, cwd=temporary_work_directory.name
+        arguments=suppplied_arguments, cwd=my_temporary_directory
     )
 
     # Assert
@@ -447,16 +458,16 @@ Test coverage has not changed since last published test coverage.
     )
 
 
-def test_summarize_bad_xml_test_coverage():
+def test_summarize_bad_xml_test_coverage(my_temporary_directory: str) -> None:
     """
     Test the summarizing of cobertura results with a bad coverage file.
     """
 
     # Arrange
     executor = MainlineExecutor()
-    temporary_work_directory, _, _ = setup_directories()
+    setup_directories2(my_temporary_directory)
     cobertura_coverage_file = os.path.join(
-        temporary_work_directory.name, get_coverage_file_name()
+        my_temporary_directory, get_coverage_file_name()
     )
     copyfile(
         os.path.join(executor.resource_directory, "coverage-bad.xml"),
@@ -474,7 +485,7 @@ def test_summarize_bad_xml_test_coverage():
 
     # Act
     execute_results = executor.invoke_main(
-        arguments=suppplied_arguments, cwd=temporary_work_directory.name
+        arguments=suppplied_arguments, cwd=my_temporary_directory
     )
 
     # Assert
@@ -483,16 +494,16 @@ def test_summarize_bad_xml_test_coverage():
     )
 
 
-def test_summarize_bad_test_coverage():
+def test_summarize_bad_test_coverage(my_temporary_directory: str) -> None:
     """
     Test the summarizing of cobertura results with a bad coverage file.
     """
 
     # Arrange
     executor = MainlineExecutor()
-    temporary_work_directory, _, _ = setup_directories()
+    setup_directories2(my_temporary_directory)
     cobertura_coverage_file = os.path.join(
-        temporary_work_directory.name, get_coverage_file_name()
+        my_temporary_directory, get_coverage_file_name()
     )
     copyfile(
         os.path.join(executor.resource_directory, "coverage-bad.txt"),
@@ -507,7 +518,7 @@ def test_summarize_bad_test_coverage():
 
     # Act
     execute_results = executor.invoke_main(
-        arguments=suppplied_arguments, cwd=temporary_work_directory.name
+        arguments=suppplied_arguments, cwd=my_temporary_directory
     )
 
     # Assert
@@ -516,16 +527,16 @@ def test_summarize_bad_test_coverage():
     )
 
 
-def test_summarize_bad_report_directory():
+def test_summarize_bad_report_directory(my_temporary_directory: str) -> None:
     """
     Test the summarizing of cobertura results with a bad report directory.
     """
 
     # Arrange
     executor = MainlineExecutor()
-    temporary_work_directory, _, _ = setup_directories(create_report_directory=False)
+    setup_directories2(my_temporary_directory, create_report_directory=False)
     cobertura_coverage_file = os.path.join(
-        temporary_work_directory.name, get_coverage_file_name()
+        my_temporary_directory, get_coverage_file_name()
     )
     copyfile(
         os.path.join(executor.resource_directory, get_coverage_file_name()),
@@ -544,7 +555,7 @@ main.py: error: argument --report-dir: Path 'report' does not exist."""
 
     # Act
     execute_results = executor.invoke_main(
-        arguments=suppplied_arguments, cwd=temporary_work_directory.name
+        arguments=suppplied_arguments, cwd=my_temporary_directory
     )
 
     # Assert
@@ -553,18 +564,18 @@ main.py: error: argument --report-dir: Path 'report' does not exist."""
     )
 
 
-def test_summarize_invalid_published_summary_file():
+def test_summarize_invalid_published_summary_file(my_temporary_directory: str) -> None:
     """
     Test the summarizing of cobertura results with a bad report directory.
     """
 
     # Arrange
     executor = MainlineExecutor()
-    temporary_work_directory, _, publish_directory = setup_directories(
-        create_publish_directory=True
+    _, publish_directory = setup_directories2(
+        my_temporary_directory, create_publish_directory=True
     )
     cobertura_coverage_file = os.path.join(
-        temporary_work_directory.name, get_coverage_file_name()
+        my_temporary_directory, get_coverage_file_name()
     )
     copyfile(
         os.path.join(executor.resource_directory, get_coverage_file_name()),
@@ -592,7 +603,7 @@ def test_summarize_invalid_published_summary_file():
 
     # Act
     execute_results = executor.invoke_main(
-        arguments=suppplied_arguments, cwd=temporary_work_directory.name
+        arguments=suppplied_arguments, cwd=my_temporary_directory
     )
 
     # Assert
@@ -601,7 +612,9 @@ def test_summarize_invalid_published_summary_file():
     )
 
 
-def test_summarize_simple_cobertura_report_and_publish_and_summarize_with_error_on_publish_read():
+def test_summarize_simple_cobertura_report_and_publish_and_summarize_with_error_on_publish_read(
+    my_temporary_directory: str,
+) -> None:
     """
     Test a summarize when trying to load a summary file from a previous run and getting
     an error when trying to write the summary report.
@@ -610,10 +623,9 @@ def test_summarize_simple_cobertura_report_and_publish_and_summarize_with_error_
     # Arrange
     (
         executor,
-        temporary_work_directory,
         publish_directory,
         cobertura_coverage_file,
-    ) = summarize_simple_cobertura_report_and_publish()
+    ) = summarize_simple_cobertura_report_and_publish(my_temporary_directory)
 
     suppplied_arguments = [COBERTURA_COMMAND_LINE_FLAG, cobertura_coverage_file]
 
@@ -635,7 +647,7 @@ def test_summarize_simple_cobertura_report_and_publish_and_summarize_with_error_
         pbo.start()
 
         execute_results = executor.invoke_main(
-            arguments=suppplied_arguments, cwd=temporary_work_directory.name
+            arguments=suppplied_arguments, cwd=my_temporary_directory
         )
     finally:
         pbo.stop()
@@ -646,16 +658,18 @@ def test_summarize_simple_cobertura_report_and_publish_and_summarize_with_error_
     )
 
 
-def test_summarize_simple_cobertura_report_with_error_on_report_write():
+def test_summarize_simple_cobertura_report_with_error_on_report_write(
+    my_temporary_directory: str,
+) -> None:
     """
     Test a summarize with an error when trying to write the summary report.
     """
 
     # Arrange
     executor = MainlineExecutor()
-    temporary_work_directory, report_directory, _ = setup_directories()
+    report_directory, _ = setup_directories2(my_temporary_directory)
     cobertura_coverage_file = os.path.join(
-        temporary_work_directory.name, get_coverage_file_name()
+        my_temporary_directory, get_coverage_file_name()
     )
     copyfile(
         os.path.join(executor.resource_directory, get_coverage_file_name()),
@@ -685,7 +699,7 @@ def test_summarize_simple_cobertura_report_with_error_on_report_write():
         pbo.start()
 
         execute_results = executor.invoke_main(
-            arguments=suppplied_arguments, cwd=temporary_work_directory.name
+            arguments=suppplied_arguments, cwd=my_temporary_directory
         )
     finally:
         pbo.stop()

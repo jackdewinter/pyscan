@@ -3,7 +3,7 @@ default_context:
     project_version: "0.5.1"
 
     project_src_additional_path: ", stubs"
-    project_src_dependencies: "columnar"
+    project_src_dependencies: "pytest, columnar"
 
     pypi_package_name: "project_summarizer"
 
