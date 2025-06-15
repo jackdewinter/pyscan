@@ -1,1 +1,3 @@
 include install-requirements.txt
+include project_summarizer/py.typed
+include project_summarizer/.external-package

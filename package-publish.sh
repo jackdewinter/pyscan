@@ -7,9 +7,13 @@ set -uo pipefail
 # Set up any project based local script variables.
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 
+VERBOSE_MODE=1
+
 load_properties_from_file() {
 
-	verbose_echo "{Loading 'project.properties file'...}"
+	if [ "${VERBOSE_MODE}" -ne 0 ]; then
+		echo "{Loading 'project.properties file'...}"
+	fi
 	while IFS='=' read -r key_value; do
 		if [[ ${key_value} == \#* ]]; then
 			continue

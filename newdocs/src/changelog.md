@@ -10,6 +10,24 @@
 <!--- pyml disable-next-line no-duplicate-heading-->
 ### Changed
 
+- None
+
+<!--- pyml disable-next-line no-duplicate-heading-->
+### Fixed
+
+- None
+
+## Version 0.6.0 - Date: 2025-06-15
+
+<!--- pyml disable-next-line no-duplicate-heading-->
+### Added
+
+- [Issue 6](https://github.com/jackdewinter/pyscan/issues/6)
+    - Standardizing on templates.
+
+<!--- pyml disable-next-line no-duplicate-heading-->
+### Changed
+
 - Cleaned up dependencies and badges.
 
 <!--- pyml disable-next-line no-duplicate-heading-->

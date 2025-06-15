@@ -23,10 +23,10 @@
         "project_summarizer/plugins/junit_plugin.py": {
             "too-many-arguments": 2
         },
-        "project_summarizer/plugins/test_measurement.py": {
+        "project_summarizer/plugins/resultant_test_measurement.py": {
             "too-many-arguments": 1
         },
-        "project_summarizer/plugins/test_totals.py": {},
+        "project_summarizer/plugins/resultant_test_totals.py": {},
         "project_summarizer/summarize_context.py": {},
         "project_summarizer/version.py": {}
     },

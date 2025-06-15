@@ -8,7 +8,7 @@ from project_summarizer.plugins.coverage_model import (
 )
 
 
-def test_pytest_cobertura_profile():
+def test_pytest_cobertura_profile() -> None:
     """
     Test to make sure the model handles the cobertura profile used by pytest.
     """
@@ -40,7 +40,7 @@ def test_pytest_cobertura_profile():
     assert back_from_dictionary == coverage_profile
 
 
-def test_junit_jacoco_profile():
+def test_junit_jacoco_profile() -> None:
     """
     Test to make sure the model handles the jacoco profile used by junit.
     """
@@ -92,7 +92,7 @@ def test_junit_jacoco_profile():
     assert back_from_dictionary == coverage_profile
 
 
-def test_made_up_profile():
+def test_made_up_profile() -> None:
     """
     Test to make sure the model can test a fictional profile that does not have
     any line or branch measurements, say a coverage of assembly instructions.

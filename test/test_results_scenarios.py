@@ -6,6 +6,7 @@ import os
 import platform
 from shutil import copyfile
 from test.patch_builtin_open import PatchBuiltinOpen
+from test.pytest_execute import InProcessResult
 from test.test_scenarios import (
     JUNIT_COMMAND_LINE_FLAG,
     JUNIT_RESULTS_FILE_NAME,
@@ -14,17 +15,21 @@ from test.test_scenarios import (
     PUBLISH_DIRECTORY,
     RESULTS_SUMMARY_FILE_NAME,
     MainlineExecutor,
-    setup_directories,
+    my_temporary_directory_impl,
+    setup_directories2,
 )
+from typing import Optional, Tuple
 
 from project_summarizer.plugin_manager.project_summarizer_plugin import (
     ProjectSummarizerPlugin,
 )
 
+_ = my_temporary_directory_impl
+
 # pylint: disable=too-many-lines
 
 
-def compose_test_results(total_tests):
+def compose_test_results(total_tests: int) -> str:
     """
     Given the right amounts for the various test totals, create a test results file
     for a report with only one class to test.
@@ -50,24 +55,22 @@ def compose_test_results(total_tests):
 
 
 def summarize_simple_junit_report(
-    create_publish_directory=False,
-    temporary_work_directory=None,
-    alternate_publish_directory=None,
-):
+    create_publish_directory: bool,
+    temporary_work_directory: str,
+    alternate_publish_directory: Optional[str] = None,
+) -> Tuple[MainlineExecutor, str, str]:
     """
     Test the summarizing of a simple junit report with no previous summary.
     """
 
     # Arrange
     executor = MainlineExecutor()
-    temporary_work_directory, report_directory, publish_directory = setup_directories(
+    report_directory, publish_directory = setup_directories2(
         create_publish_directory=create_publish_directory,
         alternate_publish_directory=alternate_publish_directory,
         temporary_work_directory=temporary_work_directory,
     )
-    junit_test_file = os.path.join(
-        temporary_work_directory.name, JUNIT_RESULTS_FILE_NAME
-    )
+    junit_test_file = os.path.join(temporary_work_directory, JUNIT_RESULTS_FILE_NAME)
     copyfile(
         os.path.join(executor.resource_directory, JUNIT_RESULTS_FILE_NAME),
         junit_test_file,
@@ -94,42 +97,41 @@ Test Results Summary
 
     # Act
     execute_results = executor.invoke_main(
-        arguments=suppplied_arguments, cwd=temporary_work_directory.name
+        arguments=suppplied_arguments, cwd=temporary_work_directory
     )
 
     # Assert
     execute_results.assert_results(
         expected_output, expected_error, expected_return_code
     )
-    execute_results.assert_resultant_file(
+    InProcessResult.assert_resultant_file(
         summary_result_file, expected_test_results_file
     )
-    return executor, temporary_work_directory, publish_directory, junit_test_file
+    return executor, publish_directory, junit_test_file
 
 
-def test_summarize_simple_junit_report():
+def test_summarize_simple_junit_report(my_temporary_directory: str) -> None:
     """
     Test the summarizing of a simple junit report with no previous summary.
     """
-    summarize_simple_junit_report()
+    summarize_simple_junit_report(False, my_temporary_directory)
 
 
 def test_summarize_simple_junit_report_with_reduced_columns(
-    create_publish_directory=False, temporary_work_directory=None
-):
+    my_temporary_directory: str,
+    create_publish_directory: bool = False,
+) -> None:
     """
     Test the summarizing of a simple junit report with no previous summary with columns set.
     """
 
     # Arrange
     executor = MainlineExecutor()
-    temporary_work_directory, report_directory, _ = setup_directories(
+    report_directory, _ = setup_directories2(
         create_publish_directory=create_publish_directory,
-        temporary_work_directory=temporary_work_directory,
+        temporary_work_directory=my_temporary_directory,
     )
-    junit_test_file = os.path.join(
-        temporary_work_directory.name, JUNIT_RESULTS_FILE_NAME
-    )
+    junit_test_file = os.path.join(my_temporary_directory, JUNIT_RESULTS_FILE_NAME)
     copyfile(
         os.path.join(executor.resource_directory, JUNIT_RESULTS_FILE_NAME),
         junit_test_file,
@@ -159,34 +161,33 @@ Test Results Summary
 
     # Act
     execute_results = executor.invoke_main(
-        arguments=suppplied_arguments, cwd=temporary_work_directory.name
+        arguments=suppplied_arguments, cwd=my_temporary_directory
     )
 
     # Assert
     execute_results.assert_results(
         expected_output, expected_error, expected_return_code
     )
-    execute_results.assert_resultant_file(
+    InProcessResult.assert_resultant_file(
         summary_result_file, expected_test_results_file
     )
 
 
 def test_summarize_simple_junit_report_with_quiet(
-    create_publish_directory=False, temporary_work_directory=None
-):
+    my_temporary_directory: str,
+    create_publish_directory: bool = False,
+) -> None:
     """
     Test the summarizing of a simple junit report with no previous summary with columns set.
     """
 
     # Arrange
     executor = MainlineExecutor()
-    temporary_work_directory, report_directory, _ = setup_directories(
+    report_directory, _ = setup_directories2(
         create_publish_directory=create_publish_directory,
-        temporary_work_directory=temporary_work_directory,
+        temporary_work_directory=my_temporary_directory,
     )
-    junit_test_file = os.path.join(
-        temporary_work_directory.name, JUNIT_RESULTS_FILE_NAME
-    )
+    junit_test_file = os.path.join(my_temporary_directory, JUNIT_RESULTS_FILE_NAME)
     copyfile(
         os.path.join(executor.resource_directory, JUNIT_RESULTS_FILE_NAME),
         junit_test_file,
@@ -202,29 +203,27 @@ def test_summarize_simple_junit_report_with_quiet(
 
     # Act
     execute_results = executor.invoke_main(
-        arguments=suppplied_arguments, cwd=temporary_work_directory.name
+        arguments=suppplied_arguments, cwd=my_temporary_directory
     )
 
     # Assert
     execute_results.assert_results(
         expected_output, expected_error, expected_return_code
     )
-    execute_results.assert_resultant_file(
+    InProcessResult.assert_resultant_file(
         summary_result_file, expected_test_results_file
     )
 
 
-def test_summarize_junit_report_with_bad_source():
+def test_summarize_junit_report_with_bad_source(my_temporary_directory: str) -> None:
     """
     Test to make sure that summarizing a test report file that does not exist.
     """
 
     # Arrange
     executor = MainlineExecutor()
-    temporary_work_directory, _, _ = setup_directories()
-    junit_test_file = os.path.join(
-        temporary_work_directory.name, JUNIT_RESULTS_FILE_NAME
-    )
+    setup_directories2(my_temporary_directory)
+    junit_test_file = os.path.join(my_temporary_directory, JUNIT_RESULTS_FILE_NAME)
 
     assert not os.path.exists(junit_test_file)
     suppplied_arguments = [JUNIT_COMMAND_LINE_FLAG, junit_test_file]
@@ -235,7 +234,7 @@ def test_summarize_junit_report_with_bad_source():
 
     # Act
     execute_results = executor.invoke_main(
-        arguments=suppplied_arguments, cwd=temporary_work_directory.name
+        arguments=suppplied_arguments, cwd=my_temporary_directory
     )
 
     # Assert
@@ -244,17 +243,17 @@ def test_summarize_junit_report_with_bad_source():
     )
 
 
-def test_summarize_junit_report_with_source_as_directory():
+def test_summarize_junit_report_with_source_as_directory(
+    my_temporary_directory: str,
+) -> None:
     """
     Test to make sure that summarizing a test report file that is not a file.
     """
 
     # Arrange
     executor = MainlineExecutor()
-    temporary_work_directory, _, _ = setup_directories()
-    junit_test_file = os.path.join(
-        temporary_work_directory.name, JUNIT_RESULTS_FILE_NAME
-    )
+    setup_directories2(my_temporary_directory)
+    junit_test_file = os.path.join(my_temporary_directory, JUNIT_RESULTS_FILE_NAME)
 
     os.makedirs(junit_test_file)
 
@@ -266,7 +265,7 @@ def test_summarize_junit_report_with_source_as_directory():
 
     # Act
     execute_results = executor.invoke_main(
-        arguments=suppplied_arguments, cwd=temporary_work_directory.name
+        arguments=suppplied_arguments, cwd=my_temporary_directory
     )
 
     # Assert
@@ -276,8 +275,9 @@ def test_summarize_junit_report_with_source_as_directory():
 
 
 def __test_summarize_simple_junit_report_and_publish(
-    temporary_work_directory=None, check_file_contents=True
-):
+    temporary_directory: str,
+    check_file_contents: bool = True,
+) -> Tuple[MainlineExecutor, str, str]:
     """
     Test the summarizing of a simple junit report, then publishing that report.
 
@@ -289,10 +289,9 @@ def __test_summarize_simple_junit_report_and_publish(
     # Arrange
     (
         executor,
-        temporary_work_directory,
         publish_directory,
         junit_test_file,
-    ) = summarize_simple_junit_report(temporary_work_directory=temporary_work_directory)
+    ) = summarize_simple_junit_report(False, temporary_directory)
     summary_result_file = os.path.join(publish_directory, RESULTS_SUMMARY_FILE_NAME)
 
     suppplied_arguments = [PUBLISH_COMMAND_LINE_FLAG]
@@ -307,7 +306,7 @@ def __test_summarize_simple_junit_report_and_publish(
 
     # Act
     execute_results = executor.invoke_main(
-        arguments=suppplied_arguments, cwd=temporary_work_directory.name
+        arguments=suppplied_arguments, cwd=temporary_directory
     )
 
     # Assert
@@ -315,23 +314,24 @@ def __test_summarize_simple_junit_report_and_publish(
         expected_output, expected_error, expected_return_code
     )
     if check_file_contents:
-        execute_results.assert_resultant_file(
+        InProcessResult.assert_resultant_file(
             summary_result_file, expected_test_results_file
         )
 
-    return executor, temporary_work_directory, publish_directory, junit_test_file
+    return executor, publish_directory, junit_test_file
 
 
-def test_summarize_simple_junit_report_and_publish():
+def test_summarize_simple_junit_report_and_publish(my_temporary_directory: str) -> None:
     """
     Test the summarizing of a simple junit report, then publishing that report.
     """
-    __test_summarize_simple_junit_report_and_publish()
+    __test_summarize_simple_junit_report_and_publish(my_temporary_directory)
 
 
 def test_summarize_simple_junit_report_and_publish_and_summarize_again(
-    temporary_work_directory=None, check_file_contents=True
-):
+    my_temporary_directory: str,
+    check_file_contents: bool = True,
+) -> None:
     """
     Test the summarizing of junit results, publishing, and then comparing again.
     """
@@ -339,11 +339,10 @@ def test_summarize_simple_junit_report_and_publish_and_summarize_again(
     # Arrange
     (
         executor,
-        temporary_work_directory,
         _,
         junit_test_file,
     ) = __test_summarize_simple_junit_report_and_publish(
-        temporary_work_directory=temporary_work_directory,
+        my_temporary_directory,
         check_file_contents=check_file_contents,
     )
 
@@ -366,7 +365,7 @@ Test Results Summary
 
     # Act
     execute_results = executor.invoke_main(
-        arguments=suppplied_arguments, cwd=temporary_work_directory.name
+        arguments=suppplied_arguments, cwd=my_temporary_directory
     )
 
     # Assert
@@ -375,7 +374,9 @@ Test Results Summary
     )
 
 
-def test_summarize_simple_junit_report_and_publish_and_summarize_again_only_changes():
+def test_summarize_simple_junit_report_and_publish_and_summarize_again_only_changes(
+    my_temporary_directory: str,
+) -> None:
     """
     Test the summarizing of junit results, publishing, and then comparing again with
     only changes enabled.
@@ -384,10 +385,9 @@ def test_summarize_simple_junit_report_and_publish_and_summarize_again_only_chan
     # Arrange
     (
         executor,
-        temporary_work_directory,
         _,
         junit_test_file,
-    ) = __test_summarize_simple_junit_report_and_publish()
+    ) = __test_summarize_simple_junit_report_and_publish(my_temporary_directory)
 
     suppplied_arguments = [
         ONLY_CHANGES_COMMAND_LINE_FLAG,
@@ -407,7 +407,7 @@ Test results have not changed since last published test results.
 
     # Act
     execute_results = executor.invoke_main(
-        arguments=suppplied_arguments, cwd=temporary_work_directory.name
+        arguments=suppplied_arguments, cwd=my_temporary_directory
     )
 
     # Assert
@@ -416,7 +416,9 @@ Test results have not changed since last published test results.
     )
 
 
-def test_summarize_simple_junit_report_and_publish_and_then_test_fails():
+def test_summarize_simple_junit_report_and_publish_and_then_test_fails(
+    my_temporary_directory: str,
+) -> None:
     """
     Test the summarizing of junit results, publishing, and then comparing again with
     a test that fails.
@@ -425,10 +427,9 @@ def test_summarize_simple_junit_report_and_publish_and_then_test_fails():
     # Arrange
     (
         executor,
-        temporary_work_directory,
         _,
         junit_test_file,
-    ) = __test_summarize_simple_junit_report_and_publish()
+    ) = __test_summarize_simple_junit_report_and_publish(my_temporary_directory)
     copyfile(
         os.path.join(executor.resource_directory, "tests-with-one-failure.xml"),
         junit_test_file,
@@ -453,7 +454,7 @@ Test Results Summary
 
     # Act
     execute_results = executor.invoke_main(
-        arguments=suppplied_arguments, cwd=temporary_work_directory.name
+        arguments=suppplied_arguments, cwd=my_temporary_directory
     )
 
     # Assert
@@ -462,7 +463,9 @@ Test Results Summary
     )
 
 
-def test_summarize_simple_junit_report_and_publish_and_then_new_test_only_changes():
+def test_summarize_simple_junit_report_and_publish_and_then_new_test_only_changes(
+    my_temporary_directory: str,
+) -> None:
     """
     Test the summarizing of junit results, publishing, and then comparing again with
     a new test with only changes enabled.
@@ -471,10 +474,9 @@ def test_summarize_simple_junit_report_and_publish_and_then_new_test_only_change
     # Arrange
     (
         executor,
-        temporary_work_directory,
         _,
         junit_test_file,
-    ) = __test_summarize_simple_junit_report_and_publish()
+    ) = __test_summarize_simple_junit_report_and_publish(my_temporary_directory)
     copyfile(
         os.path.join(executor.resource_directory, "tests-with-new-test.xml"),
         junit_test_file,
@@ -503,7 +505,7 @@ Test Results Summary
 
     # Act
     execute_results = executor.invoke_main(
-        arguments=suppplied_arguments, cwd=temporary_work_directory.name
+        arguments=suppplied_arguments, cwd=my_temporary_directory
     )
 
     # Assert
@@ -512,7 +514,9 @@ Test Results Summary
     )
 
 
-def test_summarize_simple_junit_report_and_publish_and_then_new_test_class_only_changes():
+def test_summarize_simple_junit_report_and_publish_and_then_new_test_class_only_changes(
+    my_temporary_directory: str,
+) -> None:
     """
     Test the summarizing of junit results, publishing, and then comparing again with
     a new test in a new class with only changes enabled.
@@ -521,10 +525,9 @@ def test_summarize_simple_junit_report_and_publish_and_then_new_test_class_only_
     # Arrange
     (
         executor,
-        temporary_work_directory,
         _,
         junit_test_file,
-    ) = __test_summarize_simple_junit_report_and_publish()
+    ) = __test_summarize_simple_junit_report_and_publish(my_temporary_directory)
     copyfile(
         os.path.join(executor.resource_directory, "tests-with-new-class-test.xml"),
         junit_test_file,
@@ -553,7 +556,7 @@ Test Results Summary
 
     # Act
     execute_results = executor.invoke_main(
-        arguments=suppplied_arguments, cwd=temporary_work_directory.name
+        arguments=suppplied_arguments, cwd=my_temporary_directory
     )
 
     # Assert
@@ -562,7 +565,9 @@ Test Results Summary
     )
 
 
-def test_summarize_simple_junit_report_and_publish_and_then_test_skipped():
+def test_summarize_simple_junit_report_and_publish_and_then_test_skipped(
+    my_temporary_directory: str,
+) -> None:
     """
     Test the summarizing of junit results, publishing, and then comparing again with
     a test that is skipped.
@@ -571,10 +576,9 @@ def test_summarize_simple_junit_report_and_publish_and_then_test_skipped():
     # Arrange
     (
         executor,
-        temporary_work_directory,
         _,
         junit_test_file,
-    ) = __test_summarize_simple_junit_report_and_publish()
+    ) = __test_summarize_simple_junit_report_and_publish(my_temporary_directory)
     copyfile(
         os.path.join(executor.resource_directory, "tests-with-one-skipped.xml"),
         junit_test_file,
@@ -599,7 +603,7 @@ Test Results Summary
 
     # Act
     execute_results = executor.invoke_main(
-        arguments=suppplied_arguments, cwd=temporary_work_directory.name
+        arguments=suppplied_arguments, cwd=my_temporary_directory
     )
 
     # Assert
@@ -608,7 +612,9 @@ Test Results Summary
     )
 
 
-def test_summarize_simple_junit_report_and_publish_and_then_test_rename():
+def test_summarize_simple_junit_report_and_publish_and_then_test_rename(
+    my_temporary_directory: str,
+) -> None:
     """
     Test the summarizing of junit results, publishing, and then comparing again with
     the name of the test module being renamed.
@@ -617,10 +623,9 @@ def test_summarize_simple_junit_report_and_publish_and_then_test_rename():
     # Arrange
     (
         executor,
-        temporary_work_directory,
         _,
         junit_test_file,
-    ) = __test_summarize_simple_junit_report_and_publish()
+    ) = __test_summarize_simple_junit_report_and_publish(my_temporary_directory)
     copyfile(
         os.path.join(executor.resource_directory, "tests-with-rename.xml"),
         junit_test_file,
@@ -646,7 +651,7 @@ Test Results Summary
 
     # Act
     execute_results = executor.invoke_main(
-        arguments=suppplied_arguments, cwd=temporary_work_directory.name
+        arguments=suppplied_arguments, cwd=my_temporary_directory
     )
 
     # Assert
@@ -655,7 +660,9 @@ Test Results Summary
     )
 
 
-def test_summarize_single_and_double_digit_changes_from_published():
+def test_summarize_single_and_double_digit_changes_from_published(
+    my_temporary_directory: str,
+) -> None:
     """
     Test the summarizing of junit results, publishing, and then comparing again with
     a large number of changes, both single and double digit changes.
@@ -664,10 +671,9 @@ def test_summarize_single_and_double_digit_changes_from_published():
     # Arrange
     (
         executor,
-        temporary_work_directory,
         _,
         junit_test_file,
-    ) = __test_summarize_simple_junit_report_and_publish()
+    ) = __test_summarize_simple_junit_report_and_publish(my_temporary_directory)
     copyfile(
         os.path.join(executor.resource_directory, "tests-with-lots-of-changes.xml"),
         junit_test_file,
@@ -693,7 +699,7 @@ Test Results Summary
 
     # Act
     execute_results = executor.invoke_main(
-        arguments=suppplied_arguments, cwd=temporary_work_directory.name
+        arguments=suppplied_arguments, cwd=my_temporary_directory
     )
 
     # Assert
@@ -702,17 +708,15 @@ Test Results Summary
     )
 
 
-def test_summarize_bad_xml_test_results():
+def test_summarize_bad_xml_test_results(my_temporary_directory: str) -> None:
     """
     Test the summarizing of junit results with a bad test-results file.
     """
 
     # Arrange
     executor = MainlineExecutor()
-    temporary_work_directory, _, _ = setup_directories()
-    junit_test_file = os.path.join(
-        temporary_work_directory.name, JUNIT_RESULTS_FILE_NAME
-    )
+    setup_directories2(my_temporary_directory)
+    junit_test_file = os.path.join(my_temporary_directory, JUNIT_RESULTS_FILE_NAME)
     copyfile(
         os.path.join(executor.resource_directory, "tests-bad.xml"), junit_test_file
     )
@@ -725,7 +729,7 @@ def test_summarize_bad_xml_test_results():
 
     # Act
     execute_results = executor.invoke_main(
-        arguments=suppplied_arguments, cwd=temporary_work_directory.name
+        arguments=suppplied_arguments, cwd=my_temporary_directory
     )
 
     # Assert
@@ -734,17 +738,15 @@ def test_summarize_bad_xml_test_results():
     )
 
 
-def test_summarize_bad_test_results():
+def test_summarize_bad_test_results(my_temporary_directory: str) -> None:
     """
     Test the summarizing of junit results with a bad test-results file.
     """
 
     # Arrange
     executor = MainlineExecutor()
-    temporary_work_directory, _, _ = setup_directories()
-    junit_test_file = os.path.join(
-        temporary_work_directory.name, JUNIT_RESULTS_FILE_NAME
-    )
+    setup_directories2(my_temporary_directory)
+    junit_test_file = os.path.join(my_temporary_directory, JUNIT_RESULTS_FILE_NAME)
     copyfile(
         os.path.join(executor.resource_directory, "tests-bad.txt"), junit_test_file
     )
@@ -757,7 +759,7 @@ def test_summarize_bad_test_results():
 
     # Act
     execute_results = executor.invoke_main(
-        arguments=suppplied_arguments, cwd=temporary_work_directory.name
+        arguments=suppplied_arguments, cwd=my_temporary_directory
     )
 
     # Assert
@@ -766,17 +768,15 @@ def test_summarize_bad_test_results():
     )
 
 
-def test_summarize_bad_report_directory():
+def test_summarize_bad_report_directory(my_temporary_directory: str) -> None:
     """
     Test the summarizing of junit results with a bad report directory.
     """
 
     # Arrange
     executor = MainlineExecutor()
-    temporary_work_directory, _, _ = setup_directories(create_report_directory=False)
-    junit_test_file = os.path.join(
-        temporary_work_directory.name, JUNIT_RESULTS_FILE_NAME
-    )
+    setup_directories2(my_temporary_directory, create_report_directory=False)
+    junit_test_file = os.path.join(my_temporary_directory, JUNIT_RESULTS_FILE_NAME)
     copyfile(
         os.path.join(executor.resource_directory, JUNIT_RESULTS_FILE_NAME),
         junit_test_file,
@@ -794,7 +794,7 @@ main.py: error: argument --report-dir: Path 'report' does not exist."""
 
     # Act
     execute_results = executor.invoke_main(
-        arguments=suppplied_arguments, cwd=temporary_work_directory.name
+        arguments=suppplied_arguments, cwd=my_temporary_directory
     )
 
     # Assert
@@ -803,19 +803,17 @@ main.py: error: argument --report-dir: Path 'report' does not exist."""
     )
 
 
-def test_summarize_invalid_published_summary_file():
+def test_summarize_invalid_published_summary_file(my_temporary_directory: str) -> None:
     """
     Test the summarizing of junit results with a bad report directory.
     """
 
     # Arrange
     executor = MainlineExecutor()
-    temporary_work_directory, _, publish_directory = setup_directories(
-        create_publish_directory=True
+    _, publish_directory = setup_directories2(
+        my_temporary_directory, create_publish_directory=True
     )
-    junit_test_file = os.path.join(
-        temporary_work_directory.name, JUNIT_RESULTS_FILE_NAME
-    )
+    junit_test_file = os.path.join(my_temporary_directory, JUNIT_RESULTS_FILE_NAME)
     copyfile(
         os.path.join(executor.resource_directory, JUNIT_RESULTS_FILE_NAME),
         junit_test_file,
@@ -840,7 +838,7 @@ def test_summarize_invalid_published_summary_file():
 
     # Act
     execute_results = executor.invoke_main(
-        arguments=suppplied_arguments, cwd=temporary_work_directory.name
+        arguments=suppplied_arguments, cwd=my_temporary_directory
     )
 
     # Assert
@@ -849,7 +847,9 @@ def test_summarize_invalid_published_summary_file():
     )
 
 
-def test_summarize_simple_junit_report_and_publish_and_summarize_with_error_on_publish_read():
+def test_summarize_simple_junit_report_and_publish_and_summarize_with_error_on_publish_read(
+    my_temporary_directory: str,
+) -> None:
     """
     Test a summarize when trying to load a summary file from a previous run and getting
     an error when trying to write the summary report.
@@ -858,10 +858,9 @@ def test_summarize_simple_junit_report_and_publish_and_summarize_with_error_on_p
     # Arrange
     (
         executor,
-        temporary_work_directory,
         publish_directory,
         junit_test_file,
-    ) = __test_summarize_simple_junit_report_and_publish()
+    ) = __test_summarize_simple_junit_report_and_publish(my_temporary_directory)
 
     suppplied_arguments = [JUNIT_COMMAND_LINE_FLAG, junit_test_file]
 
@@ -888,7 +887,7 @@ def test_summarize_simple_junit_report_and_publish_and_summarize_with_error_on_p
         pbo.start()
 
         execute_results = executor.invoke_main(
-            arguments=suppplied_arguments, cwd=temporary_work_directory.name
+            arguments=suppplied_arguments, cwd=my_temporary_directory
         )
     finally:
         pbo.stop()
@@ -899,17 +898,17 @@ def test_summarize_simple_junit_report_and_publish_and_summarize_with_error_on_p
     )
 
 
-def test_summarize_simple_junit_report_with_error_on_report_write():
+def test_summarize_simple_junit_report_with_error_on_report_write(
+    my_temporary_directory: str,
+) -> None:
     """
     Test a summarize with an error when trying to write the summary report.
     """
 
     # Arrange
     executor = MainlineExecutor()
-    temporary_work_directory, report_directory, _ = setup_directories()
-    junit_test_file = os.path.join(
-        temporary_work_directory.name, JUNIT_RESULTS_FILE_NAME
-    )
+    report_directory, _ = setup_directories2(my_temporary_directory)
+    junit_test_file = os.path.join(my_temporary_directory, JUNIT_RESULTS_FILE_NAME)
     copyfile(
         os.path.join(executor.resource_directory, JUNIT_RESULTS_FILE_NAME),
         junit_test_file,
@@ -938,7 +937,7 @@ def test_summarize_simple_junit_report_with_error_on_report_write():
         pbo.start()
 
         execute_results = executor.invoke_main(
-            arguments=suppplied_arguments, cwd=temporary_work_directory.name
+            arguments=suppplied_arguments, cwd=my_temporary_directory
         )
     finally:
         pbo.stop()
@@ -949,7 +948,7 @@ def test_summarize_simple_junit_report_with_error_on_report_write():
     )
 
 
-def test_sample_1():
+def test_sample_1(my_temporary_directory: str) -> None:
     """
     Test the summarizing of junit results against a previous published version.
     This was encountered during development, and the test case captured.
@@ -957,10 +956,8 @@ def test_sample_1():
 
     # Arrange
     executor = MainlineExecutor()
-    temporary_work_directory, _, publish_directory = setup_directories()
-    junit_test_file = os.path.join(
-        temporary_work_directory.name, JUNIT_RESULTS_FILE_NAME
-    )
+    _, publish_directory = setup_directories2(my_temporary_directory)
+    junit_test_file = os.path.join(my_temporary_directory, JUNIT_RESULTS_FILE_NAME)
     summary_result_file = os.path.join(publish_directory, RESULTS_SUMMARY_FILE_NAME)
 
     copyfile(
@@ -1006,7 +1003,7 @@ Test Results Summary
 
     # Act
     execute_results = executor.invoke_main(
-        arguments=suppplied_arguments, cwd=temporary_work_directory.name
+        arguments=suppplied_arguments, cwd=my_temporary_directory
     )
 
     # Assert
