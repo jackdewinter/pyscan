@@ -114,27 +114,27 @@ repos:
   - repo: https://github.com/jackdewinter/pymarkdown
     rev: v0.9.27
     hooks:
-      - id: pymarkdown
-        name: "Scan:   PyMarkdown (Old Documentation)"
-        pass_filenames: false
-        args:
-          - --config
-          - clean.json
-          - scan
-          - changelog.md
-          - README.md
-          - ./docs
+    - id: pymarkdown
+      name: "Scan:   PyMarkdown (Old Documentation)"
+      pass_filenames: false
+      args:
+        - --config
+        - clean.json
+        - scan
+        - changelog.md
+        - README.md
+        - ./docs
   - repo: https://github.com/jackdewinter/pymarkdown
     rev: v0.9.27
     hooks:
-      - id: pymarkdown
-        name: "Scan:   PyMarkdown (New Documentation)"
-        pass_filenames: false
-        args:
-          - --config
-          - newdocs/clean.json
-          - scan
-          - ./newdocs/src
+    - id: pymarkdown
+      name: "Scan:   PyMarkdown (New Documentation)"
+      pass_filenames: false
+      args:
+        - --config
+        - newdocs/clean.json
+        - scan
+        - ./newdocs/src
   - repo: https://github.com/koalaman/shellcheck-precommit
     rev: v0.10.0
     hooks:

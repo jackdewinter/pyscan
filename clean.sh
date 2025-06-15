@@ -280,15 +280,15 @@ execute_pre_commit() {
 
 	verbose_echo ""
 	verbose_echo "{Executing pre-commit hooks on Python code.}"
-	PRE_COMMIT_ARGS=
-	if [[ ${PUBLISH_MODE} -ne 0 ]]; then
-		PRE_COMMIT_ARGS="--all"
-	fi
+	PRE_COMMIT_ARGS=()
 	if [[ ${MYPY_ONLY_MODE} -ne 0 ]]; then
-		PRE_COMMIT_ARGS="${PRE_COMMIT_ARGS} mypy"
+		PRE_COMMIT_ARGS+=("mypy")
+	fi
+	if [[ ${PUBLISH_MODE} -ne 0 ]]; then
+		PRE_COMMIT_ARGS+=("--all")
 	fi
 	echo ""
-	if ! pipenv run pre-commit run "${PRE_COMMIT_ARGS}"; then
+	if ! pipenv run pre-commit run "${PRE_COMMIT_ARGS[@]}"; then
 		complete_process 1 "{Executing pre-commit hooks on Python code failed.}"
 	fi
 	echo ""
@@ -412,7 +412,12 @@ execute_test_suite() {
 }
 
 execute_performance_suite() {
-	complete_process 1 "No performance suite available for this project.  Please check the project documentation for more information."
+	if [[ ! -f "${SCRIPT_DIR}/perf_clean.sh" ]]; then
+		complete_process 1 "No performance suite available for this project.  Please check the project documentation for more information."
+	fi
+	if ! ./perf_clean.sh; then
+		complete_process 1 "{Executing performance tests failed.}"
+	fi
 }
 
 # Parse any command line values.
@@ -464,17 +469,21 @@ else
 	fi
 fi
 
-if ! pipenv run pyroma -n 10 . >"${TEMP_FILE}" 2>&1; then
-	cat "${TEMP_FILE}"
-	complete_process 1 "{Executing pyroma on Python code failed.}"
-fi
-
 if [[ ${PERFORMANCE_ONLY_MODE} -eq 0 ]]; then
 	analyze_pylint_suppressions
 
 	find_unused_pylint_suppressions
 
 	execute_test_suite
+
+	if ! ./package-release.sh; then
+		complete_process 1 "{Packaging of the project failed.}"
+	fi
+
+	if ! pipenv run pyroma -n 10 . >"${TEMP_FILE}" 2>&1; then
+		cat "${TEMP_FILE}"
+		complete_process 1 "{Executing pyroma on Python code failed.}"
+	fi
 fi
 
 if [[ ${PERFORMANCE_MODE} -ne 0 ]]; then

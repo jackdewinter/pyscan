@@ -19,17 +19,17 @@ def parse_requirements():
 
 
 def get_semantic_version():
-    version_meta = runpy.run_path(f"./{PACKAGE_NAME}/version.py")
+    version_meta = runpy.run_path(f"./{MODULE_NAME}/version.py")
     return version_meta["__version__"]
 
 
 def get_project_name():
-    version_meta = runpy.run_path(f"./{PACKAGE_NAME}/version.py")
+    version_meta = runpy.run_path(f"./{MODULE_NAME}/version.py")
     return version_meta["__project_name__"]
 
 
 def get_description():
-    version_meta = runpy.run_path(f"./{PACKAGE_NAME}/version.py")
+    version_meta = runpy.run_path(f"./{MODULE_NAME}/version.py")
     return version_meta["__description__"]
 
 
@@ -64,12 +64,12 @@ AUTHOR = "Jack De Winter"
 AUTHOR_EMAIL = "jack.de.winter@outlook.com"
 PROJECT_URL = "https://github.com/jackdewinter/pyscan"
 PROJECT_URLS = {
-    "Documentation": "https://project_summarizer4.readthedocs.io/",
-    "Change Log": "https://project_summarizer4.readthedocs.io/en/latest/changelog/",
+    "Documentation": "https://project_summarizer.readthedocs.io/",
+    "Change Log": "https://project_summarizer.readthedocs.io/en/latest/changelog/",
 }
 
+MODULE_NAME = "project_summarizer"
 PACKAGE_NAME = "project_summarizer"
-PROJECT_NAME = get_project_name()
 SEMANTIC_VERSION = get_semantic_version()
 MINIMUM_PYTHON_VERSION = "3.9.0"
 
