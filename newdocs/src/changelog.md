@@ -22,7 +22,7 @@
 <!--- pyml disable-next-line no-duplicate-heading-->
 ### Added
 
-- [Issue 6](https://github.com/jackdewinter/pyscan/issues/6)
+- [Issue 175](https://github.com/jackdewinter/pyscan/issues/175)
     - Standardizing on templates.
 
 <!--- pyml disable-next-line no-duplicate-heading-->
